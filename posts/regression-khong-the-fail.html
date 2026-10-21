@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Một regression "không thể FAIL" thì chưa phải là verification — ChiU·SoC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(820px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:18px;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.9rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.35; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:22px; }
+h2{
+  font-size:1.15rem; color:var(--accent); margin:28px 0 10px; letter-spacing:-.01em;
+}
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px;
+}
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.footer-nav{
+  margin-top:28px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html">← Trang chủ</a>
+  </div>
+</header>
+
+<main>
+<article>
+<h1>Một regression "không thể FAIL" thì chưa phải là verification</h1>
+<div class="meta">Ghi chú kỹ thuật · 21/10/2026 · Frank Nguyen</div>
+
+<p>Bảng kết quả mô phỏng toàn một màu xanh PASS là thứ ai cũng thích nhìn.
+Nhưng sau nhiều lần kiểm tra lại các môi trường mô phỏng — của người khác và của chính mình —
+tôi rút ra một nguyên tắc: <strong>trước khi tin một bảng toàn PASS, hãy hỏi nó đã FAIL
+được lần nào chưa.</strong> Một bộ chấm điểm chưa từng chứng minh rằng nó biết phát hiện lỗi
+thì kết quả PASS của nó không có trọng lượng.</p>
+
+<blockquote>"Một testcase chưa từng FAIL chưa chắc đã PASS —
+<em>nó chỉ chưa chứng minh được rằng nó biết cách FAIL.</em>"</blockquote>
+
+<h2>Những cách một regression nói dối (mà tôi đã gặp thật)</h2>
+<ul>
+  <li><strong>Chấm điểm trên log cũ.</strong> Bước compile chết, nhưng script chấm điểm vẫn đọc
+      file log của lần chạy trước và kết luận PASS. Log phải được xoá (hoặc đánh dấu) trước mỗi lần chạy.</li>
+  <li><strong>File vàng (golden) không tồn tại mà vẫn PASS.</strong> <code>$readmemh</code> chỉ
+      cảnh báo khi thiếu file rồi để nguyên mảng toàn X; mà phép so sánh X với X… lại không FAIL
+      nếu testbench dùng <code>!==</code> sai chỗ. Thử xoá file vàng đi — nếu vẫn PASS thì bộ so sánh có vấn đề.</li>
+  <li><strong>Tên testcase gõ sai vẫn chạy.</strong> Truyền một TESTCASE không tồn tại,
+      bench rơi xuống test mặc định và… PASS. Người chạy tưởng mình vừa chạy đúng bài test cần chạy.</li>
+  <li><strong>Hàm in PASS vô điều kiện.</strong> Testcase tích luỹ lỗi vào một biến đếm nhưng
+      cuối cùng gọi thẳng hàm in "TEST PASSED" mà không nhìn biến đếm đó.</li>
+  <li><strong>Script shell nuốt lỗi.</strong> <code>set -e</code> không bảo vệ một chuỗi
+      <code>&amp;&amp;</code>; lỗi compile trôi qua, bước sau vẫn chạy tiếp và báo xanh.</li>
+</ul>
+
+<h2>Cách tự kiểm tra bộ chấm điểm của mình</h2>
+<p>Phương thuốc chung rất đơn giản: <strong>cố tình làm hỏng thiết kế, rồi xem regression có đỏ không.</strong></p>
+<ul>
+  <li>Đổi một bit trong RTL (một phép mutation nhỏ) — chạy lại, regression <em>phải</em> FAIL.
+      Nếu không, testcase đó không quan sát được phần logic vừa bị hỏng.</li>
+  <li>Xoá file dữ liệu vàng — bộ so sánh <em>phải</em> kêu thiếu file, không được lặng lẽ PASS.</li>
+  <li>Truyền tên testcase sai — bench <em>phải</em> dừng với thông báo lỗi, không được chạy bài mặc định.</li>
+  <li>Với test tiêu cực (kịch bản lỗi cố ý), kiểm tra rằng nó FAIL <em>đúng tại phép kiểm tra
+      mong muốn</em>, chứ không phải FAIL vì một lý do vớ vẩn khác ở trước đó.</li>
+</ul>
+
+<p>Mỗi lần nhận một môi trường mô phỏng mới — hoặc vừa viết xong một cái — tôi đều dành
+ba mươi phút "phá hoại có chủ đích" như vậy. Số lần phát hiện bộ chấm điểm có lỗ hổng
+nhiều hơn tôi muốn thừa nhận; và mỗi lỗ hổng tìm được lúc này đều rẻ hơn rất nhiều so với
+một con chip đã tape-out.</p>
+
+<div class="footer-nav">
+  <a href="../index.html#s1">← Thiết kế RTL &amp; SoC</a>
+  <a href="../index.html#toc">↑ Mục lục</a>
+</div>
+</article>
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+</body>
+</html>

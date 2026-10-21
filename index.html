@@ -1,9 +1,422 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <title>ChiU-SoC</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ChiU-SoC — Ghi chú &amp; chia sẻ kinh nghiệm thiết kế vi mạch</title>
+<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú kỹ thuật và chia sẻ kinh nghiệm về thiết kế vi mạch (RTL/ASIC), bảo mật phần cứng và công cụ EDA mã nguồn mở."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;   /* xanh chip */
+  --accent2: #2a9d8f;   /* xanh ngọc */
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --border:  #e6e6e6;
+  --shadow:  0 10px 28px rgba(36,49,66,.08);
+  --radius:  20px;
+  --max-w:   min(1100px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; scroll-padding-top:92px; }
+body{
+  margin:0;
+  background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.75;
+  color:var(--text); -webkit-font-smoothing:antialiased;
+  counter-reset: artnum;
+}
+
+/* ===== Header ===== */
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px 22px;
+}
+.site-title{ font-size:24px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.site-tag{ font-size:.82em; color:rgba(255,255,255,.65); font-weight:400; margin-right:auto; }
+nav ul{ list-style:none; display:flex; flex-wrap:wrap; gap:2px 6px; margin:0; padding:0; }
+nav a{
+  display:block; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:15px; font-weight:600; padding:7px 13px; border-radius:999px;
+  transition:background .15s;
+}
+nav a:hover{ background:rgba(255,255,255,.12); }
+@media(max-width:640px){
+  .site-title{ font-size:19px; letter-spacing:1px; }
+  .site-tag{ display:none; }
+}
+
+/* ===== Page container ===== */
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+
+/* ===== Hero / intro ===== */
+.hero{
+  background:#fff; border-radius:var(--radius);
+  margin:26px auto 22px; padding:28px 30px;
+  box-shadow:var(--shadow); border:1px solid rgba(230,230,230,.7);
+  display:flex; gap:26px; align-items:center; flex-wrap:wrap;
+  position:relative; overflow:hidden;
+}
+.hero::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+.avatar{
+  flex:0 0 auto; width:108px; height:108px; border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; display:flex; align-items:center; justify-content:center;
+  font-size:38px; font-weight:800; letter-spacing:1px;
+  box-shadow:0 8px 24px rgba(20,83,143,.35);
+}
+.hero h1{ font-size:clamp(1.4rem,3vw,2rem); margin:0 0 8px; letter-spacing:-.02em; }
+.hero p{ margin:0 0 10px; color:var(--muted); max-width:62ch; }
+.hero-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.chip{
+  font-size:.8em; font-weight:700; color:var(--accent);
+  background:rgba(20,83,143,.08); border:1px solid rgba(20,83,143,.18);
+  padding:4px 12px; border-radius:999px;
+}
+
+/* ===== TOC ===== */
+.toc-wrap{
+  background:#eef1f7; border-radius:var(--radius);
+  padding:22px 26px 26px; margin:20px auto 26px;
+  box-shadow:0 12px 32px rgba(20,33,61,.10);
+}
+.toc-wrap h2{
+  font-size:clamp(1.3rem,2vw,1.6rem); color:#374151;
+  margin:0 0 14px; letter-spacing:-.02em;
+}
+.toc-wrap ul{
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:10px 20px; list-style:none; padding:0; margin:0;
+}
+@media(max-width:640px){ .toc-wrap ul{ grid-template-columns:1fr; } }
+.toc-wrap a{
+  display:block; color:var(--accent);
+  text-decoration:none; padding:10px 14px;
+  border-radius:13px; background:rgba(255,255,255,.70);
+  border:1px solid rgba(55,65,81,.12); font-size:1rem; font-weight:700;
+  transition:transform .15s,background .15s;
+}
+.toc-wrap a:hover{ transform:translateY(-2px); background:rgba(255,255,255,.95); }
+
+/* ===== Section cards ===== */
+.entry{
+  background:#fff; border-radius:var(--radius); padding:24px 28px;
+  margin:22px auto; box-shadow:var(--shadow);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+.entry::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+.entry h2{
+  font-size:clamp(1.2rem,2vw,1.6rem); color:var(--text);
+  margin:0 0 18px; letter-spacing:-.025em;
+}
+.entry h2::after{
+  content:""; display:block; width:56px; height:3px;
+  margin-top:8px; border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+.entry > p{ color:var(--muted); font-size:.95em; margin:0 0 16px; }
+
+/* ===== Article list — numbered continuously across sections ===== */
+.art-list{ list-style:none; padding-left:1.5rem; margin:0; }
+.art-item{
+  counter-increment: artnum;
+  padding:11px 14px; margin-bottom:10px;
+  background:rgba(250,250,252,.9);
+  border:1px solid rgba(31,41,55,.07); border-radius:14px;
+  box-shadow:0 3px 10px rgba(36,49,66,.05);
+}
+.art-item::marker{ content: counter(artnum) ". "; color:var(--accent); font-weight:700; }
+.art-item:last-child{ margin-bottom:0; }
+.art-title{ font-weight:600; color:var(--text); line-height:1.45; margin-bottom:4px; }
+.art-desc{ font-size:.91em; color:var(--muted); margin:4px 0 8px; line-height:1.6; }
+.art-links{
+  list-style:none; padding:0; margin:7px 0 0;
+  display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center;
+}
+.art-links li{ display:inline; }
+.link-html{ color:#0057b7; font-weight:700; text-decoration:underline; text-underline-offset:2px; }
+.link-html:hover{ color:#003d8f; }
+.link-pdf{ color:var(--muted); font-weight:600; text-decoration:underline; text-underline-offset:2px; font-size:.93em; }
+.link-pdf:hover{ color:var(--text); }
+.link-ext{ color:#555; font-size:.93em; font-weight:600; text-decoration:underline; text-underline-offset:2px; }
+.wip{
+  font-size:.8em; font-weight:700; color:#92400e;
+  background:rgba(234,179,8,.14); border:1px solid rgba(234,179,8,.35);
+  padding:2px 10px; border-radius:999px;
+}
+
+/* ===== Pull-quotes ===== */
+.art-quotes{ margin:14px 0 2px; display:flex; flex-direction:column; gap:9px; }
+.art-quote{
+  border-left:3px solid var(--accent);
+  padding:9px 14px 9px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-size:.905em; line-height:1.7; color:#2d3748; font-style:italic;
+}
+.art-quote em{ font-style:normal; font-weight:600; }
+
+/* ===== Note callout ===== */
+.note{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:12px 0; font-size:.93em; line-height:1.65;
+}
+.note h3{ margin:0 0 6px; font-size:.78rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+
+/* ===== Back to TOC ===== */
+.back-to-toc{
+  margin-top:1.1rem; padding-top:.9rem;
+  border-top:1px dashed rgba(31,41,55,.18); text-align:right;
+}
+.back-to-toc a{
+  display:inline-block; color:var(--accent);
+  font-weight:700; font-size:.88em; text-decoration:none;
+  padding:5px 13px; background:rgba(20,83,143,.07);
+  border-radius:999px; transition:background .15s;
+}
+.back-to-toc a:hover{ background:rgba(20,83,143,.14); }
+
+/* ===== About ===== */
+.about-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 28px; }
+@media(max-width:640px){ .about-grid{ grid-template-columns:1fr; } }
+.about-grid h3{ font-size:.95rem; margin:8px 0 6px; color:var(--accent); }
+.about-grid ul{ margin:0; padding-left:1.2rem; font-size:.95em; color:var(--muted); }
+.about-grid li{ margin-bottom:4px; }
+
+/* ===== Footer ===== */
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:22px 16px; font-size:.9em; margin-top:30px;
+}
+footer a{ color:#8fd3cb; text-decoration:none; font-weight:600; }
+footer a:hover{ text-decoration:underline; }
+</style>
 </head>
 <body>
-  <h1>Xin chào toi la Frank Nguyen!</h1>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <div class="site-tag">Ghi chú &amp; chia sẻ kinh nghiệm thiết kế vi mạch</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Trang chủ</a></li>
+        <li><a href="#s1">Thiết kế RTL &amp; SoC</a></li>
+        <li><a href="#s2">Bảo mật phần cứng</a></li>
+        <li><a href="#s3">Công cụ mã nguồn mở</a></li>
+        <li><a href="#s4">Kinh nghiệm</a></li>
+        <li><a href="#about">Giới thiệu</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="avatar">FN</div>
+  <div>
+    <h1>Xin chào, tôi là Frank Nguyen!</h1>
+    <p>Đây là nơi tôi ghi chú lại những gì học được và chia sẻ kinh nghiệm làm nghề
+       thiết kế vi mạch: từ viết RTL, dựng môi trường mô phỏng, chạy ASIC flow,
+       đến các chủ đề bảo mật phần cứng như ECC, PQC, PUF và TRNG.
+       Mỗi bài là một ghi chú ngắn — viết cho chính mình trước, cho bạn đọc sau.</p>
+    <div class="hero-chips">
+      <span class="chip">RTL / ASIC</span>
+      <span class="chip">SoC</span>
+      <span class="chip">Bảo mật phần cứng</span>
+      <span class="chip">ECC · PQC · PUF · TRNG</span>
+      <span class="chip">EDA mã nguồn mở</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TOC ===== -->
+<div class="toc-wrap" id="toc">
+  <h2>Mục lục</h2>
+  <ul>
+    <li><a href="#s1">Thiết kế vi mạch — RTL &amp; SoC</a></li>
+    <li><a href="#s2">Bảo mật phần cứng &amp; Mật mã</a></li>
+    <li><a href="#s3">Công cụ &amp; Môi trường mã nguồn mở</a></li>
+    <li><a href="#s4">Kinh nghiệm nghề nghiệp &amp; Học tập</a></li>
+  </ul>
+</div>
+
+<div class="note">
+  <h3>Ghi chú</h3>
+  Trang đang được xây dựng. Các bài gắn nhãn <span class="wip">đang viết</span> là
+  chỗ giữ trước cho những ghi chú sắp đăng — danh sách dưới đây sẽ dài dần theo thời gian.
+</div>
+
+<!-- ===== Section 1 ===== -->
+<section class="entry" id="s1">
+<h2>Thiết kế vi mạch — RTL &amp; SoC</h2>
+<p>Ghi chú về viết RTL, tổ chức một IP, testbench và mô phỏng, và con đường từ RTL đến GDSII.</p>
+<ol class="art-list">
+  <li class="art-item">
+    <div class="art-title">Một regression "không thể FAIL" thì chưa phải là verification</div>
+    <div class="art-desc">Vì sao một bảng kết quả toàn PASS đôi khi không chứng minh điều gì,
+      và cách tự kiểm tra bộ chấm điểm của chính mình bằng cách cố tình làm hỏng thiết kế.</div>
+    <ul class="art-links">
+      <li><a class="link-html" href="posts/regression-khong-the-fail.html">Bản đọc HTML</a></li>
+    </ul>
+    <div class="art-quotes">
+      <div class="art-quote">"Một testcase chưa từng FAIL chưa chắc đã PASS —
+        <em>nó chỉ chưa chứng minh được rằng nó biết cách FAIL.</em>"</div>
+    </div>
+  </li>
+  <li class="art-item">
+    <div class="art-title">Bắt đầu một IP mới: bộ khung thư mục RTL / SIM / DOC tôi luôn dùng</div>
+    <div class="art-desc">Cấu trúc thư mục, Makefile, cơ chế TESTCASE và script chạy một lệnh —
+      để sáu tháng sau quay lại vẫn chạy được ngay.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">Từ RTL đến GDSII bằng công cụ mở: những con số đầu tiên nên nhìn</div>
+    <div class="art-desc">Gate count (GE), f_max, diện tích, công suất — đọc báo cáo của một
+      ASIC flow mã nguồn mở như thế nào cho đúng.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+</ol>
+<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+</section>
+
+<!-- ===== Section 2 ===== -->
+<section class="entry" id="s2">
+<h2>Bảo mật phần cứng &amp; Mật mã</h2>
+<p>ECC (mã sửa lỗi), mật mã hậu lượng tử (PQC), PUF, TRNG — nhìn từ phía người hiện thực hoá bằng phần cứng.</p>
+<ol class="art-list">
+  <li class="art-item">
+    <div class="art-title">Mã BCH với khả năng sửa lỗi t là một tham số thiết kế</div>
+    <div class="art-desc">Thiết kế một codec BCH mà t = 1…9 chỉ là một parameter Verilog:
+      g(x) tính lúc elaboration, kiến trúc nối tiếp tiết kiệm diện tích.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">PUF: khi "sai số chế tạo" trở thành chìa khoá</div>
+    <div class="art-desc">Vì sao hai con chip giống hệt nhau trên bản vẽ lại cho ra hai định danh
+      khác nhau — và vì sao điều đó lại hữu ích cho bảo mật.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">Golden model: mô hình tham chiếu là "trọng tài" còn thiếu của nhiều IP</div>
+    <div class="art-desc">Một IP mật mã mà không có mô hình tham chiếu độc lập thì testbench
+      chỉ đang so thiết kế với chính nó.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+</ol>
+<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+</section>
+
+<!-- ===== Section 3 ===== -->
+<section class="entry" id="s3">
+<h2>Công cụ &amp; Môi trường mã nguồn mở</h2>
+<p>Verilator, Icarus Verilog, cocotb, GTKWave, OpenLane… — dựng một môi trường làm việc đầy đủ mà không cần license.</p>
+<ol class="art-list">
+  <li class="art-item">
+    <div class="art-title">Verilator chạy được thứ Icarus không chạy nổi (và ngược lại)</div>
+    <div class="art-desc">Hai trình mô phỏng miễn phí, hai tập điểm mạnh khác nhau —
+      kinh nghiệm chọn công cụ theo từng loại thiết kế.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">cocotb: viết testbench bằng Python có đáng không?</div>
+    <div class="art-desc">Port một bộ testcase Verilog sang cocotb — cái được, cái mất,
+      và những cái bẫy ít người kể.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+</ol>
+<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+</section>
+
+<!-- ===== Section 4 ===== -->
+<section class="entry" id="s4">
+<h2>Kinh nghiệm nghề nghiệp &amp; Học tập</h2>
+<p>Những điều tôi ước có người nói với mình sớm hơn — về nghề kỹ sư thiết kế vi mạch và cách tự học.</p>
+<ol class="art-list">
+  <li class="art-item">
+    <div class="art-title">Kỹ sư thiết kế vi mạch làm gì mỗi ngày?</div>
+    <div class="art-desc">Một ngày làm việc thật sự trông như thế nào — ít "thiết kế" hơn
+      bạn nghĩ, nhiều "chứng minh" hơn bạn tưởng.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">Học thiết kế vi mạch bắt đầu từ đâu khi chỉ có một chiếc laptop?</div>
+    <div class="art-desc">Lộ trình tự học với toàn công cụ miễn phí: Verilog → mô phỏng →
+      một IP hoàn chỉnh → chạy thử ASIC flow.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+</ol>
+<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+</section>
+
+<!-- ===== About ===== -->
+<section class="entry" id="about">
+<h2>Giới thiệu</h2>
+<p>Tôi là kỹ sư thiết kế vi mạch (RTL/ASIC), hiện làm việc trong lĩnh vực chip bảo mật tại Hàn Quốc.
+   Trang này là sổ tay mở của tôi: ghi lại những bài học rút ra từ công việc hằng ngày,
+   hy vọng tiết kiệm được cho bạn đọc vài lần vấp ngã.</p>
+<div class="about-grid">
+  <div>
+    <h3>Chủ đề quan tâm</h3>
+    <ul>
+      <li>Thiết kế RTL, kiến trúc SoC, bus AMBA</li>
+      <li>Mã sửa lỗi (BCH, Reed–Solomon, Hamming)</li>
+      <li>Mật mã hậu lượng tử, PUF, TRNG</li>
+      <li>ASIC flow mã nguồn mở (RTL → GDSII)</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Liên hệ</h3>
+    <ul>
+      <li>GitHub: <a class="link-ext" href="https://github.com/franknguen" target="_blank" rel="noopener">github.com/franknguen</a></li>
+    </ul>
+  </div>
+</div>
+<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+</section>
+
+</main>
+
+<footer>
+  © 2026 Frank Nguyen · <strong>ChiU·SoC</strong> — viết để nhớ, đăng để chia sẻ.
+</footer>
+
 </body>
 </html>
