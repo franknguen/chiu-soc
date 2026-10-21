@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ChiU-SoC — Ghi chú &amp; chia sẻ kinh nghiệm thiết kế vi mạch</title>
-<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú kỹ thuật và chia sẻ kinh nghiệm về thiết kế vi mạch (RTL/ASIC), bảo mật phần cứng và công cụ EDA mã nguồn mở."/>
+<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú kỹ thuật và chia sẻ kinh nghiệm về thiết kế vi mạch (RTL/ASIC), verification và công cụ EDA mã nguồn mở."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
@@ -219,9 +219,8 @@ footer a:hover{ text-decoration:underline; }
       <ul>
         <li><a href="index.html">Trang chủ</a></li>
         <li><a href="#s1">Thiết kế RTL &amp; SoC</a></li>
-        <li><a href="#s2">Bảo mật phần cứng</a></li>
-        <li><a href="#s3">Công cụ mã nguồn mở</a></li>
-        <li><a href="#s4">Kinh nghiệm</a></li>
+        <li><a href="#s2">Công cụ mã nguồn mở</a></li>
+        <li><a href="#s3">Kinh nghiệm</a></li>
         <li><a href="#about">Giới thiệu</a></li>
       </ul>
     </nav>
@@ -236,14 +235,13 @@ footer a:hover{ text-decoration:underline; }
   <div>
     <h1>Xin chào, tôi là Frank Nguyen!</h1>
     <p>Đây là nơi tôi ghi chú lại những gì học được và chia sẻ kinh nghiệm làm nghề
-       thiết kế vi mạch: từ viết RTL, dựng môi trường mô phỏng, chạy ASIC flow,
-       đến các chủ đề bảo mật phần cứng như ECC, PQC, PUF và TRNG.
+       thiết kế vi mạch: từ viết RTL, dựng môi trường mô phỏng và verification,
+       đến chạy ASIC flow bằng công cụ mã nguồn mở.
        Mỗi bài là một ghi chú ngắn — viết cho chính mình trước, cho bạn đọc sau.</p>
     <div class="hero-chips">
       <span class="chip">RTL / ASIC</span>
       <span class="chip">SoC</span>
-      <span class="chip">Bảo mật phần cứng</span>
-      <span class="chip">ECC · PQC · PUF · TRNG</span>
+      <span class="chip">Verification</span>
       <span class="chip">EDA mã nguồn mở</span>
     </div>
   </div>
@@ -254,9 +252,8 @@ footer a:hover{ text-decoration:underline; }
   <h2>Mục lục</h2>
   <ul>
     <li><a href="#s1">Thiết kế vi mạch — RTL &amp; SoC</a></li>
-    <li><a href="#s2">Bảo mật phần cứng &amp; Mật mã</a></li>
-    <li><a href="#s3">Công cụ &amp; Môi trường mã nguồn mở</a></li>
-    <li><a href="#s4">Kinh nghiệm nghề nghiệp &amp; Học tập</a></li>
+    <li><a href="#s2">Công cụ &amp; Môi trường mã nguồn mở</a></li>
+    <li><a href="#s3">Kinh nghiệm nghề nghiệp &amp; Học tập</a></li>
   </ul>
 </div>
 
@@ -292,6 +289,14 @@ footer a:hover{ text-decoration:underline; }
     </ul>
   </li>
   <li class="art-item">
+    <div class="art-title">Golden model: mô hình tham chiếu là "trọng tài" còn thiếu của nhiều IP</div>
+    <div class="art-desc">Một IP không có mô hình tham chiếu độc lập thì testbench
+      chỉ đang so thiết kế với chính nó.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
     <div class="art-title">Từ RTL đến GDSII bằng công cụ mở: những con số đầu tiên nên nhìn</div>
     <div class="art-desc">Gate count (GE), f_max, diện tích, công suất — đọc báo cáo của một
       ASIC flow mã nguồn mở như thế nào cho đúng.</div>
@@ -305,39 +310,6 @@ footer a:hover{ text-decoration:underline; }
 
 <!-- ===== Section 2 ===== -->
 <section class="entry" id="s2">
-<h2>Bảo mật phần cứng &amp; Mật mã</h2>
-<p>ECC (mã sửa lỗi), mật mã hậu lượng tử (PQC), PUF, TRNG — nhìn từ phía người hiện thực hoá bằng phần cứng.</p>
-<ol class="art-list">
-  <li class="art-item">
-    <div class="art-title">Mã BCH với khả năng sửa lỗi t là một tham số thiết kế</div>
-    <div class="art-desc">Thiết kế một codec BCH mà t = 1…9 chỉ là một parameter Verilog:
-      g(x) tính lúc elaboration, kiến trúc nối tiếp tiết kiệm diện tích.</div>
-    <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
-    </ul>
-  </li>
-  <li class="art-item">
-    <div class="art-title">PUF: khi "sai số chế tạo" trở thành chìa khoá</div>
-    <div class="art-desc">Vì sao hai con chip giống hệt nhau trên bản vẽ lại cho ra hai định danh
-      khác nhau — và vì sao điều đó lại hữu ích cho bảo mật.</div>
-    <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
-    </ul>
-  </li>
-  <li class="art-item">
-    <div class="art-title">Golden model: mô hình tham chiếu là "trọng tài" còn thiếu của nhiều IP</div>
-    <div class="art-desc">Một IP mật mã mà không có mô hình tham chiếu độc lập thì testbench
-      chỉ đang so thiết kế với chính nó.</div>
-    <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
-    </ul>
-  </li>
-</ol>
-<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
-</section>
-
-<!-- ===== Section 3 ===== -->
-<section class="entry" id="s3">
 <h2>Công cụ &amp; Môi trường mã nguồn mở</h2>
 <p>Verilator, Icarus Verilog, cocotb, GTKWave, OpenLane… — dựng một môi trường làm việc đầy đủ mà không cần license.</p>
 <ol class="art-list">
@@ -361,8 +333,8 @@ footer a:hover{ text-decoration:underline; }
 <div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
 </section>
 
-<!-- ===== Section 4 ===== -->
-<section class="entry" id="s4">
+<!-- ===== Section 3 ===== -->
+<section class="entry" id="s3">
 <h2>Kinh nghiệm nghề nghiệp &amp; Học tập</h2>
 <p>Những điều tôi ước có người nói với mình sớm hơn — về nghề kỹ sư thiết kế vi mạch và cách tự học.</p>
 <ol class="art-list">
@@ -389,7 +361,7 @@ footer a:hover{ text-decoration:underline; }
 <!-- ===== About ===== -->
 <section class="entry" id="about">
 <h2>Giới thiệu</h2>
-<p>Tôi là kỹ sư thiết kế vi mạch (RTL/ASIC), hiện làm việc trong lĩnh vực chip bảo mật tại Hàn Quốc.
+<p>Tôi là kỹ sư thiết kế vi mạch (RTL/ASIC), hiện làm việc tại Hàn Quốc.
    Trang này là sổ tay mở của tôi: ghi lại những bài học rút ra từ công việc hằng ngày,
    hy vọng tiết kiệm được cho bạn đọc vài lần vấp ngã.</p>
 <div class="about-grid">
@@ -397,14 +369,14 @@ footer a:hover{ text-decoration:underline; }
     <h3>Chủ đề quan tâm</h3>
     <ul>
       <li>Thiết kế RTL, kiến trúc SoC, bus AMBA</li>
-      <li>Mã sửa lỗi (BCH, Reed–Solomon, Hamming)</li>
-      <li>Mật mã hậu lượng tử, PUF, TRNG</li>
+      <li>Verification: testbench, mô phỏng, cocotb</li>
       <li>ASIC flow mã nguồn mở (RTL → GDSII)</li>
     </ul>
   </div>
   <div>
     <h3>Liên hệ</h3>
     <ul>
+      <li>Email: <a class="link-ext" href="mailto:nguyenmanhduc18@gmail.com">nguyenmanhduc18@gmail.com</a></li>
       <li>GitHub: <a class="link-ext" href="https://github.com/franknguen" target="_blank" rel="noopener">github.com/franknguen</a></li>
     </ul>
   </div>
