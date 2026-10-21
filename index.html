@@ -218,9 +218,10 @@ footer a:hover{ text-decoration:underline; }
     <nav>
       <ul>
         <li><a href="index.html">Trang chủ</a></li>
-        <li><a href="#s1">Thiết kế RTL &amp; SoC</a></li>
-        <li><a href="#s2">Công cụ mã nguồn mở</a></li>
-        <li><a href="#s3">Kinh nghiệm</a></li>
+        <li><a href="#s1">Thiết kế vi mạch</a></li>
+        <li><a href="#s2">Kinh nghiệm</a></li>
+        <li><a href="#s3">Nghĩ suy cùng đất nước</a></li>
+        <li><a href="#s4">Vần thơ &amp; Giai điệu</a></li>
         <li><a href="#about">Giới thiệu</a></li>
       </ul>
     </nav>
@@ -237,7 +238,9 @@ footer a:hover{ text-decoration:underline; }
     <p>Đây là nơi tôi ghi chú lại những gì học được và chia sẻ kinh nghiệm làm nghề
        thiết kế vi mạch: từ viết RTL, dựng môi trường mô phỏng và verification,
        đến chạy ASIC flow bằng công cụ mã nguồn mở.
-       Mỗi bài là một ghi chú ngắn — viết cho chính mình trước, cho bạn đọc sau.</p>
+       Mỗi bài là một ghi chú ngắn — viết cho chính mình trước, cho bạn đọc sau.
+       Bên cạnh chuyên môn còn có góc <em>Nghĩ suy cùng đất nước</em> và
+       <em>Vần thơ &amp; Giai điệu</em> — chỗ cho những điều ngoài con chip.</p>
     <div class="hero-chips">
       <span class="chip">RTL / ASIC</span>
       <span class="chip">SoC</span>
@@ -251,9 +254,10 @@ footer a:hover{ text-decoration:underline; }
 <div class="toc-wrap" id="toc">
   <h2>Mục lục</h2>
   <ul>
-    <li><a href="#s1">Thiết kế vi mạch — RTL &amp; SoC</a></li>
-    <li><a href="#s2">Công cụ &amp; Môi trường mã nguồn mở</a></li>
-    <li><a href="#s3">Kinh nghiệm nghề nghiệp &amp; Học tập</a></li>
+    <li><a href="#s1">Thiết kế vi mạch — RTL, SoC &amp; Công cụ</a></li>
+    <li><a href="#s2">Kinh nghiệm nghề nghiệp &amp; Học tập</a></li>
+    <li><a href="#s3">Nghĩ suy cùng đất nước</a></li>
+    <li><a href="#s4">Vần thơ &amp; Giai điệu</a></li>
   </ul>
 </div>
 
@@ -265,8 +269,10 @@ footer a:hover{ text-decoration:underline; }
 
 <!-- ===== Section 1 ===== -->
 <section class="entry" id="s1">
-<h2>Thiết kế vi mạch — RTL &amp; SoC</h2>
-<p>Ghi chú về viết RTL, tổ chức một IP, testbench và mô phỏng, và con đường từ RTL đến GDSII.</p>
+<h2>Thiết kế vi mạch — RTL, SoC &amp; Công cụ</h2>
+<p>Ghi chú về viết RTL, tổ chức một IP, testbench và mô phỏng, con đường từ RTL đến GDSII,
+   và các công cụ mã nguồn mở (Verilator, Icarus Verilog, cocotb, GTKWave, OpenLane…)
+   để làm tất cả những việc đó mà không cần license.</p>
 <ol class="art-list">
   <li class="art-item">
     <div class="art-title">Một regression "không thể FAIL" thì chưa phải là verification</div>
@@ -304,15 +310,6 @@ footer a:hover{ text-decoration:underline; }
       <li><span class="wip">đang viết</span></li>
     </ul>
   </li>
-</ol>
-<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
-</section>
-
-<!-- ===== Section 2 ===== -->
-<section class="entry" id="s2">
-<h2>Công cụ &amp; Môi trường mã nguồn mở</h2>
-<p>Verilator, Icarus Verilog, cocotb, GTKWave, OpenLane… — dựng một môi trường làm việc đầy đủ mà không cần license.</p>
-<ol class="art-list">
   <li class="art-item">
     <div class="art-title">Verilator chạy được thứ Icarus không chạy nổi (và ngược lại)</div>
     <div class="art-desc">Hai trình mô phỏng miễn phí, hai tập điểm mạnh khác nhau —
@@ -333,8 +330,8 @@ footer a:hover{ text-decoration:underline; }
 <div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
 </section>
 
-<!-- ===== Section 3 ===== -->
-<section class="entry" id="s3">
+<!-- ===== Section 2 ===== -->
+<section class="entry" id="s2">
 <h2>Kinh nghiệm nghề nghiệp &amp; Học tập</h2>
 <p>Những điều tôi ước có người nói với mình sớm hơn — về nghề kỹ sư thiết kế vi mạch và cách tự học.</p>
 <ol class="art-list">
@@ -350,6 +347,63 @@ footer a:hover{ text-decoration:underline; }
     <div class="art-title">Học thiết kế vi mạch bắt đầu từ đâu khi chỉ có một chiếc laptop?</div>
     <div class="art-desc">Lộ trình tự học với toàn công cụ miễn phí: Verilog → mô phỏng →
       một IP hoàn chỉnh → chạy thử ASIC flow.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+</ol>
+<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+</section>
+
+<!-- ===== Section 3 ===== -->
+<section class="entry" id="s3">
+<h2>Nghĩ suy cùng đất nước</h2>
+<p>Những suy ngẫm ngoài chuyên môn — về giáo dục, khoa học và con đường phát triển của đất nước.
+   Góc này lấy cảm hứng từ trang
+   <a class="link-ext" href="https://phandinhdieu.github.io/" target="_blank" rel="noopener">"Nghĩ Suy cùng Đất Nước"</a>
+   của cố GS. Phan Đình Diệu.</p>
+<ol class="art-list">
+  <li class="art-item">
+    <div class="art-title">Người kỹ sư xa quê có thể đóng góp gì cho quê hương?</div>
+    <div class="art-desc">Vài suy nghĩ về chia sẻ tri thức, đào tạo và cộng đồng kỹ thuật
+      người Việt ở nước ngoài.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">Đọc lại thế hệ trí thức đi trước — những điều còn nguyên giá trị</div>
+    <div class="art-desc">Ghi chép khi đọc các bài viết, tham luận của những người đi trước
+      về khoa học, giáo dục và quản lý.</div>
+    <ul class="art-links">
+      <li><span class="wip">đang viết</span></li>
+    </ul>
+  </li>
+</ol>
+<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+</section>
+
+<!-- ===== Section 4 ===== -->
+<section class="entry" id="s4">
+<h2>Vần thơ &amp; Giai điệu</h2>
+<p>Góc thư giãn — những bài thơ và bản nhạc tôi yêu thích, chép lại để dành và để chia sẻ.</p>
+<ol class="art-list">
+  <li class="art-item">
+    <div class="art-title">Bài thơ quê hương — Nguyễn Bính</div>
+    <div class="art-desc">Nguyễn Bính (1918–1966), nhà thơ "chân quê", viết về quê hương bằng
+      những hình ảnh dân gian mộc mạc mà thấm sâu. Trích hai câu mở đầu:</div>
+    <div class="art-quotes">
+      <div class="art-quote">"Quê hương tôi có cây bầu cây nhị<br/>
+        Tiếng đàn kêu tích tịch tình tang…"</div>
+    </div>
+    <ul class="art-links">
+      <li><a class="link-ext" href="https://vi.wikipedia.org/wiki/Nguy%E1%BB%85n_B%C3%ADnh" target="_blank" rel="noopener">Về nhà thơ Nguyễn Bính</a></li>
+      <li><span class="wip">toàn văn: đang bổ sung</span></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">Những bản nhạc cho một buổi tối viết RTL</div>
+    <div class="art-desc">Playlist và đôi dòng cảm nhận.</div>
     <ul class="art-links">
       <li><span class="wip">đang viết</span></li>
     </ul>
