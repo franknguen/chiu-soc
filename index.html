@@ -213,6 +213,9 @@ main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
 .back-to-toc a:hover{ background:rgba(20,83,143,.14); }
 
 /* ===== About ===== */
+.bio{ margin:0 0 18px; padding-left:1.2rem; color:var(--muted); font-size:.96em; }
+.bio li{ margin-bottom:7px; }
+.bio em{ font-style:normal; font-weight:600; color:var(--text); }
 .about-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 28px; }
 @media(max-width:640px){ .about-grid{ grid-template-columns:1fr; } }
 .about-grid h3{ font-size:.95rem; margin:8px 0 6px; color:var(--accent); }
@@ -274,9 +277,10 @@ footer a:hover{ text-decoration:underline; }
        Beyond the technical work there is also <em>Thoughts on our country</em> and
        <em>Poetry &amp; Melody</em> — room for the things outside the chip.</p>
     <div class="hero-chips">
-      <span class="chip">RTL / ASIC</span>
-      <span class="chip">SoC</span>
-      <span class="chip">Verification</span>
+      <span class="chip">SoC / ASIC</span>
+      <span class="chip">RTL Design / Verification</span>
+      <span class="chip"><span lang="vi">Mã sửa lỗi</span><span lang="en">Error correction code</span></span>
+      <span class="chip"><span lang="vi">Thuật toán mật mã</span><span lang="en">Cryptographic algorithms</span></span>
       <span class="chip"><span lang="vi">EDA mã nguồn mở</span><span lang="en">Open-source EDA</span></span>
     </div>
   </div>
@@ -293,13 +297,6 @@ footer a:hover{ text-decoration:underline; }
   </ul>
 </div>
 
-<div class="note">
-  <h3><span lang="vi">Ghi chú</span><span lang="en">Note</span></h3>
-  <span lang="vi">Trang đang được xây dựng. Các bài gắn nhãn <span class="wip">đang viết</span> là
-  chỗ giữ trước cho những ghi chú sắp đăng — danh sách dưới đây sẽ dài dần theo thời gian.</span>
-  <span lang="en">This site is a work in progress. Entries marked <span class="wip">in progress</span>
-  are placeholders for notes still to come — the list below will grow over time.</span>
-</div>
 
 <!-- ===== Section 1 ===== -->
 <section class="entry" id="s1">
@@ -313,23 +310,23 @@ footer a:hover{ text-decoration:underline; }
 <ol class="art-list">
   <li class="art-item">
     <div class="art-title">
-      <span lang="vi">MD5 (RFC 1321): hiểu một hàm băm từ định nghĩa đến mạch số</span>
-      <span lang="en">MD5 (RFC 1321): a hash function from the definition down to the circuit</span>
+      <span lang="vi">MD5: một hàm băm, kể lại cho dễ hiểu</span>
+      <span lang="en">MD5: a hash function, explained the easy way</span>
     </div>
-    <div class="art-desc" lang="vi">Đệm, bảng hằng số sinh từ hàm sin, 64 bước, góc nhìn phần cứng
-      (64 chu kỳ/khối, 8 bit/chu kỳ), hiệu ứng tuyết lở đo được, lịch sử bị phá — và cách
-      xây một mô hình chuẩn (golden model) mà ta có quyền tin.</div>
-    <div class="art-desc" lang="en">Padding, a constant table generated from the sine function,
-      64 steps, the hardware view (64 cycles per block, 8 bits per cycle), measured avalanche,
-      the history of its breaking — and how to build a golden model you are entitled to trust.</div>
+    <div class="art-desc" lang="vi">Hàm băm rốt cuộc làm gì, đệm thông điệp ra sao, 64 bước trộn,
+      nhìn từ phía người làm mạch (64 nhịp một khối, 8 bit mỗi nhịp), vì sao MD5 vỡ — và cách
+      tin được một mô hình chuẩn.</div>
+    <div class="art-desc" lang="en">What a hash really does, how a message gets padded, the 64 mixing
+      steps, the view from the hardware side (64 cycles a block, 8 bits a cycle), why MD5 broke —
+      and how to trust a golden model.</div>
     <ul class="art-links">
       <li><a class="link-html" href="posts/md5-rfc1321.html"><span lang="vi">Bản đọc HTML</span><span lang="en">Read in HTML</span></a></li>
     </ul>
     <div class="art-quotes">
       <div class="art-quote" lang="vi">"Một mô hình chuẩn chỉ đáng tin khi nó <em>có thể sai</em>:
-        tám đột biến cố ý, tám lần selftest phải đỏ."</div>
+        tám lần phá hoại có chủ đích, tám lần bộ kiểm tra phải báo đỏ."</div>
       <div class="art-quote" lang="en">"A golden model earns trust only when it <em>can fail</em>:
-        eight deliberate mutations, eight red selftests."</div>
+        eight deliberate acts of sabotage, eight red test runs."</div>
     </div>
   </li>
   <li class="art-item">
@@ -498,24 +495,45 @@ footer a:hover{ text-decoration:underline; }
 <!-- ===== About ===== -->
 <section class="entry" id="about">
 <h2><span lang="vi">Giới thiệu</span><span lang="en">About</span></h2>
-<p lang="vi">Tôi là kỹ sư thiết kế vi mạch (RTL/ASIC), hiện làm việc tại Hàn Quốc.
-   Trang này là sổ tay mở của tôi: ghi lại những bài học rút ra từ công việc hằng ngày,
-   hy vọng tiết kiệm được cho bạn đọc vài lần vấp ngã.</p>
-<p lang="en">I am a chip design engineer (RTL/ASIC), currently working in South Korea.
-   This site is my open notebook: lessons drawn from everyday work, written in the hope of
-   saving the reader a few stumbles.</p>
+<ul class="bio" lang="vi">
+  <li>Kỹ sư thiết kế IC số / SoC, sống và làm việc tại Hàn Quốc; trong ngành bán dẫn từ năm 2020.</li>
+  <li>Tiến sĩ Kỹ thuật điện (Đại học Ulsan, 2020) với nghiên cứu về mã sửa lỗi cho xử lý thông tin
+      lượng tử; cử nhân Điện tử – Viễn thông (Đại học Bách khoa Hà Nội).</li>
+  <li>Đã đi qua nhiều dòng sản phẩm: điều khiển cảm ứng và haptic, PMIC sạc nhanh, SoC NPU cho ô tô,
+      và chip bảo mật — làm từ micro-architecture, RTL, tích hợp top cho tới verification và FPGA.</li>
+  <li>Việc tôi thích nhất: biến một thuật toán thành RTL mà mạch chạy được — bỏ phép chia,
+      chỉ còn dịch bit và phép cộng.</li>
+  <li>Tin vào loại verification <em>có thể thất bại</em>: golden model bằng Python, vector chuẩn của
+      NIST, cocotb + Verilator, và mutation testing.</li>
+</ul>
+<ul class="bio" lang="en">
+  <li>Digital IC / SoC design engineer based in South Korea; in the semiconductor industry since 2020.</li>
+  <li>Ph.D. in Electrical Engineering (University of Ulsan, 2020) on error-correcting codes for quantum
+      information processing; B.S. in Electronics &amp; Telecommunications (HUST, Hanoi).</li>
+  <li>Product lines I have worked across: touchscreen and haptic controllers, fast-charging PMICs,
+      automotive NPU SoCs and security chips — from micro-architecture and RTL through top integration,
+      verification and FPGA bring-up.</li>
+  <li>The part I enjoy most: turning an algorithm into RTL a circuit can actually run — no dividers,
+      just shifts and adds.</li>
+  <li>A believer in verification that <em>can fail</em>: Python golden models, NIST known-answer
+      vectors, cocotb + Verilator, and mutation testing.</li>
+</ul>
 <div class="about-grid">
   <div>
     <h3><span lang="vi">Chủ đề quan tâm</span><span lang="en">Interests</span></h3>
     <ul lang="vi">
-      <li>Thiết kế RTL, kiến trúc SoC, bus AMBA</li>
-      <li>Verification: testbench, mô phỏng, cocotb</li>
-      <li>ASIC flow mã nguồn mở (RTL → GDSII)</li>
+      <li>Thiết kế RTL và kiến trúc SoC: bus AMBA (APB/AHB/AXI), tích hợp IP, điều khiển bộ nhớ</li>
+      <li>Mã sửa lỗi (BCH, Reed–Solomon, Hamming) và thuật toán mật mã trên phần cứng</li>
+      <li>Verification: golden model, cocotb/Verilator, mutation testing, mô phỏng cùng firmware</li>
+      <li>ASIC flow mã nguồn mở (Yosys, OpenLane 2, Sky130): gate count, STA, công suất, DRC/LVS</li>
+      <li>Phần cứng cho AI và cho xử lý thông tin lượng tử ở thiết bị biên</li>
     </ul>
     <ul lang="en">
-      <li>RTL design, SoC architecture, AMBA buses</li>
-      <li>Verification: testbenches, simulation, cocotb</li>
-      <li>Open-source ASIC flow (RTL → GDSII)</li>
+      <li>RTL design and SoC architecture: AMBA buses (APB/AHB/AXI), IP integration, memory controllers</li>
+      <li>Error-correcting codes (BCH, Reed–Solomon, Hamming) and cryptographic algorithms in hardware</li>
+      <li>Verification: golden models, cocotb/Verilator, mutation testing, firmware-in-the-loop simulation</li>
+      <li>Open-source ASIC flow (Yosys, OpenLane 2, Sky130): gate count, STA, power, DRC/LVS</li>
+      <li>Hardware for AI and for quantum information processing on edge devices</li>
     </ul>
   </div>
   <div>
