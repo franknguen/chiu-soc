@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-lang="vi"
+      data-title-vi="ChiU-SoC — Ghi chú &amp; chia sẻ kinh nghiệm thiết kế vi mạch"
+      data-title-en="ChiU-SoC — Notes &amp; experience from chip design">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ChiU-SoC — Ghi chú &amp; chia sẻ kinh nghiệm thiết kế vi mạch</title>
-<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú kỹ thuật và chia sẻ kinh nghiệm về thiết kế vi mạch (RTL/ASIC), verification và công cụ EDA mã nguồn mở."/>
+<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú kỹ thuật và chia sẻ kinh nghiệm về thiết kế vi mạch (RTL/ASIC), verification và công cụ EDA mã nguồn mở. Personal notes on chip design, verification and open-source EDA."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
@@ -30,6 +32,10 @@ body{
   counter-reset: artnum;
 }
 
+/* ===== Song ngữ / bilingual: chỉ hiện ngôn ngữ đang chọn ===== */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
 /* ===== Header ===== */
 header{
   position:sticky; top:0; z-index:100;
@@ -38,7 +44,7 @@ header{
 }
 .header-inner{
   max-width:var(--max-w); margin:0 auto; padding:12px 6px;
-  display:flex; flex-wrap:wrap; align-items:center; gap:6px 22px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px;
 }
 .site-title{ font-size:24px; font-weight:800; letter-spacing:2px; }
 .site-title a{ color:#fff; text-decoration:none; }
@@ -51,9 +57,22 @@ nav a{
   transition:background .15s;
 }
 nav a:hover{ background:rgba(255,255,255,.12); }
+.lang-switch{
+  display:flex; gap:3px; background:rgba(255,255,255,.12);
+  padding:3px; border-radius:999px; flex:0 0 auto;
+}
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
 @media(max-width:640px){
   .site-title{ font-size:19px; letter-spacing:1px; }
   .site-tag{ display:none; }
+  nav a{ font-size:14px; padding:6px 10px; }
 }
 
 /* ===== Page container ===== */
@@ -214,17 +233,24 @@ footer a:hover{ text-decoration:underline; }
 <header>
   <div class="header-inner">
     <div class="site-title"><a href="index.html">ChiU<span class="dot">·</span>SoC</a></div>
-    <div class="site-tag">Ghi chú &amp; chia sẻ kinh nghiệm thiết kế vi mạch</div>
+    <div class="site-tag">
+      <span lang="vi">Ghi chú &amp; chia sẻ kinh nghiệm thiết kế vi mạch</span>
+      <span lang="en">Notes &amp; experience from chip design</span>
+    </div>
     <nav>
       <ul>
-        <li><a href="index.html">Trang chủ</a></li>
-        <li><a href="#s1">Thiết kế vi mạch</a></li>
-        <li><a href="#s2">Kinh nghiệm</a></li>
-        <li><a href="#s3">Nghĩ suy cùng đất nước</a></li>
-        <li><a href="#s4">Vần thơ &amp; Giai điệu</a></li>
-        <li><a href="#about">Giới thiệu</a></li>
+        <li><a href="index.html"><span lang="vi">Trang chủ</span><span lang="en">Home</span></a></li>
+        <li><a href="#s1"><span lang="vi">Thiết kế vi mạch</span><span lang="en">Chip design</span></a></li>
+        <li><a href="#s2"><span lang="vi">Kinh nghiệm</span><span lang="en">Experience</span></a></li>
+        <li><a href="#s3"><span lang="vi">Nghĩ suy cùng đất nước</span><span lang="en">Thoughts on our country</span></a></li>
+        <li><a href="#s4"><span lang="vi">Vần thơ &amp; Giai điệu</span><span lang="en">Poetry &amp; Melody</span></a></li>
+        <li><a href="#about"><span lang="vi">Giới thiệu</span><span lang="en">About</span></a></li>
       </ul>
     </nav>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
   </div>
 </header>
 
@@ -234,215 +260,313 @@ footer a:hover{ text-decoration:underline; }
 <section class="hero">
   <div class="avatar">FN</div>
   <div>
-    <h1>Xin chào, tôi là Frank Nguyen!</h1>
-    <p>Đây là nơi tôi ghi chú lại những gì học được và chia sẻ kinh nghiệm làm nghề
+    <h1><span lang="vi">Xin chào, tôi là Frank Nguyen!</span><span lang="en">Hello, I am Frank Nguyen!</span></h1>
+    <p lang="vi">Đây là nơi tôi ghi chú lại những gì học được và chia sẻ kinh nghiệm làm nghề
        thiết kế vi mạch: từ viết RTL, dựng môi trường mô phỏng và verification,
        đến chạy ASIC flow bằng công cụ mã nguồn mở.
        Mỗi bài là một ghi chú ngắn — viết cho chính mình trước, cho bạn đọc sau.
        Bên cạnh chuyên môn còn có góc <em>Nghĩ suy cùng đất nước</em> và
        <em>Vần thơ &amp; Giai điệu</em> — chỗ cho những điều ngoài con chip.</p>
+    <p lang="en">This is where I keep notes on what I learn and share experience from working
+       in chip design: writing RTL, building simulation and verification environments,
+       and running an ASIC flow with open-source tools.
+       Each entry is a short note — written for myself first, for the reader second.
+       Beyond the technical work there is also <em>Thoughts on our country</em> and
+       <em>Poetry &amp; Melody</em> — room for the things outside the chip.</p>
     <div class="hero-chips">
       <span class="chip">RTL / ASIC</span>
       <span class="chip">SoC</span>
       <span class="chip">Verification</span>
-      <span class="chip">EDA mã nguồn mở</span>
+      <span class="chip"><span lang="vi">EDA mã nguồn mở</span><span lang="en">Open-source EDA</span></span>
     </div>
   </div>
 </section>
 
 <!-- ===== TOC ===== -->
 <div class="toc-wrap" id="toc">
-  <h2>Mục lục</h2>
+  <h2><span lang="vi">Mục lục</span><span lang="en">Contents</span></h2>
   <ul>
-    <li><a href="#s1">Thiết kế vi mạch — RTL, SoC &amp; Công cụ</a></li>
-    <li><a href="#s2">Kinh nghiệm nghề nghiệp &amp; Học tập</a></li>
-    <li><a href="#s3">Nghĩ suy cùng đất nước</a></li>
-    <li><a href="#s4">Vần thơ &amp; Giai điệu</a></li>
+    <li><a href="#s1"><span lang="vi">Thiết kế vi mạch — RTL, SoC &amp; Công cụ</span><span lang="en">Chip design — RTL, SoC &amp; tools</span></a></li>
+    <li><a href="#s2"><span lang="vi">Kinh nghiệm nghề nghiệp &amp; Học tập</span><span lang="en">Career &amp; learning</span></a></li>
+    <li><a href="#s3"><span lang="vi">Nghĩ suy cùng đất nước</span><span lang="en">Thoughts on our country</span></a></li>
+    <li><a href="#s4"><span lang="vi">Vần thơ &amp; Giai điệu</span><span lang="en">Poetry &amp; Melody</span></a></li>
   </ul>
 </div>
 
 <div class="note">
-  <h3>Ghi chú</h3>
-  Trang đang được xây dựng. Các bài gắn nhãn <span class="wip">đang viết</span> là
-  chỗ giữ trước cho những ghi chú sắp đăng — danh sách dưới đây sẽ dài dần theo thời gian.
+  <h3><span lang="vi">Ghi chú</span><span lang="en">Note</span></h3>
+  <span lang="vi">Trang đang được xây dựng. Các bài gắn nhãn <span class="wip">đang viết</span> là
+  chỗ giữ trước cho những ghi chú sắp đăng — danh sách dưới đây sẽ dài dần theo thời gian.</span>
+  <span lang="en">This site is a work in progress. Entries marked <span class="wip">in progress</span>
+  are placeholders for notes still to come — the list below will grow over time.</span>
 </div>
 
 <!-- ===== Section 1 ===== -->
 <section class="entry" id="s1">
-<h2>Thiết kế vi mạch — RTL, SoC &amp; Công cụ</h2>
-<p>Ghi chú về viết RTL, tổ chức một IP, testbench và mô phỏng, con đường từ RTL đến GDSII,
+<h2><span lang="vi">Thiết kế vi mạch — RTL, SoC &amp; Công cụ</span><span lang="en">Chip design — RTL, SoC &amp; tools</span></h2>
+<p lang="vi">Ghi chú về viết RTL, tổ chức một IP, testbench và mô phỏng, con đường từ RTL đến GDSII,
    và các công cụ mã nguồn mở (Verilator, Icarus Verilog, cocotb, GTKWave, OpenLane…)
    để làm tất cả những việc đó mà không cần license.</p>
+<p lang="en">Notes on writing RTL, organising an IP, testbenches and simulation, the road from
+   RTL to GDSII, and the open-source tools (Verilator, Icarus Verilog, cocotb, GTKWave,
+   OpenLane…) that do all of it without a licence.</p>
 <ol class="art-list">
   <li class="art-item">
-    <div class="art-title">Một regression "không thể FAIL" thì chưa phải là verification</div>
-    <div class="art-desc">Vì sao một bảng kết quả toàn PASS đôi khi không chứng minh điều gì,
-      và cách tự kiểm tra bộ chấm điểm của chính mình bằng cách cố tình làm hỏng thiết kế.</div>
+    <div class="art-title">
+      <span lang="vi">MD5 (RFC 1321): hiểu một hàm băm từ định nghĩa đến mạch số</span>
+      <span lang="en">MD5 (RFC 1321): a hash function from the definition down to the circuit</span>
+    </div>
+    <div class="art-desc" lang="vi">Đệm, bảng hằng số sinh từ hàm sin, 64 bước, góc nhìn phần cứng
+      (64 chu kỳ/khối, 8 bit/chu kỳ), hiệu ứng tuyết lở đo được, lịch sử bị phá — và cách
+      xây một mô hình chuẩn (golden model) mà ta có quyền tin.</div>
+    <div class="art-desc" lang="en">Padding, a constant table generated from the sine function,
+      64 steps, the hardware view (64 cycles per block, 8 bits per cycle), measured avalanche,
+      the history of its breaking — and how to build a golden model you are entitled to trust.</div>
     <ul class="art-links">
-      <li><a class="link-html" href="posts/regression-khong-the-fail.html">Bản đọc HTML</a></li>
+      <li><a class="link-html" href="posts/md5-rfc1321.html"><span lang="vi">Bản đọc HTML</span><span lang="en">Read in HTML</span></a></li>
     </ul>
     <div class="art-quotes">
-      <div class="art-quote">"Một testcase chưa từng FAIL chưa chắc đã PASS —
-        <em>nó chỉ chưa chứng minh được rằng nó biết cách FAIL.</em>"</div>
+      <div class="art-quote" lang="vi">"Một mô hình chuẩn chỉ đáng tin khi nó <em>có thể sai</em>:
+        tám đột biến cố ý, tám lần selftest phải đỏ."</div>
+      <div class="art-quote" lang="en">"A golden model earns trust only when it <em>can fail</em>:
+        eight deliberate mutations, eight red selftests."</div>
     </div>
   </li>
   <li class="art-item">
-    <div class="art-title">Bắt đầu một IP mới: bộ khung thư mục RTL / SIM / DOC tôi luôn dùng</div>
-    <div class="art-desc">Cấu trúc thư mục, Makefile, cơ chế TESTCASE và script chạy một lệnh —
+    <div class="art-title">
+      <span lang="vi">Bắt đầu một IP mới: bộ khung thư mục RTL / SIM / DOC tôi luôn dùng</span>
+      <span lang="en">Starting a new IP: the RTL / SIM / DOC skeleton I always use</span>
+    </div>
+    <div class="art-desc" lang="vi">Cấu trúc thư mục, Makefile, cơ chế TESTCASE và script chạy một lệnh —
       để sáu tháng sau quay lại vẫn chạy được ngay.</div>
+    <div class="art-desc" lang="en">Directory layout, Makefile, the TESTCASE mechanism and a
+      one-command run script — so that it still runs when you come back six months later.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
   <li class="art-item">
-    <div class="art-title">Golden model: mô hình tham chiếu là "trọng tài" còn thiếu của nhiều IP</div>
-    <div class="art-desc">Một IP không có mô hình tham chiếu độc lập thì testbench
+    <div class="art-title">
+      <span lang="vi">Golden model: mô hình tham chiếu là "trọng tài" còn thiếu của nhiều IP</span>
+      <span lang="en">Golden model: the reference model is the missing referee of many IPs</span>
+    </div>
+    <div class="art-desc" lang="vi">Một IP không có mô hình tham chiếu độc lập thì testbench
       chỉ đang so thiết kế với chính nó.</div>
+    <div class="art-desc" lang="en">Without an independent reference model, a testbench is only
+      comparing the design against itself.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
   <li class="art-item">
-    <div class="art-title">Từ RTL đến GDSII bằng công cụ mở: những con số đầu tiên nên nhìn</div>
-    <div class="art-desc">Gate count (GE), f_max, diện tích, công suất — đọc báo cáo của một
+    <div class="art-title">
+      <span lang="vi">Từ RTL đến GDSII bằng công cụ mở: những con số đầu tiên nên nhìn</span>
+      <span lang="en">From RTL to GDSII with open tools: the first numbers worth reading</span>
+    </div>
+    <div class="art-desc" lang="vi">Gate count (GE), f_max, diện tích, công suất — đọc báo cáo của một
       ASIC flow mã nguồn mở như thế nào cho đúng.</div>
+    <div class="art-desc" lang="en">Gate count (GE), f_max, area, power — how to read the reports of
+      an open-source ASIC flow correctly.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
-    </ul>
-  </li>
-  <li class="art-item">
-    <div class="art-title">Verilator chạy được thứ Icarus không chạy nổi (và ngược lại)</div>
-    <div class="art-desc">Hai trình mô phỏng miễn phí, hai tập điểm mạnh khác nhau —
-      kinh nghiệm chọn công cụ theo từng loại thiết kế.</div>
-    <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
-    </ul>
-  </li>
-  <li class="art-item">
-    <div class="art-title">cocotb: viết testbench bằng Python có đáng không?</div>
-    <div class="art-desc">Port một bộ testcase Verilog sang cocotb — cái được, cái mất,
-      và những cái bẫy ít người kể.</div>
-    <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
 </ol>
-<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+<div class="back-to-toc"><a href="#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a></div>
 </section>
 
 <!-- ===== Section 2 ===== -->
 <section class="entry" id="s2">
-<h2>Kinh nghiệm nghề nghiệp &amp; Học tập</h2>
-<p>Những điều tôi ước có người nói với mình sớm hơn — về nghề kỹ sư thiết kế vi mạch và cách tự học.</p>
+<h2><span lang="vi">Kinh nghiệm nghề nghiệp &amp; Học tập</span><span lang="en">Career &amp; learning</span></h2>
+<p lang="vi">Những điều tôi ước có người nói với mình sớm hơn — về nghề kỹ sư thiết kế vi mạch và cách tự học.</p>
+<p lang="en">The things I wish someone had told me earlier — about the craft of chip design and how to teach yourself.</p>
 <ol class="art-list">
   <li class="art-item">
-    <div class="art-title">Kỹ sư thiết kế vi mạch làm gì mỗi ngày?</div>
-    <div class="art-desc">Một ngày làm việc thật sự trông như thế nào — ít "thiết kế" hơn
+    <div class="art-title">
+      <span lang="vi">Kỹ sư thiết kế vi mạch làm gì mỗi ngày?</span>
+      <span lang="en">What does a chip design engineer actually do all day?</span>
+    </div>
+    <div class="art-desc" lang="vi">Một ngày làm việc thật sự trông như thế nào — ít "thiết kế" hơn
       bạn nghĩ, nhiều "chứng minh" hơn bạn tưởng.</div>
+    <div class="art-desc" lang="en">What a real working day looks like — less "designing" than you
+      expect, far more "proving" than you imagine.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
   <li class="art-item">
-    <div class="art-title">Học thiết kế vi mạch bắt đầu từ đâu khi chỉ có một chiếc laptop?</div>
-    <div class="art-desc">Lộ trình tự học với toàn công cụ miễn phí: Verilog → mô phỏng →
+    <div class="art-title">
+      <span lang="vi">Học thiết kế vi mạch bắt đầu từ đâu khi chỉ có một chiếc laptop?</span>
+      <span lang="en">Where do you start learning chip design with nothing but a laptop?</span>
+    </div>
+    <div class="art-desc" lang="vi">Lộ trình tự học với toàn công cụ miễn phí: Verilog → mô phỏng →
       một IP hoàn chỉnh → chạy thử ASIC flow.</div>
+    <div class="art-desc" lang="en">A self-study path on free tools only: Verilog → simulation →
+      one complete IP → a trial run of the ASIC flow.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
 </ol>
-<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+<div class="back-to-toc"><a href="#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a></div>
 </section>
 
 <!-- ===== Section 3 ===== -->
 <section class="entry" id="s3">
-<h2>Nghĩ suy cùng đất nước</h2>
-<p>Những suy ngẫm ngoài chuyên môn — về giáo dục, khoa học và con đường phát triển của đất nước.
+<h2><span lang="vi">Nghĩ suy cùng đất nước</span><span lang="en">Thoughts on our country</span></h2>
+<p lang="vi">Những suy ngẫm ngoài chuyên môn — về giáo dục, khoa học và con đường phát triển của đất nước.
    Góc này lấy cảm hứng từ trang
    <a class="link-ext" href="https://phandinhdieu.github.io/" target="_blank" rel="noopener">"Nghĩ Suy cùng Đất Nước"</a>
    của cố GS. Phan Đình Diệu.</p>
+<p lang="en">Reflections outside the technical work — on education, science and the country's path
+   forward. This corner is inspired by the late Prof. Phan Đình Diệu's site
+   <a class="link-ext" href="https://phandinhdieu.github.io/" target="_blank" rel="noopener">"Nghĩ Suy cùng Đất Nước"</a>.</p>
 <ol class="art-list">
   <li class="art-item">
-    <div class="art-title">Người kỹ sư xa quê có thể đóng góp gì cho quê hương?</div>
-    <div class="art-desc">Vài suy nghĩ về chia sẻ tri thức, đào tạo và cộng đồng kỹ thuật
+    <div class="art-title">
+      <span lang="vi">Người kỹ sư xa quê có thể đóng góp gì cho quê hương?</span>
+      <span lang="en">What can an engineer far from home contribute to it?</span>
+    </div>
+    <div class="art-desc" lang="vi">Vài suy nghĩ về chia sẻ tri thức, đào tạo và cộng đồng kỹ thuật
       người Việt ở nước ngoài.</div>
+    <div class="art-desc" lang="en">A few thoughts on sharing knowledge, teaching, and the community
+      of Vietnamese engineers abroad.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
   <li class="art-item">
-    <div class="art-title">Đọc lại thế hệ trí thức đi trước — những điều còn nguyên giá trị</div>
-    <div class="art-desc">Ghi chép khi đọc các bài viết, tham luận của những người đi trước
+    <div class="art-title">
+      <span lang="vi">Đọc lại thế hệ trí thức đi trước — những điều còn nguyên giá trị</span>
+      <span lang="en">Re-reading the generation before us — what still holds true</span>
+    </div>
+    <div class="art-desc" lang="vi">Ghi chép khi đọc các bài viết, tham luận của những người đi trước
       về khoa học, giáo dục và quản lý.</div>
+    <div class="art-desc" lang="en">Notes taken while reading the essays and speeches of earlier
+      thinkers on science, education and management.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
 </ol>
-<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+<div class="back-to-toc"><a href="#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a></div>
 </section>
 
 <!-- ===== Section 4 ===== -->
 <section class="entry" id="s4">
-<h2>Vần thơ &amp; Giai điệu</h2>
-<p>Góc thư giãn — những bài thơ và bản nhạc tôi yêu thích, chép lại để dành và để chia sẻ.</p>
+<h2><span lang="vi">Vần thơ &amp; Giai điệu</span><span lang="en">Poetry &amp; Melody</span></h2>
+<p lang="vi">Góc thư giãn — những bài thơ và bản nhạc tôi yêu thích, chép lại để dành và để chia sẻ.</p>
+<p lang="en">A quieter corner — poems and music I love, kept here to save and to share.</p>
 <ol class="art-list">
   <li class="art-item">
-    <div class="art-title">Bài thơ quê hương — Nguyễn Bính</div>
-    <div class="art-desc">Nguyễn Bính (1918–1966), nhà thơ "chân quê", viết về quê hương bằng
+    <div class="art-title">
+      <span lang="vi">Bài thơ quê hương — Nguyễn Bính</span>
+      <span lang="en">"Bài thơ quê hương" (A Poem of My Homeland) — Nguyễn Bính</span>
+    </div>
+    <div class="art-desc" lang="vi">Nguyễn Bính (1918–1966), nhà thơ "chân quê", viết về quê hương bằng
       những hình ảnh dân gian mộc mạc mà thấm sâu. Trích hai câu mở đầu:</div>
+    <div class="art-desc" lang="en">Nguyễn Bính (1918–1966), the poet of the Vietnamese countryside,
+      wrote of home in plain folk images that stay with the reader. The opening two lines:</div>
     <div class="art-quotes">
-      <div class="art-quote">"Quê hương tôi có cây bầu cây nhị<br/>
+      <div class="art-quote" lang="vi">"Quê hương tôi có cây bầu cây nhị<br/>
         Tiếng đàn kêu tích tịch tình tang…"</div>
+      <div class="art-quote" lang="en">"Quê hương tôi có cây bầu cây nhị<br/>
+        Tiếng đàn kêu tích tịch tình tang…"<br/>
+        <em>— "My homeland has the gourd vine and the two-string fiddle, / its strings calling
+        tich-tich-tinh-tang…"</em></div>
     </div>
     <ul class="art-links">
-      <li><a class="link-ext" href="https://vi.wikipedia.org/wiki/Nguy%E1%BB%85n_B%C3%ADnh" target="_blank" rel="noopener">Về nhà thơ Nguyễn Bính</a></li>
-      <li><span class="wip">toàn văn: đang bổ sung</span></li>
+      <li><a class="link-ext" href="https://vi.wikipedia.org/wiki/Nguy%E1%BB%85n_B%C3%ADnh" target="_blank" rel="noopener"><span lang="vi">Về nhà thơ Nguyễn Bính</span><span lang="en">About the poet</span></a></li>
+      <li><span class="wip"><span lang="vi">toàn văn: đang bổ sung</span><span lang="en">full text: to be added</span></span></li>
     </ul>
   </li>
   <li class="art-item">
-    <div class="art-title">Những bản nhạc cho một buổi tối viết RTL</div>
-    <div class="art-desc">Playlist và đôi dòng cảm nhận.</div>
+    <div class="art-title">
+      <span lang="vi">Những bản nhạc cho một buổi tối viết RTL</span>
+      <span lang="en">Music for an evening of writing RTL</span>
+    </div>
+    <div class="art-desc" lang="vi">Playlist và đôi dòng cảm nhận.</div>
+    <div class="art-desc" lang="en">A playlist, and a few lines on why.</div>
     <ul class="art-links">
-      <li><span class="wip">đang viết</span></li>
+      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
   </li>
 </ol>
-<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+<div class="back-to-toc"><a href="#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a></div>
 </section>
 
 <!-- ===== About ===== -->
 <section class="entry" id="about">
-<h2>Giới thiệu</h2>
-<p>Tôi là kỹ sư thiết kế vi mạch (RTL/ASIC), hiện làm việc tại Hàn Quốc.
+<h2><span lang="vi">Giới thiệu</span><span lang="en">About</span></h2>
+<p lang="vi">Tôi là kỹ sư thiết kế vi mạch (RTL/ASIC), hiện làm việc tại Hàn Quốc.
    Trang này là sổ tay mở của tôi: ghi lại những bài học rút ra từ công việc hằng ngày,
    hy vọng tiết kiệm được cho bạn đọc vài lần vấp ngã.</p>
+<p lang="en">I am a chip design engineer (RTL/ASIC), currently working in South Korea.
+   This site is my open notebook: lessons drawn from everyday work, written in the hope of
+   saving the reader a few stumbles.</p>
 <div class="about-grid">
   <div>
-    <h3>Chủ đề quan tâm</h3>
-    <ul>
+    <h3><span lang="vi">Chủ đề quan tâm</span><span lang="en">Interests</span></h3>
+    <ul lang="vi">
       <li>Thiết kế RTL, kiến trúc SoC, bus AMBA</li>
       <li>Verification: testbench, mô phỏng, cocotb</li>
       <li>ASIC flow mã nguồn mở (RTL → GDSII)</li>
     </ul>
+    <ul lang="en">
+      <li>RTL design, SoC architecture, AMBA buses</li>
+      <li>Verification: testbenches, simulation, cocotb</li>
+      <li>Open-source ASIC flow (RTL → GDSII)</li>
+    </ul>
   </div>
   <div>
-    <h3>Liên hệ</h3>
+    <h3><span lang="vi">Liên hệ</span><span lang="en">Contact</span></h3>
     <ul>
       <li>Email: <a class="link-ext" href="mailto:nguyenmanhduc18@gmail.com">nguyenmanhduc18@gmail.com</a></li>
-      <li>GitHub: <a class="link-ext" href="https://github.com/franknguen" target="_blank" rel="noopener">github.com/franknguen</a></li>
+      <li>LinkedIn: <a class="link-ext" href="https://www.linkedin.com/in/chi-u-chi-soc/" target="_blank" rel="noopener">linkedin.com/in/chi-u-chi-soc</a></li>
     </ul>
   </div>
 </div>
-<div class="back-to-toc"><a href="#toc">↑ Mục lục</a></div>
+<div class="back-to-toc"><a href="#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a></div>
 </section>
 
 </main>
 
 <footer>
-  © 2026 Frank Nguyen · <strong>ChiU·SoC</strong> — viết để nhớ, đăng để chia sẻ.
+  <span lang="vi">© 2026 Frank Nguyen · <strong>ChiU·SoC</strong> — viết để nhớ, đăng để chia sẻ.</span>
+  <span lang="en">© 2026 Frank Nguyen · <strong>ChiU·SoC</strong> — written to remember, published to share.</span>
 </footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
 
 </body>
 </html>

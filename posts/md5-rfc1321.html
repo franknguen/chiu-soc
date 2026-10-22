@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="MD5 (RFC 1321): từ định nghĩa đến mạch số — ChiU·SoC"
+      data-title-en="MD5 (RFC 1321): from the definition to the circuit — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MD5 (RFC 1321): từ định nghĩa đến mạch số — ChiU·SoC</title>
+<meta name="description" content="MD5 theo RFC 1321: đệm, bảng hằng số từ sin, 64 bước, góc nhìn phần cứng, tuyết lở, an ninh, và cách xây một golden model đáng tin."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; scroll-padding-top:80px; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:20px 0 6px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px; overflow-wrap:anywhere;
+}
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.65;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:380px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:7px 11px; text-align:left; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">MD5 (RFC 1321): hiểu một hàm băm từ định nghĩa đến mạch số</span><span lang="en">MD5 (RFC 1321): a hash function from the definition down to the circuit</span></h1>
+<div class="meta"><span lang="vi">Ghi chú kỹ thuật · 22/10/2026 · Frank Nguyen</span><span lang="en">Technical note · 22 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">MD5 đã bị phá về va chạm từ hai mươi năm trước, nên không ai nên dùng nó
+để ký số nữa. Nhưng chính vì nó nhỏ, đẹp và được đặc tả đầy đủ trong một tài liệu 21 trang,
+MD5 là bài tập nhập môn tốt nhất cho câu hỏi: <em>một hàm băm thật sự làm gì, và làm thế nào
+để biến một đặc tả thành một mô hình mà ta có quyền tin?</em></p>
+<p class="lede" lang="en">MD5 has been broken for collisions for twenty years, so nobody should sign
+anything with it today. Yet precisely because it is small, elegant and fully specified in a
+21-page document, MD5 is the best introductory exercise for the question: <em>what does a hash
+function actually do, and how do you turn a specification into a model you are entitled to
+trust?</em></p>
+
+<h2><span lang="vi">1. Một hàm băm hứa điều gì</span><span lang="en">1. What a hash function promises</span></h2>
+<p lang="vi">Hàm băm mật mã nén một thông điệp dài tuỳ ý thành một chuỗi cố định (MD5: 128 bit)
+và hứa ba điều:</p>
+<p lang="en">A cryptographic hash compresses a message of arbitrary length into a fixed string
+(MD5: 128 bits) and promises three things:</p>
+<ul lang="vi">
+  <li><strong>Kháng tiền ảnh</strong> — cho digest, không tìm được thông điệp sinh ra nó.</li>
+  <li><strong>Kháng tiền ảnh thứ hai</strong> — cho một thông điệp, không tìm được thông điệp khác cùng digest.</li>
+  <li><strong>Kháng va chạm</strong> — không tìm được <em>bất kỳ</em> cặp thông điệp nào trùng digest.</li>
+</ul>
+<ul lang="en">
+  <li><strong>Preimage resistance</strong> — given a digest, you cannot find a message producing it.</li>
+  <li><strong>Second-preimage resistance</strong> — given a message, you cannot find another with the same digest.</li>
+  <li><strong>Collision resistance</strong> — you cannot find <em>any</em> pair of messages sharing a digest.</li>
+</ul>
+<p lang="vi">Điều thứ ba luôn yếu nhất: nghịch lý ngày sinh cho thấy với digest n bit, một va chạm
+chỉ tốn khoảng 2<sup>n/2</sup> phép thử — với MD5 là 2<sup>64</sup>, đã nằm trong tầm tay máy
+móc từ lâu. Đó là lý do độ dài digest luôn phải gấp đôi mức an ninh mong muốn.</p>
+<p lang="en">The third is always the weakest: the birthday paradox says that for an n-bit digest a
+collision costs about 2<sup>n/2</sup> trials — 2<sup>64</sup> for MD5, long within reach of real
+machines. This is why a digest must always be twice as long as the security level you want.</p>
+
+<h2><span lang="vi">2. Khung Merkle–Damgård: băm dài bằng cách lặp cái ngắn</span><span lang="en">2. Merkle–Damgård: hashing something long by repeating something short</span></h2>
+<p lang="vi">MD5 chỉ biết làm một việc: nén một khối 512 bit vào một trạng thái 128 bit. Mọi thứ
+còn lại là khung bao quanh — đệm thông điệp cho tròn khối, rồi cho từng khối đi qua hàm nén,
+trạng thái ra của khối này là trạng thái vào của khối sau (<em>chaining</em>). Trạng thái cuối
+cùng chính là digest.</p>
+<p lang="en">MD5 only knows how to do one thing: compress a 512-bit block into a 128-bit state.
+Everything else is scaffolding — pad the message to a whole number of blocks, then run each block
+through the compression function, the output state of one block becoming the input state of the
+next (<em>chaining</em>). The final state is the digest.</p>
+<p lang="vi">Khung này có một hệ quả nổi tiếng mà người thiết kế giao thức phải nhớ:
+<strong>tấn công mở rộng độ dài</strong>. Biết <code>MD5(m)</code> và độ dài của <code>m</code>,
+kẻ tấn công tính được <code>MD5(m ‖ đệm ‖ m')</code> mà không cần biết <code>m</code>. Vì vậy
+<code>MD5(khoá ‖ thông_điệp)</code> không phải là một MAC; HMAC sinh ra để sửa đúng chỗ này.</p>
+<p lang="en">The construction has one famous consequence every protocol designer must remember:
+the <strong>length-extension attack</strong>. Knowing <code>MD5(m)</code> and the length of
+<code>m</code>, an attacker can compute <code>MD5(m ‖ padding ‖ m')</code> without knowing
+<code>m</code>. Hence <code>MD5(key ‖ message)</code> is not a MAC; HMAC exists to fix exactly that.</p>
+
+<h2><span lang="vi">3. Đệm: nơi mọi hiện thực sai đầu tiên</span><span lang="en">3. Padding: where every implementation goes wrong first</span></h2>
+<p lang="vi">Quy tắc của RFC 1321 §3.1–3.2: thêm một byte <code>0x80</code> (bit 1 rồi bảy bit 0),
+thêm các byte <code>0x00</code> cho tới khi độ dài ≡ 56 (mod 64), rồi thêm 8 byte ghi
+<strong>độ dài thông điệp gốc tính bằng bit, little-endian</strong>. Với <code>"abc"</code>:</p>
+<p lang="en">The rule from RFC 1321 §3.1–3.2: append one <code>0x80</code> byte (a 1 bit then seven
+0 bits), append <code>0x00</code> bytes until the length ≡ 56 (mod 64), then append 8 bytes holding
+the <strong>original message length in bits, little-endian</strong>. For <code>"abc"</code>:</p>
+<pre><code>00: 61 62 63 80 00 00 00 00 00 00 00 00 00 00 00 00
+16: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+32: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+48: 00 00 00 00 00 00 00 00 18 00 00 00 00 00 00 00
+                             ^^ 0x18 = 24 bit = 3 byte</code></pre>
+<p lang="vi">Hai chi tiết khiến người ta mất cả buổi gỡ lỗi: độ dài là
+<strong>little-endian</strong> (SHA-1/SHA-2 dùng big-endian), và nó đếm bit chứ không đếm byte.
+Hệ quả thấy ngay ở số khối: thông điệp 0–55 byte vừa một khối, 56–119 byte cần hai khối,
+120 byte trở lên cần ba — biên 55/56 chính là nơi testcase phải có mặt.</p>
+<p lang="en">Two details cost people an afternoon of debugging: the length is
+<strong>little-endian</strong> (SHA-1/SHA-2 use big-endian), and it counts bits, not bytes.
+The consequence shows up in the block count: a 0–55 byte message fits one block, 56–119 bytes
+need two, 120 and up need three — the 55/56 boundary is exactly where your testcases must live.</p>
+
+<h2><span lang="vi">4. Hằng số: bảng T sinh từ hàm sin</span><span lang="en">4. Constants: the T table generated from the sine function</span></h2>
+<p lang="vi">Trạng thái khởi đầu là bốn từ 32 bit (RFC §3.3):</p>
+<p lang="en">The initial state is four 32-bit words (RFC §3.3):</p>
+<pre><code>A = 0x67452301   B = 0xefcdab89   C = 0x98badcfe   D = 0x10325476</code></pre>
+<p lang="vi">Mỗi bước trong 64 bước dùng một hằng số <code>T[i]</code>. Rivest không chọn chúng
+tuỳ ý mà sinh ra từ một công thức công khai — đây là một ví dụ sớm của
+<em>"nothing up my sleeve number"</em>, con số mà tác giả không thể giấu cửa hậu bên trong:</p>
+<p lang="en">Each of the 64 steps uses a constant <code>T[i]</code>. Rivest did not pick them
+arbitrarily but generated them from a public formula — an early example of a
+<em>"nothing up my sleeve number"</em>, a constant in which the author cannot hide a backdoor:</p>
+<pre><code>T[i] = floor( 2^32 * |sin(i+1)| )        i = 0..63, i+1 tính bằng radian / in radians
+
+T[0] = floor(2^32 * 0.8414709848...) = 3614090360 = 0xd76aa478</code></pre>
+<p lang="vi">Lượng quay trái <code>s[i]</code> thì RFC chỉ liệt kê, không có công thức:
+mỗi vòng 16 bước lặp lại bốn giá trị — [7, 12, 17, 22], [5, 9, 14, 20], [4, 11, 16, 23],
+[6, 10, 15, 21]. Chỉ số từ thông điệp <code>g(i)</code> lại có công thức, và chính nó tạo nên
+sự xáo trộn giữa bốn vòng:</p>
+<p lang="en">The left-rotation amounts <code>s[i]</code> are merely listed in the RFC, with no formula:
+each round of 16 steps repeats four values — [7, 12, 17, 22], [5, 9, 14, 20], [4, 11, 16, 23],
+[6, 10, 15, 21]. The message index <code>g(i)</code>, in contrast, does have a formula, and it is
+what shuffles the message across the four rounds:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Vòng</span><span lang="en">Round</span></th>
+  <th><span lang="vi">Bước</span><span lang="en">Steps</span></th>
+  <th><span lang="vi">Hàm phi tuyến</span><span lang="en">Non-linear function</span></th>
+  <th>g(i)</th>
+</tr></thead>
+<tbody>
+  <tr><td>1</td><td>0–15</td><td><code>F(b,c,d) = (b &amp; c) | (~b &amp; d)</code></td><td><code>i</code></td></tr>
+  <tr><td>2</td><td>16–31</td><td><code>G(b,c,d) = (b &amp; d) | (c &amp; ~d)</code></td><td><code>(5i + 1) mod 16</code></td></tr>
+  <tr><td>3</td><td>32–47</td><td><code>H(b,c,d) = b ^ c ^ d</code></td><td><code>(3i + 5) mod 16</code></td></tr>
+  <tr><td>4</td><td>48–63</td><td><code>I(b,c,d) = c ^ (b | ~d)</code></td><td><code>7i mod 16</code></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi"><code>F</code> là hàm "chọn": từng bit của <code>b</code> quyết định lấy bit của
+<code>c</code> hay của <code>d</code>. <code>H</code> là chẵn lẻ. Bốn hàm khác nhau ở bốn vòng
+khiến cùng một từ thông điệp tác động theo bốn cách khác nhau.</p>
+<p lang="en"><code>F</code> is a "choice" function: each bit of <code>b</code> decides whether to
+take the bit of <code>c</code> or of <code>d</code>. <code>H</code> is parity. Four different
+functions in four rounds make the same message word act in four different ways.</p>
+
+<h2><span lang="vi">5. Một bước, và toàn bộ hàm nén</span><span lang="en">5. One step, and the whole compression function</span></h2>
+<p lang="vi">Toàn bộ MD5 nằm gọn trong một dòng, lặp 64 lần:</p>
+<p lang="en">All of MD5 fits in one line, repeated 64 times:</p>
+<pre><code>a' = b + rotl( a + f(b,c,d) + M[g(i)] + T[i], s[i] )
+(a, b, c, d) &lt;- (d, a', b, c)</code></pre>
+<p lang="vi">Sau 64 bước, cộng trạng thái đầu vào vào kết quả (đây là chaining của Merkle–Damgård,
+và cũng là cái làm hàm nén không nghịch đảo được). Digest là A, B, C, D ghi ra
+little-endian. Một chi tiết đáng chú ý cho người làm phần cứng: <strong>mỗi bước chỉ sinh
+đúng một từ mới</strong>, ba từ còn lại chỉ xoay vòng — nghĩa là datapath cần một bộ cộng và
+một thanh ghi dịch, không cần bốn.</p>
+<p lang="en">After 64 steps, add the input state to the result (this is the Merkle–Damgård chaining,
+and also what makes the compression function non-invertible). The digest is A, B, C, D written out
+little-endian. One detail worth noting for hardware people: <strong>each step produces exactly one
+new word</strong>, the other three merely rotate — meaning the datapath needs one adder chain and
+one rotator, not four.</p>
+<p lang="vi">Kiểm chứng nhanh một hiện thực: <code>MD5("abc")</code> phải bằng
+<code>900150983cd24fb0d6963f7d28e17f72</code>, và <code>MD5("")</code> =
+<code>d41d8cd98f00b204e9800998ecf8427e</code>.</p>
+<p lang="en">A quick check of any implementation: <code>MD5("abc")</code> must equal
+<code>900150983cd24fb0d6963f7d28e17f72</code>, and <code>MD5("")</code> =
+<code>d41d8cd98f00b204e9800998ecf8427e</code>.</p>
+
+<h2><span lang="vi">6. Góc nhìn phần cứng</span><span lang="en">6. The hardware view</span></h2>
+<p lang="vi">Đếm phép toán 32 bit cho <strong>một khối</strong> (64 bước + chaining) cho thấy
+giá của MD5 rất rõ ràng:</p>
+<p lang="en">Counting the 32-bit operations for <strong>one block</strong> (64 steps + chaining)
+shows the cost of MD5 very clearly:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Phép toán</span><span lang="en">Operation</span></th>
+  <th><span lang="vi">Số lần / khối</span><span lang="en">Count per block</span></th>
+  <th><span lang="vi">Ghi chú</span><span lang="en">Note</span></th>
+</tr></thead>
+<tbody>
+  <tr><td><span lang="vi">cộng biến + biến</span><span lang="en">add (var + var)</span></td><td class="num">196</td>
+      <td><span lang="vi">3/bước (<code>a+f</code>, <code>+M[g]</code>, <code>b+rot</code>) + 4 chaining</span><span lang="en">3 per step (<code>a+f</code>, <code>+M[g]</code>, <code>b+rot</code>) + 4 chaining</span></td></tr>
+  <tr><td><span lang="vi">cộng hằng T[i]</span><span lang="en">add constant T[i]</span></td><td class="num">64</td>
+      <td><span lang="vi">1/bước — hằng số, rẻ hơn cộng biến</span><span lang="en">1 per step — constant, cheaper than a variable add</span></td></tr>
+  <tr><td><code>rotl</code></td><td class="num">64</td>
+      <td><span lang="vi">lượng quay cố định ⇒ chỉ là dây nối, 0 cổng</span><span lang="en">fixed amounts ⇒ pure wiring, zero gates</span></td></tr>
+  <tr><td><code>and</code> / <code>or</code> / <code>xor</code></td><td class="num">64 / 48 / 48</td>
+      <td><span lang="vi">từ bốn hàm F, G, H, I</span><span lang="en">from the four functions F, G, H, I</span></td></tr>
+  <tr><td><code>not</code> (xor <span lang="vi">với</span><span lang="en">with</span> 0xFFFFFFFF)</td><td class="num">48</td>
+      <td><span lang="vi">~b ở F, ~d ở G và I</span><span lang="en">~b in F, ~d in G and I</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Kiến trúc đơn giản nhất — <strong>một bước mỗi chu kỳ</strong> — cho 64 chu kỳ mỗi
+khối, tức <strong>512/64 = 8 bit thông điệp mỗi chu kỳ</strong>. Đường găng là chuỗi cộng bốn
+số hạng rồi quay rồi cộng tiếp; muốn nhanh hơn thì chẻ bước thành hai chu kỳ hoặc dùng
+carry-save cho chuỗi cộng. Điều đáng nói là <code>rotl</code> với lượng quay cố định
+<em>không tốn gì</em> trong phần cứng — một bài học chung: cùng một thuật toán, chi phí trên
+CPU và trên mạch số hoàn toàn khác nhau.</p>
+<p lang="en">The simplest architecture — <strong>one step per cycle</strong> — gives 64 cycles per
+block, i.e. <strong>512/64 = 8 message bits per cycle</strong>. The critical path is the
+four-term addition, then the rotate, then one more add; to go faster you split a step across two
+cycles or carry-save the adder chain. Worth stressing: a <code>rotl</code> by a fixed amount
+<em>costs nothing</em> in hardware — a general lesson that the same algorithm has entirely
+different costs on a CPU and in a circuit.</p>
+
+<h2><span lang="vi">7. Tuyết lở: đo, đừng tin cảm giác</span><span lang="en">7. Avalanche: measure it, don't trust your feeling</span></h2>
+<p lang="vi">Một hàm băm tốt phải có hiệu ứng tuyết lở: đổi một bit đầu vào thì khoảng một nửa
+số bit đầu ra phải đổi. Với MD5 (digest 128 bit), kỳ vọng là 64 ± 3 bit. Đo thật:</p>
+<p lang="en">A good hash must show the avalanche effect: flip one input bit and about half the output
+bits must change. For MD5 (a 128-bit digest), the expectation is 64 ± 3 bits. Measured:</p>
+<pre><code>MD5("hello") = 5d41402abc4b2a76b9719d911017c592
+MD5("hellp") = c983190483df167d2a3841463c2a9341
+   'o' -&gt; 'p' : 5 bit vào đổi / 5 input bits differ  =&gt;  65/128 bit ra đổi / output bits differ
+
+300 lần lật đúng 1 bit / 300 single-bit flips:  trung bình / average 64.20 / 128</code></pre>
+<p lang="vi">Phép đo này cũng là một testcase tốt: nó không cần vector chuẩn từ bên ngoài, chỉ cần
+tính chất thống kê. Một lỗi RTL kiểu "quên một vòng" thường vẫn cho digest trông ngẫu nhiên,
+nhưng làm con số tuyết lở lệch hẳn.</p>
+<p lang="en">This measurement doubles as a good testcase: it needs no external vectors, only a
+statistical property. An RTL bug of the "forgot one round" kind usually still produces a
+random-looking digest, yet shifts the avalanche figure noticeably.</p>
+
+<h2><span lang="vi">8. MD5 đã vỡ ở đâu — và còn dùng được ở đâu</span><span lang="en">8. Where MD5 broke — and where it still works</span></h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Mốc</span><span lang="en">Milestone</span></th>
+  <th><span lang="vi">Nội dung</span><span lang="en">What happened</span></th>
+</tr></thead>
+<tbody>
+  <tr><td>1992</td><td><span lang="vi">RFC 1321 công bố MD5 (Ronald Rivest)</span><span lang="en">RFC 1321 publishes MD5 (Ronald Rivest)</span></td></tr>
+  <tr><td>2005</td><td><span lang="vi">Wang &amp; Yu: va chạm thực tế đầu tiên — kháng va chạm sụp đổ</span><span lang="en">Wang &amp; Yu: the first practical collisions — collision resistance falls</span></td></tr>
+  <tr><td>2007–2009</td><td><span lang="vi">Stevens và cộng sự: va chạm tiền tố chọn trước, dẫn tới chứng thư CA giả</span><span lang="en">Stevens et al.: chosen-prefix collisions, leading to a rogue CA certificate</span></td></tr>
+  <tr><td>2009</td><td><span lang="vi">Sasaki &amp; Aoki: tấn công tiền ảnh tốt nhất ~2<sup>123.4</sup> — vẫn ngoài tầm thực tế</span><span lang="en">Sasaki &amp; Aoki: best preimage attack ~2<sup>123.4</sup> — still far out of practical reach</span></td></tr>
+  <tr><td>2012</td><td><span lang="vi">Mã độc Flame giả chữ ký Microsoft bằng va chạm MD5</span><span lang="en">The Flame malware forges a Microsoft signature using an MD5 collision</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Tình trạng chuẩn hoá hôm nay: RFC 6151 (2011) khuyến cáo bỏ MD5 khỏi mọi ứng dụng cần
+kháng va chạm; NIST SP 800-131A loại MD5 khỏi chữ ký số; RFC 9155 (2021) bỏ MD5 và SHA-1 khỏi
+chữ ký trong TLS 1.2. Nói ngắn gọn:</p>
+<p lang="en">Standardisation status today: RFC 6151 (2011) advises retiring MD5 from every application
+needing collision resistance; NIST SP 800-131A disallows MD5 for digital signatures; RFC 9155 (2021)
+removes MD5 and SHA-1 from TLS 1.2 signatures. In short:</p>
+<div class="callout">
+  <span lang="vi"><strong>Không dùng</strong> cho chữ ký số, chứng thư, chống giả mạo, nơi có đối thủ
+  chủ động. <strong>Còn chấp nhận được</strong> cho kiểm tra toàn vẹn không có đối thủ (phát hiện
+  file tải lỗi), khử trùng lặp, định danh nội dung, và tương thích hệ thống cũ. Hệ thống mới nên
+  dùng SHA-256 hoặc SHA-3.</span>
+  <span lang="en"><strong>Do not use</strong> for digital signatures, certificates, tamper protection
+  — anywhere an active adversary exists. <strong>Still acceptable</strong> for non-adversarial
+  integrity checks (spotting a corrupted download), deduplication, content addressing and legacy
+  interoperability. New systems should use SHA-256 or SHA-3.</span>
+</div>
+
+<h2><span lang="vi">9. Từ đặc tả đến golden model đáng tin</span><span lang="en">9. From specification to a golden model you can trust</span></h2>
+<p lang="vi">Phần này mới là lý do tôi viết bài. Trước khi viết RTL cho bất kỳ thuật toán nào, ta
+cần một <strong>mô hình chuẩn</strong> (golden model) — thường bằng Python — đóng vai trọng tài.
+Nhưng mô hình cũng là phần mềm, cũng có lỗi. Bốn quy tắc tôi rút ra:</p>
+<p lang="en">This section is the reason I wrote the article. Before writing RTL for any algorithm you
+need a <strong>golden model</strong> — usually in Python — to act as referee. But a model is
+software too, and software has bugs. Four rules I have settled on:</p>
+
+<h3><span lang="vi">a. Viết từ định nghĩa, không chép từ mã tham chiếu</span><span lang="en">a. Write from the definition, never copy the reference code</span></h3>
+<p lang="vi">Tính <code>T[i]</code> từ <code>sin</code>, tính <code>g(i)</code> từ công thức. Bảng
+64 giá trị in trong RFC chỉ dùng để <em>đối chiếu</em>. Nếu chép bảng vào mã, ta chỉ chứng minh
+được mình biết copy-paste; tính từ công thức rồi thấy trùng 64/64 mới là một phép kiểm tra thật.</p>
+<p lang="en">Compute <code>T[i]</code> from <code>sin</code>, compute <code>g(i)</code> from the
+formula. The 64-value table printed in the RFC is only for <em>cross-checking</em>. Copying the
+table into your code proves only that you can copy-paste; computing it and then matching 64/64 is
+a real test.</p>
+
+<h3><span lang="vi">b. Mỗi khẳng định phải được tính hai cách độc lập</span><span lang="en">b. Check every claim two independent ways</span></h3>
+<p lang="vi">So mô hình với một hiện thực hoàn toàn khác — <code>hashlib</code> của Python, rồi
+<code>openssl dgst -md5</code> và <code>md5sum</code> ngoài Python — trên hàng chục thông điệp
+phủ mọi độ dài quanh biên 55/56/64/119/120, cả thông điệp rỗng lẫn 256 KiB. Hai nguồn độc lập
+cùng sai giống nhau là chuyện rất khó xảy ra.</p>
+<p lang="en">Compare the model against a completely different implementation — Python's
+<code>hashlib</code>, then <code>openssl dgst -md5</code> and <code>md5sum</code> outside Python —
+over dozens of messages covering every length around the 55/56/64/119/120 boundaries, from the empty
+message to 256 KiB. Two independent sources being wrong in the same way is vanishingly unlikely.</p>
+
+<h3><span lang="vi">c. Chứng minh rằng bộ kiểm tra CÓ THỂ đỏ</span><span lang="en">c. Prove that the test suite CAN go red</span></h3>
+<p lang="vi">Đây là bước hay bị bỏ qua nhất. Tôi cố tình tạo tám đột biến — <code>T</code> tính từ
+<code>sin(i)</code> thay vì <code>sin(i+1)</code>, <code>G</code> mất phép NOT, <code>g</code> của
+vòng 2 sai, độ dài đệm ghi big-endian, một lượng quay sai, bỏ chaining, digest big-endian, từ
+thông điệp big-endian — và yêu cầu <strong>mỗi đột biến làm selftest thất bại</strong>. Một bộ
+kiểm tra chưa từng chứng minh được nó biết đỏ thì màu xanh của nó không có trọng lượng.</p>
+<p lang="en">This is the step most often skipped. I deliberately introduce eight mutations —
+<code>T</code> computed from <code>sin(i)</code> instead of <code>sin(i+1)</code>, <code>G</code>
+losing its NOT, round 2's <code>g</code> wrong, the padded length written big-endian, one rotation
+amount wrong, chaining dropped, the digest big-endian, the message words big-endian — and require
+<strong>every mutation to make the selftest fail</strong>. A suite that has never shown it can go
+red gives its green no weight.</p>
+<blockquote lang="vi">"Một mô hình chuẩn chỉ đáng tin khi nó <em>có thể sai</em>:
+tám đột biến cố ý, tám lần selftest phải đỏ."</blockquote>
+<blockquote lang="en">"A golden model earns trust only when it <em>can fail</em>:
+eight deliberate mutations, eight red selftests."</blockquote>
+
+<h3><span lang="vi">d. Xuất vector chuẩn cho RTL, ở ba mức</span><span lang="en">d. Emit golden vectors for the RTL, at three levels</span></h3>
+<p lang="vi">Mô hình chỉ hữu ích cho người thiết kế mạch khi nó đẻ ra dữ liệu mà testbench dùng
+được trực tiếp:</p>
+<p lang="en">A model is only useful to the hardware designer when it emits data a testbench can use
+directly:</p>
+<ul lang="vi">
+  <li><strong>mức thông điệp</strong> — <code>độ_dài, thông_điệp, digest</code>: kiểm tra lõi tự đệm.</li>
+  <li><strong>mức khối</strong> — <code>khối, A B C D vào, A B C D ra</code>: kiểm tra riêng hàm nén.</li>
+  <li><strong>mức bước</strong> — 64 dòng <code>i, g, s, T, a, b, c, d</code>: khi digest sai, đây là
+      thứ chỉ đúng vào bước hỏng thay vì bắt ta soi sóng cả khối.</li>
+</ul>
+<ul lang="en">
+  <li><strong>message level</strong> — <code>length, message, digest</code>: tests the self-padding core.</li>
+  <li><strong>block level</strong> — <code>block, A B C D in, A B C D out</code>: tests the compression function alone.</li>
+  <li><strong>step level</strong> — 64 rows of <code>i, g, s, T, a, b, c, d</code>: when a digest is
+      wrong, this points at the failing step instead of making you stare at a whole block of waveform.</li>
+</ul>
+<p lang="vi">RTL được coi là khớp mô hình khi: đúng digest cho mọi vector mức thông điệp, đúng
+trạng thái ra cho mọi vector mức khối, và — nếu thiết kế có lộ trạng thái từng bước — trùng cả 64
+dòng vết. Giá trị trung gian <em>bên trong</em> một bước thì được phép khác, vì phép cộng có tính
+kết hợp: mạch có quyền cộng theo thứ tự khác mô hình.</p>
+<p lang="en">The RTL counts as matching the model when: every message-level vector gives the right
+digest, every block-level vector gives the right output state, and — if the design exposes
+per-step state — all 64 trace rows match too. Intermediate values <em>inside</em> a step are allowed
+to differ, because addition is associative: the circuit may sum in a different order than the model.</p>
+
+<h2><span lang="vi">10. Điều đọng lại</span><span lang="en">10. What stays with you</span></h2>
+<p lang="vi">MD5 không còn an toàn, nhưng nó dạy ba điều vẫn còn nguyên giá trị với mọi thuật toán
+sau nó: khung Merkle–Damgård và cái bẫy mở rộng độ dài; quy tắc đệm mà biên của nó phải thành
+testcase; và quan trọng nhất — quy trình biến một văn bản chuẩn thành một mô hình mà ta có quyền
+tin, bằng cách bắt chính bộ kiểm tra của mình chứng minh rằng nó biết thất bại. Thói quen đó
+chuyển nguyên vẹn sang SHA-2, SHA-3, và sang mọi IP ta sẽ viết sau này.</p>
+<p lang="en">MD5 is no longer secure, but it teaches three things that remain valid for every
+algorithm after it: the Merkle–Damgård construction and its length-extension trap; a padding rule
+whose boundaries must become testcases; and most importantly — the process of turning a standards
+document into a model you are entitled to trust, by making your own test suite prove it knows how
+to fail. That habit carries over unchanged to SHA-2, SHA-3, and to every IP you will write later.</p>
+
+<h2><span lang="vi">Tài liệu tham chiếu</span><span lang="en">References</span></h2>
+<ul class="refs">
+  <li>R. Rivest, <em>The MD5 Message-Digest Algorithm</em>, RFC 1321, IETF, 1992.</li>
+  <li>S. Turner, L. Chen, <em>Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms</em>, RFC 6151, 2011.</li>
+  <li>L. Velvindron et al., <em>Deprecating MD5 and SHA-1 Signature Hashes in TLS 1.2 and DTLS 1.2</em>, RFC 9155, 2021.</li>
+  <li>X. Wang, H. Yu, <em>How to Break MD5 and Other Hash Functions</em>, EUROCRYPT 2005.</li>
+  <li>M. Stevens, A. Lenstra, B. de Weger, <em>Chosen-Prefix Collisions for MD5…</em>, EUROCRYPT 2007; M. Stevens et al., CRYPTO 2009 (rogue CA).</li>
+  <li>Y. Sasaki, K. Aoki, <em>Finding Preimages in Full MD5 Faster than Exhaustive Search</em>, EUROCRYPT 2009.</li>
+  <li>NIST SP 800-131A Rev. 2, <em>Transitioning the Use of Cryptographic Algorithms and Key Lengths</em>, 2019; FIPS 180-4 (SHS); FIPS 202 (SHA-3).</li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s1"><span lang="vi">← Thiết kế vi mạch</span><span lang="en">← Chip design</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
