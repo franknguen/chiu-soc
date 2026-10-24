@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Chuyện ngày xưa — Trúc Phương — ChiU·SoC"
+      data-title-en="Chuyện ngày xưa — Trúc Phương — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chuyện ngày xưa — Trúc Phương — ChiU·SoC</title>
+<meta name="description" content="Chuyện ngày xưa của nhạc sĩ Trúc Phương: câu chuyện đằng sau bài hát, đôi nét về người nhạc sĩ, và vì sao một bản nhạc vàng hơn sáu mươi năm tuổi vẫn còn được hát lại."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* video */
+.video{
+  position:relative; width:100%; aspect-ratio:16/9;
+  border-radius:14px; overflow:hidden; margin:0 0 10px;
+  background:#0f1b2d; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.video-cap{ font-size:.86em; color:var(--muted); margin:0 0 22px; text-align:center; }
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">"Chuyện ngày xưa" — Trúc Phương</span><span lang="en">"Chuyện ngày xưa" (The Old Story) — Trúc Phương</span></h1>
+<div class="meta"><span lang="vi">Vần thơ &amp; Giai điệu · 24/10/2026 · Frank Nguyen</span><span lang="en">Poetry &amp; Melody · 24 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Có những bài hát không cần hiểu hết lời cũng thấy buồn. "Chuyện ngày xưa"
+là một trong số đó — một bản nhạc vàng hơn sáu mươi năm tuổi, viết ra từ một cuộc gặp lại
+không ai mong, bởi một người nhạc sĩ mà cuộc đời còn buồn hơn những gì ông viết.</p>
+<p class="lede" lang="en">Some songs make you sad before you have even followed the words.
+"Chuyện ngày xưa" is one of them — a Vietnamese "yellow music" ballad more than sixty years old,
+written out of a reunion nobody had wished for, by a composer whose own life turned out sadder
+than anything he wrote.</p>
+
+<div class="video">
+  <iframe src="https://www.youtube-nocookie.com/embed/8oRb-8DO3PM"
+          title="Chuyện ngày xưa — Trúc Phương"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen></iframe>
+</div>
+<p class="video-cap">
+  <span lang="vi">"Chuyện ngày xưa" — sáng tác: Trúc Phương · bản phối mới 2026, kênh <em>Quán Nửa Đêm</em>.
+    Nếu khung hình không hiện, hãy <a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener">mở trên YouTube</a>.</span>
+  <span lang="en">"Chuyện ngày xưa" — composed by Trúc Phương · a 2026 re-arrangement, channel <em>Quán Nửa Đêm</em>.
+    If the frame does not load, <a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener">open it on YouTube</a>.</span>
+</p>
+
+<h2><span lang="vi">Một bài hát từ trước năm 1975</span><span lang="en">A song from before 1975</span></h2>
+<p lang="vi">"Chuyện ngày xưa" là một tuyệt phẩm nhạc vàng nổi tiếng, được cố nhạc sĩ
+<strong>Trúc Phương</strong> sáng tác trước năm 1975 — thường được ghi là vào khoảng
+<strong>năm 1962</strong>. Đó là quãng thời gian sung sức nhất của ông, cũng là lúc dòng nhạc
+bolero ở miền Nam đang ở đỉnh cao.</p>
+<p lang="en">"Chuyện ngày xưa" is a well-known piece of Vietnamese <em>nhạc vàng</em> ("yellow
+music"), written by the late composer <strong>Trúc Phương</strong> before 1975 — usually dated to
+around <strong>1962</strong>. That was his most productive period, and also the height of the
+bolero style in southern Vietnam.</p>
+
+<h2><span lang="vi">Câu chuyện đằng sau bài hát</span><span lang="en">The story behind the song</span></h2>
+<p lang="vi">Bài hát ra đời từ những cảm xúc có thật trong cuộc sống của Trúc Phương — một người
+vốn trầm lặng, khép kín, mang tâm hồn đa sầu đa cảm. Theo những gì được kể lại, ca khúc được
+gợi hứng từ một lần <strong>người yêu cũ tìm đến thăm ông sau một thời gian dài xa cách</strong>.</p>
+<p lang="en">The song came out of something that actually happened to Trúc Phương — a quiet,
+withdrawn man with an unusually sensitive temperament. As the story is told, it was prompted by a
+visit: <strong>a former love came to see him after a long separation</strong>.</p>
+<p lang="vi">Cuộc gặp ấy không mang lại niềm vui sum họp. Nó chỉ gợi lên nỗi buồn xót xa khi cả
+hai nhận ra duyên xưa đã lỡ làng. Hình ảnh đọng lại trong bài là một cô gái <em>"đến thăm mà quên
+mang tiếng cười"</em> — ngồi đó, lặng im, không còn gì để nói. Và lời từ biệt cuối cùng:</p>
+<p lang="en">The meeting brought no joy of reunion. It only opened up a quiet ache, as both realised
+the old bond had long since passed them by. The image the song keeps is of a woman who
+<em>"came to visit but forgot to bring her laughter"</em> — sitting there, silent, with nothing
+left to say. And then the parting line:</p>
+<blockquote lang="vi">"Thôi em nhé xin trả về niềm cô đơn trước…"</blockquote>
+<blockquote lang="en">"Thôi em nhé xin trả về niềm cô đơn trước…"<br/>
+  <em>— "So be it; let me give you back the loneliness that came before."</em></blockquote>
+<p lang="vi">Không trách móc, không níu kéo. Chỉ là trả lại cho nhau đúng cái mà mỗi người đã có
+trước khi gặp nhau. Tôi nghĩ sức nặng của bài hát nằm hết ở chữ "trả về" ấy.</p>
+<p lang="en">No reproach, no attempt to hold on. Just handing back to each other exactly what each
+had carried before they met. I think the whole weight of the song sits in that one phrase,
+"give back".</p>
+
+<h2><span lang="vi">Đôi nét về nhạc sĩ Trúc Phương</span><span lang="en">A few words about Trúc Phương</span></h2>
+<p lang="vi">Trúc Phương tên thật là <strong>Nguyễn Thiện Lộc</strong>, sinh năm <strong>1933</strong>
+tại Trà Vinh, mất ngày <strong>18/9/1995</strong> tại Sài Gòn. Ông được nhiều người gọi là
+<em>"ông hoàng của dòng nhạc bolero"</em> — không phải vì viết nhiều nhất, mà vì hầu như bài nào
+của ông cũng ở lại rất lâu trong trí nhớ người nghe.</p>
+<p lang="en">Trúc Phương's real name was <strong>Nguyễn Thiện Lộc</strong>. He was born in
+<strong>1933</strong> in Trà Vinh, in the Mekong Delta, and died on <strong>18 September 1995</strong>
+in Saigon. Many call him <em>"the king of bolero"</em> — not for writing the most songs, but
+because almost everything he wrote stayed in people's memory for decades.</p>
+<p lang="vi">Một số ca khúc gắn liền với tên ông:</p>
+<p lang="en">Some of the songs his name is inseparable from:</p>
+<ul class="songlist" data-i18n="neutral">
+  <li>Nửa đêm ngoài phố</li>
+  <li>Buồn trong kỷ niệm</li>
+  <li>Hai lối mộng</li>
+  <li>Tàu đêm năm cũ</li>
+  <li>Mưa nửa đêm</li>
+  <li>Ai cho tôi tình yêu</li>
+  <li>Con đường mang tên em</li>
+  <li>Bóng nhỏ đường chiều</li>
+  <li>Chiều cuối tuần</li>
+  <li>Thói đời</li>
+</ul>
+<p lang="vi">Chất nhạc của ông rất dễ nhận: điệu bolero chậm, giai điệu đi từng bước một như người
+đang lững thững trên phố đêm, và lời ca thì gần như không bao giờ to tiếng. Chủ đề quen thuộc là
+chia xa, đêm khuya, chuyến tàu, con phố, và những mối tình không đi đến đâu.</p>
+<p lang="en">His musical signature is easy to recognise: a slow bolero, a melody that walks rather
+than runs — like someone drifting along a street at night — and words that almost never raise their
+voice. The recurring subjects are separation, late nights, trains, city streets, and loves that
+went nowhere.</p>
+
+<h2><span lang="vi">Những năm cuối đời</span><span lang="en">His final years</span></h2>
+<p lang="vi">Có một điều buồn mà người yêu nhạc Việt hầu như ai cũng biết: sau năm 1975, cuộc sống
+của Trúc Phương rất cơ cực. Người viết ra những bài hát mà cả miền Nam thuộc lòng đã có những năm
+tháng không có nổi một chỗ ở ổn định — câu chuyện thường được kể lại là ông phải ngủ nhờ ở bến xe,
+thuê một chiếc chiếu để qua đêm. Ông qua đời năm 1995 trong cảnh nghèo.</p>
+<p lang="en">There is a sad fact that most lovers of Vietnamese music know: after 1975, Trúc Phương's
+life became very hard. The man whose songs the whole south could sing from memory spent years
+without a stable roof — the account usually told is that he slept at a bus station, renting a
+sleeping mat for the night. He died in 1995 in poverty.</p>
+<div class="callout">
+  <span lang="vi">Tôi kể chi tiết này không phải để bi kịch hoá, mà vì nó giải thích một điều:
+  nỗi buồn trong nhạc Trúc Phương không phải là nỗi buồn dàn dựng. Ông viết đúng cái ông sống.</span>
+  <span lang="en">I mention this not to dramatise his life, but because it explains something: the
+  sadness in Trúc Phương's music was never staged. He wrote exactly what he lived.</span>
+</div>
+
+<h2><span lang="vi">Vì sao một bài hát sáu mươi năm tuổi vẫn được hát lại</span><span lang="en">Why a sixty-year-old song keeps being sung</span></h2>
+<p lang="vi">Bản trong video ở đầu trang là một bản phối mới, làm năm 2026 — tức là hơn sáu mươi
+năm sau khi bài hát ra đời. Mỗi thế hệ lại mang nó về một kiểu: có bản mộc chỉ guitar thùng, có
+bản dựng cả dàn dây, có bản hát chậm hơn nguyên tác rất nhiều.</p>
+<p lang="en">The recording at the top of this page is a new arrangement made in 2026 — more than
+sixty years after the song was written. Each generation brings it back in its own way: a bare
+version with nothing but an acoustic guitar, one with a full string section, one sung far slower
+than the original.</p>
+<p lang="vi">Bài hát sống được lâu như vậy, tôi nghĩ, vì nó không kể một câu chuyện cụ thể của
+riêng ai. Nó chỉ dựng lại một khoảnh khắc mà gần như ai cũng từng đi qua: gặp lại một người, nhận
+ra mọi thứ đã khác, và hiểu rằng điều tử tế nhất lúc đó là im lặng rồi quay đi.</p>
+<p lang="en">It survives, I think, because it does not tell any one person's particular story. It
+simply reconstructs a moment nearly everyone passes through: meeting someone again, realising
+everything has changed, and understanding that the kindest thing left to do is to stay quiet and
+walk away.</p>
+
+<h2><span lang="vi">Vì sao bài này nằm ở đây</span><span lang="en">Why this one is here</span></h2>
+<p lang="vi">Góc này của trang vốn dành cho những bản nhạc tôi hay mở khi làm việc khuya. Nghe thì
+chẳng liên quan gì đến mạch điện, nhưng tôi vẫn tin hai việc có một chỗ giống nhau: cùng là ngồi
+rất lâu với một thứ, kiên nhẫn chỉnh từng chút một, và biết rằng phần hay nhất thường nằm ở chỗ
+mình chịu bỏ bớt đi chứ không phải chỗ thêm vào.</p>
+<p lang="en">This corner of the site is for the music I put on when working late. It has nothing to
+do with circuits, and yet I keep thinking the two share one thing: both are about sitting with
+something for a long time, adjusting it patiently, and knowing that the best part usually comes
+from what you are willing to take away rather than what you add.</p>
+
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://vi.wikipedia.org/wiki/Tr%C3%BAc_Ph%C6%B0%C6%A1ng" target="_blank" rel="noopener" data-i18n="neutral">Trúc Phương</a>
+      — <span lang="vi">tiểu sử trên Wikipedia tiếng Việt</span><span lang="en">biography on Vietnamese Wikipedia</span>.</li>
+  <li><a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener" data-i18n="neutral">"Chuyện ngày xưa"</a>
+      — <span lang="vi">bản phối mới 2026, kênh Quán Nửa Đêm</span><span lang="en">the 2026 arrangement, Quán Nửa Đêm channel</span>.</li>
+  <li><span lang="vi">Trang này chỉ trích vài chữ trong lời bài hát để bình luận; bản quyền ca khúc
+      thuộc về tác giả và những người thừa kế.</span>
+      <span lang="en">This page quotes only a few words of the lyrics for commentary; the song
+      remains the copyright of its author and his heirs.</span></li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s4"><span lang="vi">← Vần thơ &amp; Giai điệu</span><span lang="en">← Poetry &amp; Melody</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
