@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Bài thơ quê hương — Nguyễn Bính — ChiU·SoC"
+      data-title-en="Bài thơ quê hương — Nguyễn Bính — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bài thơ quê hương — Nguyễn Bính — ChiU·SoC</title>
+<meta name="description" content="Bài thơ quê hương của Nguyễn Bính: hai câu mở đầu và kho truyện dân gian sau chúng, chân dung thi sĩ của đồng quê, và cách một bài thơ định nghĩa quê hương bằng cách liệt kê."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">"Bài thơ quê hương" — Nguyễn Bính</span><span lang="en">"Bài thơ quê hương" (A Poem of My Homeland) — Nguyễn Bính</span></h1>
+<div class="meta"><span lang="vi">Vần thơ &amp; Giai điệu · 25/10/2026 · Frank Nguyen</span><span lang="en">Poetry &amp; Melody · 25 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Có hai cách nói về quê hương. Cách thứ nhất là định nghĩa nó — và thường
+thành ra sáo rỗng. Cách thứ hai là chỉ việc kể ra những thứ có ở đó, thật cụ thể, thật bình thường,
+cho đến khi người đọc tự thấy nhớ. Nguyễn Bính chọn cách thứ hai, và đó là lý do bài thơ này còn
+được đọc thuộc sau hơn nửa thế kỷ.</p>
+<p class="lede" lang="en">There are two ways to talk about home. The first is to define it — which
+usually ends in platitude. The second is simply to list what is there, concretely and plainly, until
+the reader finds themselves missing it. Nguyễn Bính chose the second, and that is why this poem is
+still recited from memory more than half a century later.</p>
+
+<figure class="cover">
+  <img src="assets/bai-tho-que-huong.svg" width="800" height="450"
+       alt="Minh hoạ: buổi chiều trên cánh đồng, khóm tre, dòng sông uốn khúc với con thuyền nhỏ, mái nhà phía xa và đàn chim về tổ."/>
+  <figcaption>
+    <span lang="vi">"Chiều quê" — minh hoạ gốc của trang này, vẽ bằng vector, không lấy từ đâu cả.</span>
+    <span lang="en">"Evening in the countryside" — an original drawing made for this page, in vector, taken from nowhere.</span>
+  </figcaption>
+</figure>
+
+<h2><span lang="vi">1. Hai câu mở đầu</span><span lang="en">1. The opening two lines</span></h2>
+<blockquote lang="vi">"Quê hương tôi có cây bầu cây nhị<br/>
+  Tiếng đàn kêu tích tịch tình tang…"</blockquote>
+<blockquote lang="en">"Quê hương tôi có cây bầu cây nhị<br/>
+  Tiếng đàn kêu tích tịch tình tang…"<br/>
+  <em>— "My homeland has the gourd lute and the two-string fiddle, / their strings calling
+  tich-tich-tinh-tang…"</em></blockquote>
+<p lang="vi">Hai câu, ba lớp nghĩa chồng lên nhau. <strong>"Cây bầu, cây nhị"</strong> là
+đàn bầu — cây đàn một dây gần như chỉ Việt Nam mới có — và đàn nhị hai dây. Chúng không phải
+nhạc cụ sang trọng; chúng là thứ vang lên ở sân đình, ở chiếu chèo, ở góc chợ.</p>
+<p lang="en">Two lines, three layers stacked on top of one another. <strong>The "gourd lute" and
+the "two-string fiddle"</strong> are the <em>đàn bầu</em> — a one-string instrument that is almost
+uniquely Vietnamese — and the <em>đàn nhị</em>. Neither is a refined concert instrument; these are
+what you hear in a village courtyard, at a folk-opera mat, in a corner of the market.</p>
+<p lang="vi">Còn <strong>"tích tịch tình tang"</strong> thì không phải tượng thanh bình thường: đó
+là tiếng cây đàn thần trong truyện <em>Thạch Sanh</em>, câu chuyện cổ mà hầu như đứa trẻ Việt Nam
+nào cũng nghe trước khi biết đọc. Chỉ bốn tiếng, nhà thơ gọi về cả một kho truyện dân gian mà không
+cần kể lại một chữ nào. Mở đầu như thế thì bài thơ không còn là lời của một người nữa — nó mượn
+giọng của cái kho chung ấy.</p>
+<p lang="en">And <strong>"tich-tich-tinh-tang"</strong> is not ordinary onomatopoeia: it is the sound
+of the magic lute in the folk tale of <em>Thạch Sanh</em>, a story nearly every Vietnamese child
+hears before learning to read. In four syllables the poet summons an entire body of folklore without
+retelling a word of it. Open a poem that way and it stops being one man's speech — it borrows the
+voice of that shared store.</p>
+
+<h2><span lang="vi">2. Nguyễn Bính là ai</span><span lang="en">2. Who Nguyễn Bính was</span></h2>
+<p lang="vi">Tên thật <strong>Nguyễn Trọng Bính</strong>, sinh ngày <strong>13/02/1918</strong> ở
+làng Thiện Vịnh, huyện Vụ Bản, Nam Định; mất ngày <strong>20/01/1966</strong> tại Hà Nam. Ông được
+giải khuyến khích của Tự lực văn đoàn năm 1937, khi mới mười chín tuổi, và được truy tặng Giải
+thưởng Hồ Chí Minh về văn học nghệ thuật năm 2000.</p>
+<p lang="en">His real name was <strong>Nguyễn Trọng Bính</strong>, born <strong>13 February
+1918</strong> in Thiện Vịnh village, Vụ Bản district, Nam Định province, and died <strong>20 January
+1966</strong> in Hà Nam. He won an encouragement prize from the Tự Lực Văn Đoàn literary group in
+1937, at nineteen, and was posthumously awarded the Hồ Chí Minh Prize for literature and the arts in
+2000.</p>
+<p lang="vi">Những tập để lại dấu rõ nhất: <em>Những bóng người trên sân ga</em> (1937),
+<em>Chân quê</em> (1940), <em>Lỡ bước sang ngang</em> (1940), <em>Tâm hồn tôi</em> (1940),
+<em>Sao chẳng về đây</em> (1941), và muộn hơn là <em>Đêm sao sáng</em> (1962).</p>
+<p lang="en">The collections that left the clearest mark: <em>Những bóng người trên sân ga</em>
+(1937), <em>Chân quê</em> (1940), <em>Lỡ bước sang ngang</em> (1940), <em>Tâm hồn tôi</em> (1940),
+<em>Sao chẳng về đây</em> (1941), and later <em>Đêm sao sáng</em> (1962).</p>
+
+<h2><span lang="vi">3. "Chân quê": người đi ngược phong trào</span><span lang="en">3. "Chân quê": the poet who went against his movement</span></h2>
+<p lang="vi">Nguyễn Bính thuộc phong trào <strong>Thơ mới</strong> những năm 1930–1940, giai đoạn
+thơ Việt thoát khỏi niêm luật cũ. Nhưng trong khi phần lớn bạn thơ cùng thời ngả theo thơ lãng mạn
+Pháp — với những hình ảnh, nhịp điệu và cả nỗi buồn rất "Tây" — thì ông đi ngược lại: ông viết bằng
+giọng ca dao, bằng thể lục bát, bằng hình ảnh của làng quê Bắc Bộ. Giậu mùng tơi, bến đò, con bướm
+vàng, tấm áo tứ thân.</p>
+<p lang="en">Nguyễn Bính belonged to the <strong>Thơ mới</strong> ("New Poetry") movement of the
+1930s–40s, when Vietnamese verse broke free of its classical rules. But while most of his
+contemporaries leaned toward French Romanticism — its imagery, its cadences, even its particular
+melancholy — he went the other way: he wrote in the voice of folk song, in the traditional
+<em>lục bát</em> metre, out of the images of the northern countryside. A hedge of vine, a river
+ferry, a yellow butterfly, a four-panel dress.</p>
+<p lang="vi">Vì thế người ta gọi ông là <em>"thi sĩ của đồng quê"</em>. Cách gọi ấy dễ bị hiểu nhầm
+thành "nhà thơ quê mùa". Thật ra đó là một lựa chọn rất tỉnh táo: khi cả một thế hệ đang học cách
+nói mới, ông chọn chứng minh rằng cách nói cũ vẫn còn đủ sức. Bài <em>Chân quê</em> của ông gần như
+là một tuyên ngôn — nỗi sợ người mình thương đánh mất cái mộc mạc vốn có khi chạy theo thứ thời thượng.</p>
+<p lang="en">Hence his epithet: <em>"the poet of the countryside"</em>. It is easily misread as
+"the rustic poet". In fact it was a clear-eyed choice: while a whole generation was learning a new
+way of speaking, he set out to prove the old way still had force enough. His poem <em>Chân quê</em>
+reads almost as a manifesto — the fear of watching someone you love lose their plainness while
+chasing what is fashionable.</p>
+
+<h2><span lang="vi">4. Quê hương, định nghĩa bằng cách liệt kê</span><span lang="en">4. Home, defined by listing</span></h2>
+<p lang="vi">"Bài thơ quê hương" là một bài dài, và cấu trúc của nó gần như đơn giản đến mức táo bạo:
+<strong>cứ "quê hương tôi có…" rồi kể tiếp</strong>. Có tiếng đàn. Có truyện cổ. Có những dòng sông,
+những ngọn núi, những con người đã đi vào sử sách. Lớp này chồng lên lớp kia.</p>
+<p lang="en">"Bài thơ quê hương" is a long poem, and its structure is almost audaciously simple:
+<strong>"my homeland has…", again and again</strong>. It has these instruments. It has these old
+tales. It has rivers, mountains, people who passed into the history books. Layer after layer.</p>
+<p lang="vi">Nghe qua thì giống một bản danh sách. Nhưng chính ở đó mới là chỗ hay. Một bài thơ nói
+"tôi yêu quê hương" thì người đọc chỉ biết rằng tác giả yêu. Một bài thơ kể ra tiếng đàn bầu, câu
+chuyện cổ, dòng sông cụ thể thì người đọc <em>tự mình</em> nhớ ra cái của riêng họ — cái sân, cái
+bến, cái giọng nói của bà. Nhà thơ không áp đặt cảm xúc; ông chỉ bày ra những cái móc, rồi để ký ức
+của từng người treo lên đó.</p>
+<p lang="en">It sounds like an inventory. That is exactly where its power lies. A poem that says
+"I love my homeland" tells the reader only that the author loves it. A poem that names a one-string
+lute, an old tale, a particular river makes the reader remember their <em>own</em> — their yard,
+their landing, their grandmother's voice. The poet does not impose the feeling; he simply sets out
+hooks, and lets each reader hang their own memory on them.</p>
+<p lang="vi">Về năm sáng tác, các nguồn ghi không thống nhất, và bài này không nằm trong danh mục
+những tập thơ được nhắc tới nhiều nhất của ông — nên tôi không ghi một năm cụ thể ở đây thay vì
+chép lại một con số mình chưa kiểm được.</p>
+<p lang="en">Sources disagree about when it was written, and the poem is not among the collections
+most often listed in his bibliography — so rather than copy a year I have not been able to verify,
+I leave the date out.</p>
+
+<h2><span lang="vi">5. Đọc bài thơ này khi đang ở xa</span><span lang="en">5. Reading this poem from far away</span></h2>
+<p lang="vi">Tôi đọc lại bài thơ này ở một căn hộ tại Hàn Quốc, vào một buổi tối mùa thu, sau một
+ngày ngồi với sóng tín hiệu và các bảng số. Cái lạ là nó không làm tôi buồn theo kiểu nhớ nhà.
+Nó làm tôi nhận ra một điều khác: quê hương trong bài thơ không phải một nơi chốn mà ta rời đi,
+nó là một <em>danh sách những thứ mình mang theo được</em>. Tiếng đàn ấy, câu chuyện ấy, cái nhịp
+nói ấy — chúng không nằm lại ở Nam Định. Chúng đi theo, nằm im, và chỉ cần hai câu thơ là thức dậy.</p>
+<p lang="en">I reread this poem in an apartment in Korea, on an autumn evening, after a day spent
+with signals and tables of numbers. The odd thing is that it did not make me homesick. It made me
+notice something else: the homeland in this poem is not a place you leave behind, it is a
+<em>list of the things you were able to bring with you</em>. That sound, that tale, that cadence of
+speech — none of them stayed in Nam Định. They travel along, lying quiet, and two lines of verse are
+enough to wake them.</p>
+
+<h2><span lang="vi">6. Vì sao trang này không đăng toàn văn</span><span lang="en">6. Why this page does not reproduce the whole poem</span></h2>
+<p lang="vi">Tôi chỉ trích hai câu mở đầu để bình, chứ không chép cả bài. Nguyễn Bính mất năm 1966,
+nên ở Việt Nam tác phẩm của ông đã hết thời hạn bảo hộ; nhưng trang này đặt trên máy chủ ở Mỹ, nơi
+các tác phẩm nước ngoài có thể vẫn còn trong thời hạn theo luật sở tại. Giữa "gần như chắc là được"
+và "chắc chắn không sao", tôi chọn vế sau — cũng là thói quen tôi giữ khi làm kỹ thuật.</p>
+<p lang="en">I quote only the opening two lines, for commentary, rather than reproducing the poem.
+Nguyễn Bính died in 1966, so in Vietnam his work has passed out of copyright; but this site is
+hosted on servers in the United States, where foreign works may still be protected under local law.
+Between "almost certainly fine" and "certainly fine", I take the second — the same habit I keep in
+engineering work.</p>
+<p lang="vi">Toàn văn thì dễ tìm: bài thơ được chép lại ở rất nhiều nơi, và các tuyển tập in của
+Nguyễn Bính vẫn được tái bản đều. Nếu đọc được một bản in, hãy đọc bản in — thơ ông chép tay qua
+mạng rất hay sai chữ, mà với thơ thì sai một chữ là hỏng cả câu.</p>
+<p lang="en">The full text is easy to find: it is transcribed in many places, and printed collections
+of his work are still regularly reissued. If you can read it in print, read it in print — his poems
+circulate online in copies riddled with small errors, and in poetry a single wrong word ruins the
+line.</p>
+
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://vi.wikipedia.org/wiki/Nguy%E1%BB%85n_B%C3%ADnh" target="_blank" rel="noopener" data-i18n="neutral">Nguyễn Bính</a>
+      — <span lang="vi">tiểu sử và danh mục tác phẩm trên Wikipedia tiếng Việt; mọi mốc thời gian
+      trong bài này lấy từ đó.</span>
+      <span lang="en">biography and bibliography on Vietnamese Wikipedia; every date in this article
+      comes from there.</span></li>
+  <li><a href="https://vi.wikipedia.org/wiki/Th%C6%A1_m%E1%BB%9Bi" target="_blank" rel="noopener" data-i18n="neutral">Thơ mới</a>
+      — <span lang="vi">phong trào thơ mà ông vừa thuộc về vừa đi ngược.</span>
+      <span lang="en">the poetry movement he both belonged to and worked against.</span></li>
+  <li><span lang="vi">Bài hát</span><span lang="en">The song</span>
+      <a href="chuyen-ngay-xua-truc-phuong.html" data-i18n="neutral">"Chuyện ngày xưa"</a>
+      — <span lang="vi">mục còn lại của góc Vần thơ &amp; Giai điệu.</span>
+      <span lang="en">the other entry in the Poetry &amp; Melody corner.</span></li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s4"><span lang="vi">← Vần thơ &amp; Giai điệu</span><span lang="en">← Poetry &amp; Melody</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
