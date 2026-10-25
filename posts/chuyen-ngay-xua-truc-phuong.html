@@ -79,14 +79,27 @@ p{ margin:0 0 14px; }
 ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
 li{ margin-bottom:8px; }
 
-/* video */
-.video{
-  position:relative; width:100%; aspect-ratio:16/9;
-  border-radius:14px; overflow:hidden; margin:0 0 10px;
-  background:#0f1b2d; box-shadow:0 10px 30px rgba(15,27,45,.28);
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
 }
-.video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
-.video-cap{ font-size:.86em; color:var(--muted); margin:0 0 22px; text-align:center; }
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
 
 blockquote{
   border-left:3px solid var(--accent);
@@ -149,20 +162,32 @@ không ai mong, bởi một người nhạc sĩ mà cuộc đời còn buồn h�
 written out of a reunion nobody had wished for, by a composer whose own life turned out sadder
 than anything he wrote.</p>
 
-<div class="video">
-  <iframe src="https://www.youtube-nocookie.com/embed/8oRb-8DO3PM"
-          title="Chuyện ngày xưa — Trúc Phương"
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allowfullscreen></iframe>
+<figure class="cover">
+  <img src="assets/chuyen-ngay-xua.svg" width="800" height="450"
+       alt="Minh hoạ: một ngọn đèn đường lẻ loi trong đêm, vòng sáng toả thành những cung sóng âm."/>
+  <figcaption>
+    <span lang="vi">"Đêm phố cũ" — minh hoạ gốc của trang này, vẽ bằng vector, không lấy từ đâu cả.</span>
+    <span lang="en">"An old street at night" — an original drawing made for this page, in vector, taken from nowhere.</span>
+  </figcaption>
+</figure>
+
+<div class="listen">
+  <span class="listen-label"><span lang="vi">Nghe ở đâu</span><span lang="en">Where to listen</span></span>
+  <a href="https://www.youtube.com/results?search_query=Chuy%E1%BB%87n+ng%C3%A0y+x%C6%B0a+Tr%C3%BAc+Ph%C6%B0%C6%A1ng" target="_blank" rel="noopener">
+    <span lang="vi">Tìm trên YouTube</span><span lang="en">Search on YouTube</span></a>
+  <a href="https://open.spotify.com/search/Chuy%E1%BB%87n%20ng%C3%A0y%20x%C6%B0a%20Tr%C3%BAc%20Ph%C6%B0%C6%A1ng" target="_blank" rel="noopener">
+    <span lang="vi">Tìm trên Spotify</span><span lang="en">Search on Spotify</span></a>
+  <a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener">
+    <span lang="vi">Bản phối 2026 tôi đang nghe</span><span lang="en">The 2026 arrangement I listen to</span></a>
+  <p class="note">
+    <span lang="vi">Hai đường dẫn đầu là <em>tìm kiếm</em>, không phải một video cụ thể — nên chúng
+      không chết khi một bản tải lên nào đó bị gỡ. Đường dẫn thứ ba có thể hỏng một ngày nào đó;
+      lúc ấy bài viết này vẫn còn nguyên.</span>
+    <span lang="en">The first two are <em>searches</em>, not one particular video — so they survive
+      when some upload is taken down. The third may break one day; this article will still be here
+      when it does.</span>
+  </p>
 </div>
-<p class="video-cap">
-  <span lang="vi">"Chuyện ngày xưa" — sáng tác: Trúc Phương · bản phối mới 2026, kênh <em>Quán Nửa Đêm</em>.
-    Nếu khung hình không hiện, hãy <a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener">mở trên YouTube</a>.</span>
-  <span lang="en">"Chuyện ngày xưa" — composed by Trúc Phương · a 2026 re-arrangement, channel <em>Quán Nửa Đêm</em>.
-    If the frame does not load, <a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener">open it on YouTube</a>.</span>
-</p>
 
 <h2><span lang="vi">Một bài hát từ trước năm 1975</span><span lang="en">A song from before 1975</span></h2>
 <p lang="vi">"Chuyện ngày xưa" là một tuyệt phẩm nhạc vàng nổi tiếng, được cố nhạc sĩ
@@ -270,12 +295,34 @@ do with circuits, and yet I keep thinking the two share one thing: both are abou
 something for a long time, adjusting it patiently, and knowing that the best part usually comes
 from what you are willing to take away rather than what you add.</p>
 
+<h2><span lang="vi">Ghi chú kỹ thuật: vì sao trang này không nhúng video</span><span lang="en">A technical note: why this page embeds no video</span></h2>
+<p lang="vi">Ban đầu trang này nhúng thẳng một video. Tôi bỏ đi vì hai lý do. <strong>Thứ nhất là
+bản quyền</strong>: bài hát vẫn trong thời hạn bảo hộ, và bản ghi âm là một quyền riêng nữa thuộc
+về người thực hiện — tải về rồi tự đăng lại không phải là cách lách, đó đúng là điều mà luật cấm.
+<strong>Thứ hai là tuổi thọ của đường dẫn</strong>: một video có thể bị gỡ bất cứ lúc nào, và khi
+đó khung nhúng chỉ còn là một ô đen ghi "video không khả dụng".</p>
+<p lang="en">This page used to embed a video directly. I removed it for two reasons.
+<strong>First, copyright</strong>: the song is still protected, and the recording carries a second
+right belonging to whoever made it — downloading and re-posting it is not a loophole, it is the
+thing the law actually forbids. <strong>Second, link rot</strong>: a video can be taken down at any
+moment, and the embed then becomes a black box reading "video unavailable".</p>
+<p lang="vi">Cách sửa không phải là đi tìm chỗ lưu khác, mà là <strong>đổi cái gì là nội dung
+chính</strong>. Phần thuộc về trang này — bài viết, tranh minh hoạ ở trên — nằm ngay trong kho mã
+nguồn, không ai gỡ được. Mọi bản thu chỉ còn là chỗ tham chiếu, và tham chiếu thì trỏ bằng
+<em>tìm kiếm</em> chứ không trỏ vào một video duy nhất. Đây đúng là nguyên tắc tôi vẫn dùng khi
+thiết kế: đừng để một điểm hỏng duy nhất làm chết cả hệ thống.</p>
+<p lang="en">The fix is not to find somewhere else to host it, but to <strong>change what counts as
+the content</strong>. What belongs to this page — the writing, the drawing above — sits in the
+repository itself, where nobody can remove it. Any recording is only a reference, and a reference
+should point through a <em>search</em> rather than at one single video. This is the same principle
+I work by in design: never let one point of failure take the whole system down.</p>
+
 <h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
 <ul class="refs">
   <li><a href="https://vi.wikipedia.org/wiki/Tr%C3%BAc_Ph%C6%B0%C6%A1ng" target="_blank" rel="noopener" data-i18n="neutral">Trúc Phương</a>
       — <span lang="vi">tiểu sử trên Wikipedia tiếng Việt</span><span lang="en">biography on Vietnamese Wikipedia</span>.</li>
-  <li><a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener" data-i18n="neutral">"Chuyện ngày xưa"</a>
-      — <span lang="vi">bản phối mới 2026, kênh Quán Nửa Đêm</span><span lang="en">the 2026 arrangement, Quán Nửa Đêm channel</span>.</li>
+  <li><a href="https://www.youtube.com/results?search_query=Chuy%E1%BB%87n+ng%C3%A0y+x%C6%B0a+Tr%C3%BAc+Ph%C6%B0%C6%A1ng" target="_blank" rel="noopener" data-i18n="neutral">"Chuyện ngày xưa"</a>
+      — <span lang="vi">các bản thu hiện có; bản tôi hay nghe là bản phối 2026 của kênh Quán Nửa Đêm</span><span lang="en">the recordings available; the one I listen to is the 2026 arrangement by the Quán Nửa Đêm channel</span>.</li>
   <li><span lang="vi">Trang này chỉ trích vài chữ trong lời bài hát để bình luận; bản quyền ca khúc
       thuộc về tác giả và những người thừa kế.</span>
       <span lang="en">This page quotes only a few words of the lyrics for commentary; the song

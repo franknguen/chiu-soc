@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Dùng AI agent để làm RTL — ChiU·SoC"
+      data-title-en="Using AI agents for RTL — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dùng AI agent để làm RTL — ChiU·SoC</title>
+<meta name="description" content="Đưa AI agent vào quy trình RTL: các giai đoạn và cổng duyệt, cách viết prompt có cấu trúc, AI làm tốt chỗ nào, và những cái bẫy thường gặp."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; scroll-padding-top:80px; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:20px 0 6px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px; overflow-wrap:anywhere;
+}
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.65;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:380px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:7px 11px; text-align:left; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">Dùng AI agent để làm RTL: quy trình, cổng kiểm tra, và phần không giao được</span><span lang="en">Using AI agents for RTL: the flow, the gates, and the part you cannot delegate</span></h1>
+<div class="meta"><span lang="vi">AI, Lượng tử &amp; Mã sửa lỗi · 25/10/2026 · Frank Nguyen</span><span lang="en">AI, Quantum &amp; ECC · 25 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Mô hình ngôn ngữ viết Verilog khá tốt. Nhưng thiết kế phần cứng không
+giống viết phần mềm: một lỗi lọt xuống silicon thì không có bản vá. Ghi chú này là những gì tôi
+rút ra khi đưa AI agent vào quy trình RTL thật — nó giúp được gì, cái gì vẫn phải tự làm, và vì
+sao các <em>cổng kiểm tra</em> mới là thứ quyết định kết quả.</p>
+<p class="lede" lang="en">Language models write decent Verilog. But hardware is not software:
+a bug that reaches silicon has no patch. These are the notes I took while putting AI agents into a
+real RTL flow — what they help with, what still has to be done by hand, and why the
+<em>review gates</em> are what actually decide the outcome.</p>
+
+<h2><span lang="vi">1. Vì sao RTL khó hơn code thường</span><span lang="en">1. Why RTL is harder than ordinary code</span></h2>
+<p lang="vi">Khi AI viết sai một hàm Python, bạn chạy thử, thấy lỗi, sửa trong ba mươi giây. Khi AI
+viết sai một dòng RTL, ba điều có thể xảy ra: mô phỏng vẫn chạy qua, tổng hợp vẫn ra mạch, và lỗi
+chỉ lộ ra ở một tổ hợp đầu vào hiếm — có khi sau khi đã tape-out. Phần mềm sai thì vá; phần cứng
+sai thì làm lại mặt nạ.</p>
+<p lang="en">When an agent writes a broken Python function, you run it, see the error, and fix it in
+thirty seconds. When it writes a broken line of RTL, three things can happen at once: the simulation
+still passes, synthesis still produces a circuit, and the bug only shows up on a rare input
+combination — sometimes after tape-out. Software that is wrong gets patched; hardware that is wrong
+gets a new mask set.</p>
+<p lang="vi">Hệ quả: với RTL, giá trị của AI không nằm ở chỗ "viết hộ code", mà ở chỗ rút ngắn quãng
+đường từ đặc tả đến một bản <em>có thể đem đi kiểm chứng</em> — rồi để công cụ và con người phán xử.</p>
+<p lang="en">The consequence: for RTL, the value of an agent is not that it writes the code for you,
+but that it shortens the road from a specification to something you can <em>put under
+verification</em> — and then lets tools and people pass judgement.</p>
+
+<h2><span lang="vi">2. Một quy trình AI-assisted thật sự trông như thế nào</span><span lang="en">2. What an AI-assisted flow actually looks like</span></h2>
+<p lang="vi">Quy trình dùng được không phải là "mở chat rồi hỏi". Nó có các giai đoạn rõ ràng, mỗi
+giai đoạn sinh ra một thứ có thể đọc và duyệt được:</p>
+<p lang="en">A usable flow is not "open a chat and ask". It has distinct phases, and each phase
+produces something a human can read and sign off:</p>
+<pre lang="vi"><code>mô tả thiết kế
+   -> đặc tả phần cứng                 (văn bản, người đọc được)
+   -> yêu cầu có định danh (JSON)      [CỔNG 1: duyệt đặc tả]
+   -> cấu hình chốt lại                [CỔNG 2: chốt tham số]
+   -> RTL + lint + tổng hợp
+   -> assertion (SVA) + ma trận truy vết [CỔNG 3: duyệt thuộc tính]
+   -> testbench + test plan            [CỔNG 4: duyệt kế hoạch test]
+   -> mô phỏng + mutation testing      [CỔNG 5: duyệt kiểm chứng]
+   -> tài liệu</code></pre>
+<pre lang="en"><code>design description
+   -> hardware specification           (prose a human reads)
+   -> numbered requirements (JSON)     [GATE 1: spec review]
+   -> frozen configuration             [GATE 2: parameters locked]
+   -> RTL + lint + synthesis
+   -> assertions (SVA) + traceability matrix  [GATE 3: property review]
+   -> testbench + test plan            [GATE 4: test plan review]
+   -> simulation + mutation testing    [GATE 5: verification review]
+   -> documentation</code></pre>
+<p lang="vi">Thứ giữ cho cả chuỗi này không rời rạc là <strong>ma trận truy vết yêu cầu</strong>
+(requirement traceability matrix): mỗi yêu cầu được đánh số, rồi nối thẳng tới dòng RTL hiện thực
+nó, tới assertion kiểm nó, tới testcase chạm vào nó, và tới kết quả chạy. Khi cuối ngày có ai hỏi
+"yêu cầu số 14 đã được kiểm chưa", câu trả lời là một ô trong bảng chứ không phải một cảm giác.</p>
+<p lang="en">What keeps the chain from falling apart is a <strong>requirement traceability
+matrix</strong>: every requirement gets a number, and that number links to the RTL line implementing
+it, the assertion checking it, the testcase touching it, and the run that produced evidence. When
+someone asks at the end of the day whether requirement 14 has been verified, the answer is a cell in
+a table rather than a feeling.</p>
+
+<h2><span lang="vi">3. Một prompt dùng được có cấu trúc</span><span lang="en">3. A prompt that works has a shape</span></h2>
+<p lang="vi">Prompt viết kiểu trò chuyện cho kết quả kiểu trò chuyện. Khuôn sáu phần dưới đây đơn
+giản nhưng hiệu quả rõ rệt, và dùng được cho cả việc viết RTL lẫn việc dựng một script:</p>
+<p lang="en">A conversational prompt gets you a conversational answer. The six-part shape below is
+simple but makes a visible difference, and works for writing RTL as well as for building a script:</p>
+<pre lang="vi"><code>[Mục tiêu]   một câu, nói rõ cái cần đạt
+[Vai trò]    agent đang đóng vai ai (kỹ sư RTL? người viết testbench?)
+[Đầu vào]    đường dẫn thật tới file, tài liệu, chuẩn cần đọc
+[Xử lý]      các bước phải làm, theo thứ tự
+[Đầu ra]     tên file cụ thể sẽ được tạo ra
+[Ràng buộc]  cái KHÔNG được làm, và chuẩn phải tuân theo</code></pre>
+<pre lang="en"><code>[Goal]        one sentence saying what must be achieved
+[Role]        who the agent is being (RTL engineer? testbench writer?)
+[Input]       real paths to the files, documents and standards to read
+[Process]     the steps to follow, in order
+[Output]      the exact filenames to be produced
+[Constraints] what must NOT be done, and which rules apply</code></pre>
+<p lang="vi">Phần quan trọng nhất là <strong>[Đầu ra]</strong> và <strong>[Ràng buộc]</strong>. Nêu
+rõ tên file buộc agent phải tạo ra thứ kiểm tra được, thay vì trả lời bằng một đoạn văn. Còn
+[Ràng buộc] là nơi bạn chặn trước những thói quen xấu — "không được sửa testbench để test đậu",
+"không dùng cấu trúc mà công cụ tổng hợp không nhận", "mọi hằng số phải tính ra chứ không chép".</p>
+<p lang="en">The two parts that matter most are <strong>[Output]</strong> and
+<strong>[Constraints]</strong>. Naming the output files forces the agent to produce something
+checkable instead of answering with a paragraph. And constraints are where you block the bad habits
+in advance — "do not edit the testbench to make a test pass", "do not use constructs synthesis will
+reject", "every constant must be computed, not copied".</p>
+
+<h2><span lang="vi">4. AI làm tốt chỗ nào, và chỗ nào không</span><span lang="en">4. Where the agent is good, and where it is not</span></h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Giao cho AI được</span><span lang="en">Safe to delegate</span></th>
+  <th><span lang="vi">Phải tự làm</span><span lang="en">Keep for yourself</span></th>
+</tr></thead>
+<tbody>
+  <tr>
+    <td><span lang="vi">Dựng khung: module, cổng, thanh ghi, FSM theo một mẫu đã có</span><span lang="en">Scaffolding: modules, ports, registers, an FSM following an existing pattern</span></td>
+    <td><span lang="vi">Quyết định kiến trúc: chia khối, chọn độ sâu pipeline, đánh đổi diện tích/tốc độ</span><span lang="en">Architecture decisions: block partitioning, pipeline depth, area/speed trade-offs</span></td>
+  </tr>
+  <tr>
+    <td><span lang="vi">Việc lặp đi lặp lại: sinh testcase theo danh sách, đổi tên hàng loạt, viết script chạy</span><span lang="en">Repetitive work: generating testcases from a list, bulk renaming, writing run scripts</span></td>
+    <td><span lang="vi">Định nghĩa đúng/sai: cái gì được coi là PASS, và vì sao</span><span lang="en">Defining right and wrong: what counts as PASS, and why</span></td>
+  </tr>
+  <tr>
+    <td><span lang="vi">Đọc log dài, tóm tắt lỗi, dò điểm khác nhau giữa hai lần chạy</span><span lang="en">Reading long logs, summarising failures, diffing two runs</span></td>
+    <td><span lang="vi">Mô hình tham chiếu: nó phải được viết từ chuẩn, bởi người hiểu chuẩn</span><span lang="en">The reference model: it must be written from the standard, by someone who understands it</span></td>
+  </tr>
+  <tr>
+    <td><span lang="vi">Chuyển đặc tả văn xuôi thành danh sách yêu cầu đánh số</span><span lang="en">Turning prose specifications into a numbered requirement list</span></td>
+    <td><span lang="vi">Đọc sóng khi mọi thứ xanh mà kết quả vẫn sai</span><span lang="en">Reading waveforms when everything is green and the answer is still wrong</span></td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+<h2><span lang="vi">5. Cổng kiểm tra mới là thứ quyết định</span><span lang="en">5. The gates are what decide the outcome</span></h2>
+<p lang="vi">Có một điều dễ bị bỏ qua: bộ slash command hay bộ skill mà ta viết cho agent chỉ là
+<strong>hướng dẫn</strong>, không phải một cỗ máy cưỡng chế. Không có gì bắt agent dừng ở cổng số 3
+ngoài việc nó chịu làm theo lời dặn. Nghĩa là trách nhiệm không chuyển đi đâu cả — nó vẫn nằm
+nguyên chỗ cũ.</p>
+<p lang="en">One thing is easy to miss: the slash commands or skills you write for an agent are
+<strong>instructions</strong>, not an enforcement engine. Nothing makes the agent stop at gate 3
+except its willingness to follow the instruction. Which means responsibility has not moved anywhere —
+it is still sitting exactly where it was.</p>
+<p lang="vi">Vì vậy mọi khẳng định của agent đều phải quy ra bằng chứng từ công cụ:</p>
+<p lang="en">So every claim the agent makes has to be converted into evidence from a tool:</p>
+<ul lang="vi">
+  <li><strong>lint</strong> — cú pháp và lỗi phong cách, chạy trên hai công cụ nếu có.</li>
+  <li><strong>tổng hợp</strong> — nếu nó không ra mạch được thì nó không phải RTL.</li>
+  <li><strong>mô phỏng</strong> — và kiểm rằng log là của lần chạy này, không phải lần trước.</li>
+  <li><strong>mutation testing</strong> — cố tình làm hỏng thiết kế; nếu bộ test vẫn xanh thì bộ
+      test mới là thứ cần sửa.</li>
+</ul>
+<ul lang="en">
+  <li><strong>lint</strong> — syntax and style, on two tools if you have them.</li>
+  <li><strong>synthesis</strong> — if it will not become a circuit, it is not RTL.</li>
+  <li><strong>simulation</strong> — and check the log belongs to this run, not the previous one.</li>
+  <li><strong>mutation testing</strong> — break the design on purpose; if the suite stays green,
+      the suite is what needs fixing.</li>
+</ul>
+<blockquote lang="vi">"AI rút ngắn quãng đường từ ý tưởng đến bản chạy được.
+<em>Nó không rút ngắn trách nhiệm.</em>"</blockquote>
+<blockquote lang="en">"An agent shortens the road from idea to something that runs.
+<em>It does not shorten responsibility.</em>"</blockquote>
+
+<h2><span lang="vi">6. Bốn cái bẫy tôi đã gặp</span><span lang="en">6. Four traps I have walked into</span></h2>
+<ul lang="vi">
+  <li><strong>Agent sửa bài kiểm tra thay vì sửa bài làm.</strong> Khi một testcase đỏ, lối ra dễ
+      nhất là nới lỏng phép so sánh. Hãy ghi thẳng vào [Ràng buộc] rằng không được đụng vào
+      testbench khi đang sửa RTL.</li>
+  <li><strong>"Đã chạy xong" mà chưa hề chạy.</strong> Một bản tóm tắt tự tin không phải bằng chứng.
+      Hãy đòi đường dẫn file log, rồi tự mở ra xem — và kiểm cả dấu thời gian.</li>
+  <li><strong>Con số đẹp nhưng không ai tính.</strong> Diện tích, số cổng, tần số tối đa: nếu không
+      kèm file báo cáo của công cụ thì coi như chưa có.</li>
+  <li><strong>Mất dấu vết.</strong> Sau vài vòng sửa, RTL không còn khớp với danh sách yêu cầu nữa.
+      Ma trận truy vết phải được cập nhật ở mỗi vòng, nếu không nó sẽ nói dối một cách rất thuyết phục.</li>
+</ul>
+<ul lang="en">
+  <li><strong>The agent fixes the exam instead of the answer.</strong> When a testcase goes red, the
+      easiest way out is to loosen the comparison. Put it in [Constraints]: do not touch the
+      testbench while fixing RTL.</li>
+  <li><strong>"Done, it ran" — when nothing ran.</strong> A confident summary is not evidence. Ask
+      for the log file path, open it yourself, and check the timestamp too.</li>
+  <li><strong>Pretty numbers nobody computed.</strong> Area, gate count, maximum frequency: without
+      the tool's own report file attached, treat them as not yet measured.</li>
+  <li><strong>Lost traceability.</strong> After a few rounds of edits the RTL no longer matches the
+      requirement list. The traceability matrix has to be updated every round, or it will lie to you
+      very convincingly.</li>
+</ul>
+
+<h2><span lang="vi">7. Điều đọng lại</span><span lang="en">7. What stays with you</span></h2>
+<p lang="vi">Sau vài tháng dùng, tôi thấy chỗ AI thay đổi công việc nhiều nhất không phải là viết
+RTL, mà là <em>thời gian chuẩn bị</em>: dựng môi trường mô phỏng, sinh testcase theo danh sách,
+viết script, đọc log, chuyển đặc tả thành danh sách yêu cầu. Những việc ấy trước đây ăn mất phần
+lớn một tuần; giờ còn một buổi. Phần thời gian tiết kiệm được nên đổ vào đúng chỗ cũ: nghĩ kiến
+trúc, và kiểm chứng cho ra kiểm chứng.</p>
+<p lang="en">After a few months of using them, the place agents changed my work most is not writing
+RTL but <em>the preparation time</em>: standing up a simulation environment, generating testcases
+from a list, writing scripts, reading logs, turning a specification into a numbered requirement
+list. That used to eat most of a week; now it takes an afternoon. The time saved should go straight
+back into the same two places as before: thinking about architecture, and verifying properly.</p>
+
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://github.com/nguyenquanicd/VLSIT_RTL_Generator_AI_Model" target="_blank" rel="noopener" data-i18n="neutral">VLSIT RTL Generator AI Flow</a>
+      — <span lang="vi">một quy trình AI-assisted RTL công khai trên GitHub (Claude Code + Codex CLI),
+      nơi tôi mượn cách tổ chức các giai đoạn và cổng duyệt mô tả ở mục 2.</span>
+      <span lang="en">a public AI-assisted RTL flow on GitHub (Claude Code + Codex CLI); the phase
+      and gate structure described in part 2 is borrowed from it.</span></li>
+  <li><span lang="vi">Về mutation testing và vì sao một bộ kiểm tra phải chứng minh được nó biết báo đỏ,
+      xem thêm ghi chú</span><span lang="en">On mutation testing and why a test suite must prove it can
+      go red, see the note</span>
+      <a href="md5-rfc1321.html" data-i18n="neutral">MD5</a>.</li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← AI, Lượng tử &amp; Mã sửa lỗi</span><span lang="en">← AI, Quantum &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

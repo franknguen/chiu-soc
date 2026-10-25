@@ -244,7 +244,7 @@ footer a:hover{ text-decoration:underline; }
       <ul>
         <li><a href="index.html"><span lang="vi">Trang chủ</span><span lang="en">Home</span></a></li>
         <li><a href="#s1"><span lang="vi">Thiết kế vi mạch</span><span lang="en">Chip design</span></a></li>
-        <li><a href="#s2"><span lang="vi">Kinh nghiệm</span><span lang="en">Experience</span></a></li>
+        <li><a href="#s2"><span lang="vi">AI &amp; Lượng tử</span><span lang="en">AI &amp; Quantum</span></a></li>
         <li><a href="#s3"><span lang="vi">Nghĩ suy cùng đất nước</span><span lang="en">Thoughts on our country</span></a></li>
         <li><a href="#s4"><span lang="vi">Vần thơ &amp; Giai điệu</span><span lang="en">Poetry &amp; Melody</span></a></li>
         <li><a href="#about"><span lang="vi">Giới thiệu</span><span lang="en">About</span></a></li>
@@ -291,7 +291,7 @@ footer a:hover{ text-decoration:underline; }
   <h2><span lang="vi">Mục lục</span><span lang="en">Contents</span></h2>
   <ul>
     <li><a href="#s1"><span lang="vi">Thiết kế vi mạch — RTL, SoC &amp; Công cụ</span><span lang="en">Chip design — RTL, SoC &amp; tools</span></a></li>
-    <li><a href="#s2"><span lang="vi">Kinh nghiệm nghề nghiệp &amp; Học tập</span><span lang="en">Career &amp; learning</span></a></li>
+    <li><a href="#s2"><span lang="vi">AI, Lượng tử &amp; Mã sửa lỗi</span><span lang="en">AI, Quantum &amp; Error-Correcting Codes</span></a></li>
     <li><a href="#s3"><span lang="vi">Nghĩ suy cùng đất nước</span><span lang="en">Thoughts on our country</span></a></li>
     <li><a href="#s4"><span lang="vi">Vần thơ &amp; Giai điệu</span><span lang="en">Poetry &amp; Melody</span></a></li>
   </ul>
@@ -374,32 +374,46 @@ footer a:hover{ text-decoration:underline; }
 
 <!-- ===== Section 2 ===== -->
 <section class="entry" id="s2">
-<h2><span lang="vi">Kinh nghiệm nghề nghiệp &amp; Học tập</span><span lang="en">Career &amp; learning</span></h2>
-<p lang="vi">Những điều tôi ước có người nói với mình sớm hơn — về nghề kỹ sư thiết kế vi mạch và cách tự học.</p>
-<p lang="en">The things I wish someone had told me earlier — about the craft of chip design and how to teach yourself.</p>
+<h2><span lang="vi">AI, Lượng tử &amp; Mã sửa lỗi</span><span lang="en">AI, Quantum &amp; Error-Correcting Codes</span></h2>
+<p lang="vi">Ba hướng tôi đang theo và tự học: tác tử AI trong công việc thiết kế, máy tính lượng tử,
+   và mã sửa lỗi. Nhìn thì xa nhau, nhưng cả ba gặp nhau ở một chỗ: đều phải sống chung với sai sót,
+   và đều cần một cách kiểm chứng đáng tin.</p>
+<p lang="en">Three directions I follow and keep learning: AI agents in design work, quantum computing,
+   and error-correcting codes. They look unrelated, but all three meet at the same place — each must
+   live with errors, and each needs a way of checking that can be trusted.</p>
 <ol class="art-list">
   <li class="art-item">
     <div class="art-title">
-      <span lang="vi">Kỹ sư thiết kế vi mạch làm gì mỗi ngày?</span>
-      <span lang="en">What does a chip design engineer actually do all day?</span>
+      <span lang="vi">Dùng AI agent để làm RTL: quy trình, cổng kiểm tra, và phần không giao được</span>
+      <span lang="en">Using AI agents for RTL: the flow, the gates, and the part you cannot delegate</span>
     </div>
-    <div class="art-desc" lang="vi">Một ngày làm việc thật sự trông như thế nào — ít "thiết kế" hơn
-      bạn nghĩ, nhiều "chứng minh" hơn bạn tưởng.</div>
-    <div class="art-desc" lang="en">What a real working day looks like — less "designing" than you
-      expect, far more "proving" than you imagine.</div>
+    <div class="art-desc" lang="vi">Một quy trình AI-assisted thật sự trông thế nào từ đặc tả đến
+      verification, cách viết một prompt dùng được, AI làm tốt chỗ nào — và vì sao cổng kiểm tra
+      của con người mới là thứ quyết định.</div>
+    <div class="art-desc" lang="en">What an AI-assisted flow really looks like from specification to
+      verification, how to write a prompt that works, where the agent is genuinely good — and why the
+      human review gates are what decide the outcome.</div>
+    <div class="art-quotes">
+      <div class="art-quote" lang="vi">"AI rút ngắn quãng đường từ ý tưởng đến bản chạy được.
+        <em>Nó không rút ngắn trách nhiệm.</em>"</div>
+      <div class="art-quote" lang="en">"An agent shortens the road from idea to something that runs.
+        <em>It does not shorten responsibility.</em>"</div>
+    </div>
     <ul class="art-links">
-      <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
+      <li><a class="link-html" href="posts/ai-agent-lam-rtl.html"><span lang="vi">Bản đọc HTML</span><span lang="en">Read in HTML</span></a></li>
     </ul>
   </li>
   <li class="art-item">
     <div class="art-title">
-      <span lang="vi">Học thiết kế vi mạch bắt đầu từ đâu khi chỉ có một chiếc laptop?</span>
-      <span lang="en">Where do you start learning chip design with nothing but a laptop?</span>
+      <span lang="vi">Từ mã sửa lỗi lượng tử đến ECC trong con chip</span>
+      <span lang="en">From quantum error correction to ECC inside a chip</span>
     </div>
-    <div class="art-desc" lang="vi">Lộ trình tự học với toàn công cụ miễn phí: Verilog → mô phỏng →
-      một IP hoàn chỉnh → chạy thử ASIC flow.</div>
-    <div class="art-desc" lang="en">A self-study path on free tools only: Verilog → simulation →
-      one complete IP → a trial run of the ASIC flow.</div>
+    <div class="art-desc" lang="vi">Luận án của tôi là về mã sửa lỗi cho xử lý thông tin lượng tử.
+      Ghi chú này đi từ đó về lại mặt đất: hai thế giới dùng chung ngôn ngữ gì, khác nhau ở đâu,
+      và một người làm phần cứng mang được gì sang.</div>
+    <div class="art-desc" lang="en">My doctoral work was on error-correcting codes for quantum
+      information processing. This note walks from there back down to earth: what language the two
+      worlds share, where they part, and what a hardware engineer can carry across.</div>
     <ul class="art-links">
       <li><span class="wip"><span lang="vi">đang viết</span><span lang="en">in progress</span></span></li>
     </ul>
@@ -497,7 +511,7 @@ footer a:hover{ text-decoration:underline; }
     </div>
     <ul class="art-links">
       <li><a class="link-html" href="posts/chuyen-ngay-xua-truc-phuong.html"><span lang="vi">Bản đọc HTML</span><span lang="en">Read in HTML</span></a></li>
-      <li><a class="link-ext" href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener"><span lang="vi">Nghe trên YouTube</span><span lang="en">Listen on YouTube</span></a></li>
+      <li><a class="link-ext" href="https://www.youtube.com/results?search_query=Chuy%E1%BB%87n+ng%C3%A0y+x%C6%B0a+Tr%C3%BAc+Ph%C6%B0%C6%A1ng" target="_blank" rel="noopener"><span lang="vi">Tìm bản thu</span><span lang="en">Find a recording</span></a></li>
     </ul>
   </li>
 </ol>
@@ -513,10 +527,6 @@ footer a:hover{ text-decoration:underline; }
       lượng tử; cử nhân Điện tử – Viễn thông (Đại học Bách khoa Hà Nội).</li>
   <li>Đã đi qua nhiều dòng sản phẩm: điều khiển cảm ứng và haptic, PMIC sạc nhanh, SoC NPU cho ô tô,
       và chip bảo mật — làm từ micro-architecture, RTL, tích hợp top cho tới verification và FPGA.</li>
-  <li>Việc tôi thích nhất: biến một thuật toán thành RTL mà mạch chạy được — bỏ phép chia,
-      chỉ còn dịch bit và phép cộng.</li>
-  <li>Tin vào loại verification <em>có thể thất bại</em>: golden model bằng Python, vector chuẩn của
-      NIST, cocotb + Verilator, và mutation testing.</li>
 </ul>
 <ul class="bio" lang="en">
   <li>Digital IC / SoC design engineer based in South Korea; in the semiconductor industry since 2020.</li>
@@ -525,27 +535,25 @@ footer a:hover{ text-decoration:underline; }
   <li>Product lines I have worked across: touchscreen and haptic controllers, fast-charging PMICs,
       automotive NPU SoCs and security chips — from micro-architecture and RTL through top integration,
       verification and FPGA bring-up.</li>
-  <li>The part I enjoy most: turning an algorithm into RTL a circuit can actually run — no dividers,
-      just shifts and adds.</li>
-  <li>A believer in verification that <em>can fail</em>: Python golden models, NIST known-answer
-      vectors, cocotb + Verilator, and mutation testing.</li>
 </ul>
 <div class="about-grid">
   <div>
     <h3><span lang="vi">Chủ đề quan tâm</span><span lang="en">Interests</span></h3>
     <ul lang="vi">
       <li>Thiết kế RTL và kiến trúc SoC: bus AMBA (APB/AHB/AXI), tích hợp IP, điều khiển bộ nhớ</li>
+      <li>Chạy mô hình AI trên thiết bị biên: lượng tử hoá, khối tăng tốc, ngân sách bộ nhớ và điện năng</li>
+      <li>Máy tính lượng tử và mã sửa lỗi lượng tử — nền nghiên cứu cũ, nay soi lại vào ECC phần cứng</li>
+      <li>Mật mã hậu lượng tử (PQC) và chuyện sinh, lưu, huỷ khoá cho thiết bị biên</li>
       <li>Mã sửa lỗi (BCH, Reed–Solomon, Hamming) và thuật toán mật mã trên phần cứng</li>
-      <li>Verification: golden model, cocotb/Verilator, mutation testing, mô phỏng cùng firmware</li>
-      <li>ASIC flow mã nguồn mở (Yosys, OpenLane 2, Sky130): gate count, STA, công suất, DRC/LVS</li>
-      <li>Phần cứng cho AI và cho xử lý thông tin lượng tử ở thiết bị biên</li>
+      <li>Verification và ASIC flow mã nguồn mở (Yosys, OpenLane 2, Sky130)</li>
     </ul>
     <ul lang="en">
       <li>RTL design and SoC architecture: AMBA buses (APB/AHB/AXI), IP integration, memory controllers</li>
+      <li>Running AI models on edge devices: quantisation, accelerator blocks, memory and power budgets</li>
+      <li>Quantum computing and quantum error correction — my research background, now read back into hardware ECC</li>
+      <li>Post-quantum cryptography (PQC), and generating, storing and destroying keys on edge devices</li>
       <li>Error-correcting codes (BCH, Reed–Solomon, Hamming) and cryptographic algorithms in hardware</li>
-      <li>Verification: golden models, cocotb/Verilator, mutation testing, firmware-in-the-loop simulation</li>
-      <li>Open-source ASIC flow (Yosys, OpenLane 2, Sky130): gate count, STA, power, DRC/LVS</li>
-      <li>Hardware for AI and for quantum information processing on edge devices</li>
+      <li>Verification and the open-source ASIC flow (Yosys, OpenLane 2, Sky130)</li>
     </ul>
   </div>
   <div>
