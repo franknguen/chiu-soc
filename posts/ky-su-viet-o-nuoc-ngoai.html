@@ -75,6 +75,7 @@ h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; 
 .lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
   padding:4px 0 4px 16px; margin:0 0 24px; }
 h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:22px 0 7px; color:var(--text); }
 p{ margin:0 0 14px; }
 ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
 li{ margin-bottom:8px; }
@@ -100,6 +101,32 @@ li{ margin-bottom:8px; }
 }
 .listen a:hover{ background:rgba(20,83,143,.09); }
 .listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+/* thư viện ảnh */
+.gallery{ display:grid; gap:16px; margin:22px 0 26px; }
+.gallery.two{ grid-template-columns:repeat(2,1fr); }
+@media(max-width:620px){ .gallery.two{ grid-template-columns:1fr; } }
+.gallery figure{ margin:0; }
+.gallery img{
+  display:block; width:100%; height:auto; border-radius:13px;
+  box-shadow:0 8px 24px rgba(15,27,45,.18); background:#e9eef5;
+}
+.gallery figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; line-height:1.55; }
+.diagram{ margin:22px 0 10px; }
+.diagram img{ display:block; width:100%; height:auto; border-radius:14px;
+  border:1px solid rgba(20,83,143,.14); background:#f7f9fc; }
+.diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; }
+.dl{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  margin:20px 0 24px; padding:16px 18px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.16); border-radius:14px;
+}
+.dl a{
+  font-size:.9em; font-weight:700; color:#fff; text-decoration:none;
+  padding:8px 16px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.dl .meta-note{ font-size:.82em; color:var(--muted); flex:1 1 220px; margin:0; }
 
 .tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
 table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
@@ -241,6 +268,29 @@ ecosystem covering every important position, so the question "how do they do it"
 We offered what we could see from where we stood — not as policy experts, but as people employed
 inside that ecosystem who know how it works at the lowest level.</p>
 
+<div class="gallery two">
+  <figure>
+    <img src="assets/vink-bo-nganh.jpg" loading="lazy" width="1500" height="763"
+         alt="Đông đảo thành viên mạng lưới trí thức người Việt tại Hàn Quốc chụp ảnh chung với một đoàn công tác cấp bộ."/>
+    <figcaption>
+      <span lang="vi">Mạng lưới trí thức người Việt tại Hàn Quốc gặp một đoàn công tác cấp bộ
+        của Việt Nam. Những buổi như thế này diễn ra đều đặn trong vài năm qua.</span>
+      <span lang="en">The Vietnamese intellectual network in Korea meeting a visiting ministerial
+        delegation. Gatherings like this happened regularly over the past few years.</span>
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="assets/vink-dai-su-quan.jpg" loading="lazy" width="1500" height="1125"
+         alt="Buổi trao đổi tại Phòng Khoa học và Công nghệ, Đại sứ quán Việt Nam tại Hàn Quốc."/>
+    <figcaption>
+      <span lang="vi">Một buổi trao đổi tại Phòng Khoa học và Công nghệ, Đại sứ quán Việt Nam
+        tại Hàn Quốc — nơi cộng đồng gặp nhau thường xuyên nhất.</span>
+      <span lang="en">An exchange at the Science and Technology Office of the Vietnamese Embassy
+        in Korea — where the community meets most often.</span>
+    </figcaption>
+  </figure>
+</div>
+
 <h2><span lang="vi">3. Những chính sách ra đời sau đó</span><span lang="en">3. The policies that followed</span></h2>
 <p lang="vi">Trong khoảng 2024–2025, Việt Nam ban hành một loạt văn bản về công nghệ cao và công
 nghiệp bán dẫn. Những văn bản tôi theo dõi sát nhất:</p>
@@ -305,32 +355,144 @@ margins: someone working in biology in Japan, someone in materials in France, so
 United States, and a great many people working at home. Each carried back one piece of a picture
 nobody can see whole.</p>
 
+<div class="gallery two">
+  <figure>
+    <img src="assets/ttt6-phu-chu-tich.jpg" loading="lazy" width="1600" height="1065"
+         alt="Toàn thể đại biểu Diễn đàn Trí thức trẻ Việt Nam toàn cầu lần thứ VI chụp ảnh chung trước Phủ Chủ tịch."/>
+    <figcaption>
+      <span lang="vi">Toàn thể đại biểu Diễn đàn lần thứ VI trong buổi gặp tại Phủ Chủ tịch,
+        Hà Nội, tháng 7/2025.</span>
+      <span lang="en">All delegates of the 6th Forum at the reception at the Presidential Palace,
+        Hanoi, July 2025.</span>
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="assets/ttt6-cung-ban.jpg" loading="lazy" width="1100" height="1467"
+         alt="Tác giả cùng ba đại biểu khác trên bậc thềm Phủ Chủ tịch."/>
+    <figcaption>
+      <span lang="vi">Cùng mấy anh em đại biểu trên bậc thềm Phủ Chủ tịch. Phần lớn những gì
+        tôi học được ở diễn đàn đến từ những câu chuyện bên lề như thế này.</span>
+      <span lang="en">With fellow delegates on the steps of the Presidential Palace. Most of what
+        I took away from the forum came from side conversations like these.</span>
+    </figcaption>
+  </figure>
+</div>
+
 <h2><span lang="vi">5. Tham luận: mô hình K-Belt của Hàn Quốc</span><span lang="en">5. The talk: Korea's K-Belt model</span></h2>
 <p lang="vi">Tham luận của tôi có tên <em>"Chiến lược bán dẫn của Hàn Quốc — định hướng cho Việt
 Nam"</em>. Tôi chọn chủ đề này vì đó đúng là thứ tôi nhìn thấy hằng ngày, chứ không phải thứ tôi
-đọc được.</p>
+đọc được. Dưới đây là phần nội dung chính, viết lại cho người đọc ngoài ngành.</p>
 <p lang="en">My talk was titled <em>"Korea's semiconductor strategy — directions for Vietnam"</em>.
-I chose it because it is what I actually see every day, rather than something I had read about.</p>
-<p lang="vi"><strong>K-Belt</strong> là chiến lược quốc gia của Hàn Quốc nhằm xây dựng một hệ sinh
-thái bán dẫn toàn diện: nối các trung tâm nghiên cứu, nhà máy sản xuất và đơn vị thiết kế thành một
-mạng lưới liên kết chặt chẽ về mặt địa lý lẫn tổ chức. Theo những con số tôi tổng hợp trong bài
-trình bày, quy mô cam kết gồm đầu tư tổng thể khoảng 450 tỷ USD đến năm 2030, miễn giảm thuế lên
-đến 260 tỷ USD cho đầu tư R&amp;D và cơ sở vật chất, và trợ cấp 50% chi phí xây dựng hạ tầng năng
-lượng cho nhà máy bán dẫn.</p>
-<p lang="en"><strong>K-Belt</strong> is Korea's national strategy for building a comprehensive
-semiconductor ecosystem: linking research centres, fabrication plants and design houses into a
-tightly connected network, geographically as well as organisationally. By the figures I compiled for
-the talk, the commitment includes roughly 450 billion USD of total investment to 2030, tax relief of
-up to 260 billion USD for R&amp;D and facility investment, and a 50% subsidy on the cost of building
-energy infrastructure for semiconductor plants.</p>
-<p lang="vi">Kết quả thấy được ở tầng tôi đang đứng: một làn sóng start-up fabless về phần cứng AI,
-IC quản lý năng lượng, cảm biến thông minh — và một mặt bằng chung được nâng lên cho cả những tập
-đoàn lớn. Chính công ty tôi làm là một mắt xích nhỏ trong mạng lưới đó, dùng tài nguyên của nó và
-được nó định hướng.</p>
-<p lang="en">The result, seen from where I stand: a wave of fabless start-ups in AI hardware, power
-management ICs and smart sensors — and a general floor raised for the large corporations too. The
-company I work for is itself one small link in that network, using its resources and taking its
-direction from it.</p>
+I chose it because it is what I actually see every day, rather than something I had read about.
+What follows is its substance, rewritten for a reader outside the field.</p>
+
+<h3><span lang="vi">Vành đai ấy gồm những gì</span><span lang="en">What the belt is made of</span></h3>
+<p lang="vi"><strong>K-Belt</strong> — tên đầy đủ hay dùng là <em>K-Semiconductor Belt</em> — là
+chiến lược quốc gia của Hàn Quốc nhằm nối các mắt xích của ngành bán dẫn thành một mạng lưới liên
+kết chặt chẽ, <strong>cả về tổ chức lẫn về địa lý</strong>. Các cụm chính nằm quanh vùng thủ đô và
+phía nam: cụm thiết kế fabless, các xưởng đúc (foundry), các nhà máy bộ nhớ, các nhà máy đóng gói
+và kiểm thử, cụm vật liệu – thiết bị, và các trung tâm nghiên cứu.</p>
+<p lang="en"><strong>K-Belt</strong> — often written in full as the <em>K-Semiconductor Belt</em> —
+is Korea's national strategy for linking the industry's parts into one tightly connected network,
+<strong>organisationally and geographically</strong>. The main clusters sit around the capital
+region and to its south: the fabless design cluster, the foundries, the memory plants, the
+packaging and test houses, the materials-and-equipment cluster, and the research centres.</p>
+
+<figure class="diagram" data-i18n="neutral">
+  <img src="assets/k-belt-so-do.svg" width="820" height="540"
+       alt="Sơ đồ: một vành đai nối các cụm chức năng của ngành bán dẫn; bên dưới là ba nhóm chủ thể đại học, tập đoàn lớn, start-up; dưới cùng là lớp đầu tư của nhà nước."/>
+  <figcaption>
+    <span lang="vi">Sơ đồ khái niệm do tôi vẽ lại cho trang này — lược bỏ tên doanh nghiệp cụ thể
+      để chỉ còn phần cấu trúc.</span>
+    <span lang="en">A conceptual diagram I redrew for this page — company names stripped out so that
+      only the structure remains.</span>
+  </figcaption>
+</figure>
+
+<p lang="vi">Vì sao khoảng cách địa lý lại quan trọng đến thế? Vì vòng lặp sửa lỗi của ngành này rất
+đắt. Khi một lô wafer ra kết quả không như mong đợi, kỹ sư thiết kế, kỹ sư quy trình và kỹ sư kiểm
+thử cần ngồi lại với nhau — nếu ba người đó ở ba múi giờ, mỗi vòng lặp mất hàng tuần; nếu họ cách
+nhau một giờ lái xe, mỗi vòng lặp mất một ngày. Cả một ngành chạy nhanh hơn chỉ nhờ chi tiết đó.</p>
+<p lang="en">Why does physical distance matter so much? Because the debug loop in this industry is
+expensive. When a wafer lot comes back wrong, the design engineer, the process engineer and the test
+engineer need to sit together — if those three are in three time zones, each loop costs weeks; if
+they are an hour's drive apart, each loop costs a day. A whole industry moves faster on that detail
+alone.</p>
+
+<h3><span lang="vi">Ba nhóm chủ thể, và dòng chảy giữa họ</span><span lang="en">Three kinds of actor, and what flows between them</span></h3>
+<p lang="vi">Phần dưới của sơ đồ mới là phần tôi muốn nhấn mạnh nhất ở diễn đàn. Một hệ sinh thái
+không sống bằng việc có đủ loại công ty, nó sống bằng <em>những dòng chảy</em> giữa chúng:</p>
+<p lang="en">The lower half of the diagram is what I most wanted to stress at the forum. An ecosystem
+does not live by having one of each kind of company; it lives on the <em>flows</em> between them:</p>
+<ul lang="vi">
+  <li><strong>Đại học và viện nghiên cứu ↔ tập đoàn lớn</strong>: nghiên cứu chung, và quan trọng
+      hơn là một đường ống nhân lực được đào tạo đúng thứ công nghiệp cần.</li>
+  <li><strong>Tập đoàn lớn → start-up</strong>: vốn, đơn hàng đầu tiên, và cả tri thức vận hành.
+      Một tập đoàn lớn khoẻ không bóp chết start-up, nó tạo ra thị trường cho start-up.</li>
+  <li><strong>Viện nghiên cứu → start-up</strong>: cho thuê công cụ, quy trình, phòng đo. Đây là
+      mắt xích rẻ nhất mà hiệu quả nhất — một công ty hai mươi người không thể tự mua những thứ đó.</li>
+</ul>
+<ul lang="en">
+  <li><strong>Academia ↔ major companies</strong>: joint research, and more importantly a pipeline
+      of people trained in what the industry actually needs.</li>
+  <li><strong>Major companies → start-ups</strong>: capital, first orders, and operating know-how.
+      A healthy giant does not crush start-ups; it creates the market they sell into.</li>
+  <li><strong>Research institutes → start-ups</strong>: renting out tools, processes and measurement
+      labs. This is the cheapest link to build and the most effective — a twenty-person company
+      cannot buy any of that itself.</li>
+</ul>
+
+<h3><span lang="vi">Quy mô cam kết</span><span lang="en">The scale of the commitment</span></h3>
+<p lang="vi">Theo những con số tôi tổng hợp trong bài trình bày: đầu tư tổng thể khoảng
+<strong>450 tỷ USD</strong> đến năm 2030; miễn giảm thuế lên đến <strong>260 tỷ USD</strong> cho
+đầu tư R&amp;D và cơ sở vật chất; và trợ cấp <strong>50% chi phí</strong> xây dựng hạ tầng năng
+lượng cho nhà máy bán dẫn. Con số cuối cùng ít được nhắc nhưng rất đáng chú ý: một nhà máy bán dẫn
+tiêu thụ điện ngang một thị trấn, nên điện không phải chuyện phụ — nó là điều kiện để nhà máy tồn
+tại.</p>
+<p lang="en">By the figures I compiled for the talk: total investment of about
+<strong>450 billion USD</strong> to 2030; tax relief of up to <strong>260 billion USD</strong> for
+R&amp;D and facility investment; and a <strong>50% subsidy</strong> on the cost of building energy
+infrastructure for semiconductor plants. That last one is rarely quoted and well worth noticing: a
+fab consumes as much electricity as a small town, so power is not a side issue — it is the condition
+for the plant existing at all.</p>
+
+<h3><span lang="vi">Kết quả, nhìn từ tầng dưới cùng</span><span lang="en">Results, seen from the bottom floor</span></h3>
+<p lang="vi">Tôi không ở vị trí đánh giá hiệu quả vĩ mô của chiến lược. Nhưng ở tầng tôi đang đứng
+thì thấy rõ một làn sóng start-up fabless về phần cứng AI, IC quản lý năng lượng và cảm biến thông
+minh — những công ty vài chục người vẫn ra được chip, vì mọi mắt xích còn lại đã có sẵn để thuê.
+Chính công ty tôi làm là một mắt xích nhỏ trong mạng lưới đó, dùng tài nguyên của nó và được nó
+định hướng.</p>
+<p lang="en">I am in no position to judge the strategy's macro-economic results. But from where I
+stand the fabless start-up wave is plain to see — AI hardware, power management ICs, smart sensors —
+companies of a few dozen people still shipping chips, because every other link already exists to be
+rented. The company I work for is itself one small link in that network, using its resources and
+taking its direction from it.</p>
+
+<h3><span lang="vi">Cái bê nguyên được và cái không</span><span lang="en">What transfers, and what does not</span></h3>
+<p lang="vi">Phần kết của tham luận, và cũng là phần tôi nghĩ nhiều nhất. <strong>Không bê nguyên
+được</strong>: Hàn Quốc có vài chục năm tích luỹ chế tạo và hai tập đoàn bộ nhớ tầm thế giới làm
+neo cho cả chuỗi — đó là điểm xuất phát, không phải thứ mua được bằng chính sách. <strong>Bê được
+</strong>: cơ chế nối các mắt xích với nhau; giáo dục gắn với doanh nghiệp; và việc nhà nước đứng
+ra gánh phần hạ tầng mà không doanh nghiệp nhỏ nào gánh nổi. Ba thứ đó không đòi hỏi phải giàu
+trước, chỉ đòi hỏi làm đúng thứ tự.</p>
+<p lang="en">That was how the talk ended, and it is the part I have thought about most.
+<strong>What does not transfer</strong>: Korea has decades of accumulated manufacturing and two
+world-scale memory companies anchoring the chain — that is a starting position, not something policy
+can purchase. <strong>What does transfer</strong>: the mechanism for connecting the links; education
+tied to industry; and the state carrying the infrastructure no small company can carry. None of
+those three requires being rich first. They require doing things in the right order.</p>
+
+<div class="dl">
+  <a href="assets/k-belt-ttt6-2025.pdf" download>
+    <span lang="vi">Tải bản trình bày (PDF, 2,9 MB)</span><span lang="en">Download the slides (PDF, 2.9 MB)</span></a>
+  <p class="meta-note">
+    <span lang="vi">Bản trình bày của tôi tại Diễn đàn, ngày 19/7/2025 — đăng nguyên trạng, không
+      chỉnh sửa. Một vài hình trong đó trích từ tài liệu công khai của phía Hàn Quốc và được ghi
+      nguồn ngay trên slide.</span>
+    <span lang="en">My own slides from the Forum, 19 July 2025 — posted as presented, unedited. A few
+      figures inside are taken from public Korean material and are credited on the slide itself.</span>
+  </p>
+</div>
 
 <h2><span lang="vi">6. Bốn đề xuất tôi đưa ra</span><span lang="en">6. The four things I proposed</span></h2>
 <ol lang="vi">

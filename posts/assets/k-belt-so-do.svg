@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 540" role="img" aria-labelledby="t d">
+  <title id="t">Sơ đồ khái niệm hệ sinh thái bán dẫn kiểu "vành đai"</title>
+  <desc id="d">Hình vẽ gốc: một vành đai nối các cụm chức năng của ngành bán dẫn (thiết kế, đúc,
+    bộ nhớ, đóng gói, vật liệu – thiết bị, nghiên cứu), bên dưới là ba nhóm chủ thể gồm đại học,
+    tập đoàn lớn và start-up, và dưới cùng là lớp đầu tư của nhà nước.</desc>
+  <defs>
+    <linearGradient id="belt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#14538f"/><stop offset="100%" stop-color="#2a9d8f"/>
+    </linearGradient>
+    <linearGradient id="gov" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0f3d6b"/><stop offset="100%" stop-color="#1f7a70"/>
+    </linearGradient>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5f6b7a"/>
+    </marker>
+  </defs>
+  <rect width="820" height="540" fill="#f7f9fc"/>
+
+  <!-- vành đai -->
+  <path d="M60 150 C 180 58, 640 58, 760 150" fill="none" stroke="url(#belt)" stroke-width="13"
+        stroke-linecap="round" opacity=".28"/>
+  <g font-family="Inter,Arial,sans-serif" text-anchor="middle">
+    <g fill="#14538f">
+      <circle cx="80"  cy="138" r="9"/><circle cx="216" cy="86" r="9"/><circle cx="352" cy="70" r="9"/>
+      <circle cx="488" cy="70" r="9"/><circle cx="624" cy="86" r="9"/><circle cx="752" cy="140" r="9"/>
+    </g>
+    <g font-size="14" font-weight="700" fill="#1f2937">
+      <text x="80"  y="168">Fabless</text>
+      <text x="216" y="116">Foundry</text>
+      <text x="352" y="100">Memory</text>
+      <text x="488" y="100">Packaging</text>
+      <text x="624" y="116">Materials</text>
+      <text x="752" y="170">R &amp; D</text>
+    </g>
+    <g font-size="11" fill="#5f6b7a">
+      <text x="80"  y="186">design houses</text>
+      <text x="216" y="134">wafer fabs</text>
+      <text x="352" y="118">DRAM / NAND</text>
+      <text x="488" y="118">assembly, test</text>
+      <text x="624" y="134">&amp; equipment</text>
+      <text x="752" y="188">institutes</text>
+    </g>
+    <text x="410" y="46" font-size="17" font-weight="800" fill="#14538f" letter-spacing="2">
+      ONE CONNECTED BELT</text>
+  </g>
+
+  <!-- ba nhóm chủ thể -->
+  <g font-family="Inter,Arial,sans-serif">
+    <g>
+      <rect x="40" y="246" width="212" height="104" rx="16" fill="#fff" stroke="#14538f" stroke-opacity=".3"/>
+      <text x="146" y="280" text-anchor="middle" font-size="15" font-weight="800" fill="#14538f">Academia</text>
+      <text x="146" y="304" text-anchor="middle" font-size="11.5" fill="#5f6b7a">universities, public</text>
+      <text x="146" y="322" text-anchor="middle" font-size="11.5" fill="#5f6b7a">research institutes</text>
+      <text x="146" y="340" text-anchor="middle" font-size="11.5" fill="#5f6b7a">shared tools &amp; PDKs</text>
+    </g>
+    <g>
+      <rect x="304" y="246" width="212" height="104" rx="16" fill="#fff" stroke="#14538f" stroke-opacity=".3"/>
+      <text x="410" y="280" text-anchor="middle" font-size="15" font-weight="800" fill="#14538f">Major companies</text>
+      <text x="410" y="304" text-anchor="middle" font-size="11.5" fill="#5f6b7a">anchor demand</text>
+      <text x="410" y="322" text-anchor="middle" font-size="11.5" fill="#5f6b7a">capital &amp; know-how</text>
+      <text x="410" y="340" text-anchor="middle" font-size="11.5" fill="#5f6b7a">they pull the chain</text>
+    </g>
+    <g>
+      <rect x="568" y="246" width="212" height="104" rx="16" fill="#fff" stroke="#14538f" stroke-opacity=".3"/>
+      <text x="674" y="280" text-anchor="middle" font-size="15" font-weight="800" fill="#14538f">Start-ups</text>
+      <text x="674" y="304" text-anchor="middle" font-size="11.5" fill="#5f6b7a">fabless, 20–50 people</text>
+      <text x="674" y="322" text-anchor="middle" font-size="11.5" fill="#5f6b7a">rent every other link</text>
+      <text x="674" y="340" text-anchor="middle" font-size="11.5" fill="#5f6b7a">AI HW, PMIC, sensors</text>
+    </g>
+    <g stroke="#5f6b7a" stroke-width="1.8" marker-end="url(#ar)" fill="none">
+      <path d="M256 282 H 298"/>
+      <path d="M298 316 H 256"/>
+      <path d="M520 298 H 562"/>
+    </g>
+    <g font-size="10.5" fill="#5f6b7a" text-anchor="middle">
+      <text x="277" y="274">joint R&amp;D</text>
+      <text x="277" y="334">talent</text>
+      <text x="541" y="290">investment</text>
+    </g>
+  </g>
+
+  <!-- lớp nhà nước -->
+  <g font-family="Inter,Arial,sans-serif">
+    <path d="M40 392 H 780" stroke="#cfd8e3" stroke-width="2" stroke-dasharray="5 6"/>
+    <rect x="40" y="416" width="740" height="92" rx="18" fill="url(#gov)"/>
+    <text x="410" y="448" text-anchor="middle" font-size="15" font-weight="800" fill="#fff"
+          letter-spacing="1">GOVERNMENT INVESTMENT PLAN</text>
+    <g font-size="12" fill="#dbeae6" text-anchor="middle">
+      <text x="186" y="478">R &amp; D funding</text>
+      <text x="186" y="496">+ tax relief</text>
+      <text x="410" y="478">talent pipeline</text>
+      <text x="410" y="496">school ↔ industry</text>
+      <text x="634" y="478">infrastructure</text>
+      <text x="634" y="496">power, land, utilities</text>
+    </g>
+    <g stroke="#2a9d8f" stroke-width="2.4" marker-end="url(#ar)" fill="none" opacity=".75">
+      <path d="M146 414 V 358"/><path d="M410 414 V 358"/><path d="M674 414 V 358"/>
+    </g>
+  </g>
+</svg>
