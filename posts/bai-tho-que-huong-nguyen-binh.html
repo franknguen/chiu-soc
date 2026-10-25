@@ -101,6 +101,24 @@ li{ margin-bottom:8px; }
 .listen a:hover{ background:rgba(20,83,143,.09); }
 .listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
 
+/* khối toàn văn bài thơ */
+.poem{
+  margin:22px 0 26px; padding:26px 30px;
+  background:linear-gradient(135deg, rgba(20,83,143,.045), rgba(42,157,143,.03));
+  border:1px solid rgba(20,83,143,.14); border-radius:16px;
+}
+.poem-text{
+  margin:0; font-family:inherit; font-size:1.02em; line-height:2;
+  white-space:pre-wrap; color:#27323f; background:none; padding:0;
+  text-align:center;
+}
+.poem-credit{
+  margin:18px 0 0; padding-top:12px; text-align:center;
+  border-top:1px dashed rgba(31,41,55,.16);
+  font-size:.84em; color:var(--muted);
+}
+@media(max-width:560px){ .poem{ padding:20px 16px; } .poem-text{ font-size:.96em; text-align:left; } }
+
 blockquote{
   border-left:3px solid var(--accent);
   margin:18px 0; padding:10px 16px;
@@ -260,6 +278,27 @@ chép lại một con số mình chưa kiểm được.</p>
 most often listed in his bibliography — so rather than copy a year I have not been able to verify,
 I leave the date out.</p>
 
+<!-- ============================================================================
+     TOÀN VĂN BÀI THƠ — chỗ dành sẵn để TÁC GIẢ TRANG tự dán vào.
+
+     Cách dùng:
+       1. Chép nguyên văn bài thơ vào giữa hai thẻ <pre class="poem-text"> ... </pre>
+          bên dưới. Mỗi dòng thơ một dòng; cách khổ bằng MỘT dòng trống.
+          Không cần thẻ <br/>, khối này đã giữ nguyên xuống dòng.
+       2. Xoá chữ  hidden  ở thẻ <section> để khối hiện ra.
+       3. Xoá hoặc sửa đoạn "6. Vì sao trang này không đăng toàn văn" ở dưới cho khớp.
+       4. Chạy lại cổng kiểm tra site (xem README.md ở thư mục gốc của kho).
+
+     Lưu ý: giữ nguyên  data-i18n="neutral"  — nguyên văn tiếng Việt hiện ở cả hai
+     ngôn ngữ, và thuộc tính này cho bộ kiểm tra biết đó là chủ ý.
+     ============================================================================ -->
+<section class="poem" data-i18n="neutral" hidden>
+  <h2>Bài thơ quê hương</h2>
+<pre class="poem-text">
+</pre>
+  <p class="poem-credit">Nguyễn Bính (1918–1966)</p>
+</section>
+
 <h2><span lang="vi">5. Đọc bài thơ này khi đang ở xa</span><span lang="en">5. Reading this poem from far away</span></h2>
 <p lang="vi">Tôi đọc lại bài thơ này ở một căn hộ tại Hàn Quốc, vào một buổi tối mùa thu, sau một
 ngày ngồi với sóng tín hiệu và các bảng số. Cái lạ là nó không làm tôi buồn theo kiểu nhớ nhà.
@@ -285,11 +324,14 @@ Between "almost certainly fine" and "certainly fine", I take the second — the 
 engineering work.</p>
 <p lang="vi">Toàn văn thì dễ tìm: bài thơ được chép lại ở rất nhiều nơi, và các tuyển tập in của
 Nguyễn Bính vẫn được tái bản đều. Nếu đọc được một bản in, hãy đọc bản in — thơ ông chép tay qua
-mạng rất hay sai chữ, mà với thơ thì sai một chữ là hỏng cả câu.</p>
+mạng rất hay sai chữ, mà với thơ thì sai một chữ là hỏng cả câu. Trong mã nguồn của trang này đã có
+sẵn một khối dành cho nguyên văn; khi nào tôi đối chiếu xong với một bản in đáng tin, nó sẽ được
+bật lên.</p>
 <p lang="en">The full text is easy to find: it is transcribed in many places, and printed collections
 of his work are still regularly reissued. If you can read it in print, read it in print — his poems
 circulate online in copies riddled with small errors, and in poetry a single wrong word ruins the
-line.</p>
+line. The source of this page already holds a block reserved for the original text; it will be
+switched on once I have checked it against a trustworthy printed edition.</p>
 
 <h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
 <ul class="refs">
