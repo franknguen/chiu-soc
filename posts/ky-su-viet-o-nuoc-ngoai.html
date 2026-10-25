@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Người kỹ sư Việt ở nước ngoài — ChiU·SoC"
+      data-title-en="Người kỹ sư Việt ở nước ngoài — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Người kỹ sư Việt ở nước ngoài — ChiU·SoC</title>
+<meta name="description" content="Làm kỹ sư thiết kế vi mạch ở Hàn Quốc từ 2020: hệ sinh thái bán dẫn nhìn từ bên trong, mạng lưới VINK và các cuộc trao đổi với đoàn công tác trong nước, Diễn đàn Trí thức trẻ Việt Nam toàn cầu lần thứ VI, và tham luận về mô hình K-Belt."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:8px 12px; text-align:left; vertical-align:top; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px;
+}
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">Người kỹ sư Việt ở nước ngoài: làm việc trong một hệ sinh thái công nghệ hàng đầu</span><span lang="en">A Vietnamese engineer abroad: working inside a leading technology ecosystem</span></h1>
+<div class="meta"><span lang="vi">Nghĩ suy cùng đất nước · 25/10/2026 · Frank Nguyen</span><span lang="en">Thoughts on our country · 25 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Tôi làm kỹ sư thiết kế vi mạch ở Hàn Quốc từ năm 2020. Đây không phải
+câu chuyện về một đóng góp lớn — tôi không có đóng góp nào đủ lớn để kể như vậy. Đây là ghi chép
+về một điều bình thường hơn nhiều: khi bạn ngồi làm việc bên trong một hệ sinh thái công nghệ đã
+hoàn chỉnh, bạn vô tình trở thành một điểm quan sát; và điểm quan sát ấy, nếu chịu khó ghi lại và
+chia sẻ, thì có ích cho người ở nhà.</p>
+<p class="lede" lang="en">I have worked as a chip design engineer in South Korea since 2020. This is
+not the story of some large contribution — I have made none large enough to tell that way. It is a
+note about something far more ordinary: when you sit and work inside a technology ecosystem that is
+already complete, you become, without meaning to, a vantage point; and that vantage point, if you
+bother to write down what you see and pass it on, is useful to people back home.</p>
+
+<figure class="cover">
+  <img src="assets/ttt6-phat-bieu.jpg" loading="lazy" width="2560" height="1707"
+       alt="Tác giả phát biểu tại Diễn đàn Trí thức trẻ Việt Nam toàn cầu lần thứ VI, Hà Nội, 19/7/2025."/>
+  <figcaption>
+    <span lang="vi">Phát biểu tại Diễn đàn Trí thức trẻ Việt Nam toàn cầu lần thứ VI,
+      Trường Đại học VinUniversity, Hà Nội, ngày 19/7/2025.</span>
+    <span lang="en">Speaking at the 6th Global Vietnamese Young Intellectuals Forum,
+      VinUniversity, Hanoi, 19 July 2025.</span>
+  </figcaption>
+</figure>
+
+<h2><span lang="vi">1. Một chỗ ngồi bình thường, ở một nơi không bình thường</span><span lang="en">1. An ordinary desk, in a rather unordinary place</span></h2>
+<p lang="vi">Từ năm 2020 tôi làm kỹ sư thiết kế và kiểm chứng IC tại các công ty fabless — công ty
+thiết kế chip không có nhà máy — ở Hàn Quốc. Công việc hằng ngày của tôi không có gì đặc biệt:
+viết RTL, dựng môi trường mô phỏng, chạy kiểm chứng, sửa lỗi, rồi lặp lại.</p>
+<p lang="en">Since 2020 I have worked as an IC design and verification engineer at fabless companies
+— chip design houses without a factory — in South Korea. My daily work is nothing special: write
+RTL, build the simulation environment, run verification, fix bugs, repeat.</p>
+<p lang="vi">Cái đặc biệt nằm ở xung quanh. Quanh cái bàn làm việc ấy là một hệ sinh thái bán dẫn
+gần như đầy đủ mọi mắt xích: trường đại học đào tạo đúng thứ công nghiệp cần, viện nghiên cứu công
+lập cho doanh nghiệp nhỏ mượn công cụ và quy trình, các xưởng đúc, các nhà máy đóng gói và kiểm
+thử, các nhà cung cấp IP và EDA, và những tập đoàn lớn đủ sức kéo cả chuỗi đi theo. Một công ty
+khởi nghiệp vài chục người vẫn có thể làm ra một con chip, vì tất cả những mắt xích còn lại đã có
+sẵn để thuê.</p>
+<p lang="en">What is special is everything around it. Around that desk sits a semiconductor ecosystem
+with nearly every link in place: universities teaching what the industry actually needs, public
+research institutes lending tools and processes to small companies, foundries, packaging and test
+houses, IP and EDA vendors, and corporations large enough to pull the whole chain along. A start-up
+of a few dozen people can still produce a chip, because every other link already exists to be
+rented.</p>
+<p lang="vi">Làm việc trong đó vài năm thì bạn hiểu một điều mà đọc báo cáo không hiểu được: một
+ngành công nghiệp không chạy bằng từng công ty riêng lẻ, nó chạy bằng khoảng cách giữa các công ty.</p>
+<p lang="en">Work inside that for a few years and you understand something no report conveys: an
+industry does not run on individual companies, it runs on the distances between them.</p>
+
+<h2><span lang="vi">2. Mạng lưới, và những cuộc gặp</span><span lang="en">2. A network, and a series of meetings</span></h2>
+<p lang="vi">Người Việt làm khoa học và kỹ thuật ở Hàn Quốc có một mạng lưới đổi mới sáng tạo gọi
+là <strong>VINK</strong>, nơi mọi người gặp nhau, trao đổi và học lẫn nhau. Tôi là một thành viên,
+sinh hoạt trong nhóm bán dẫn.</p>
+<p lang="en">Vietnamese scientists and engineers in Korea have an innovation network called
+<strong>VINK</strong>, where people meet, exchange and learn from one another. I am a member, active
+in its semiconductor group.</p>
+<p lang="vi">Trong khoảng một hai năm trước khi các chính sách lớn được ban hành, có khá nhiều đoàn
+công tác cấp nhà nước của Việt Nam sang Hàn Quốc — có thể kể đến đoàn của Bộ Kế hoạch và Đầu tư,
+Bộ Ngoại giao, và cả một đoàn lớn của Thủ tướng Chính phủ. Trong những chuyến đi đó, phía đoàn
+công tác thường dành thời gian gặp gỡ và làm việc với mạng lưới trí thức người Việt tại đây. Song
+song, Phòng Khoa học Công nghệ của Đại sứ quán Việt Nam tại Hàn Quốc cũng thường xuyên tổ chức các
+buổi trao đổi với cộng đồng.</p>
+<p lang="en">In the year or two before the major policies were issued, a number of Vietnamese state
+delegations travelled to Korea — among them the Ministry of Planning and Investment, the Ministry
+of Foreign Affairs, and a large delegation led by the Prime Minister. On those visits the
+delegations regularly set aside time to meet and work with the Vietnamese intellectual network here.
+In parallel, the Science and Technology Office of the Vietnamese Embassy in Korea holds frequent
+exchanges with the community.</p>
+<p lang="vi">Tôi tham gia những cuộc trao đổi ấy cùng nhóm bán dẫn của VINK. Chiến lược phát triển
+ngành bán dẫn luôn là chủ đề nóng, và cũng dễ hiểu: Hàn Quốc có lực lượng chuyên gia rất mạnh và
+một hệ sinh thái đủ các vị trí quan trọng, nên câu hỏi "họ làm thế nào" lúc nào cũng được đặt ra.
+Chúng tôi góp ý từ chỗ mình đang đứng — không phải với tư cách chuyên gia hoạch định chính sách,
+mà với tư cách những người đang làm thuê trong chính cái hệ sinh thái đó và biết nó vận hành ra sao
+ở tầng dưới cùng.</p>
+<p lang="en">I took part in those exchanges with VINK's semiconductor group. Semiconductor strategy
+was always a live topic, and understandably so: Korea has a very strong body of specialists and an
+ecosystem covering every important position, so the question "how do they do it" came up every time.
+We offered what we could see from where we stood — not as policy experts, but as people employed
+inside that ecosystem who know how it works at the lowest level.</p>
+
+<h2><span lang="vi">3. Những chính sách ra đời sau đó</span><span lang="en">3. The policies that followed</span></h2>
+<p lang="vi">Trong khoảng 2024–2025, Việt Nam ban hành một loạt văn bản về công nghệ cao và công
+nghiệp bán dẫn. Những văn bản tôi theo dõi sát nhất:</p>
+<p lang="en">Through 2024–2025, Vietnam issued a series of documents on high technology and the
+semiconductor industry. The ones I followed most closely:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Văn bản</span><span lang="en">Document</span></th>
+  <th><span lang="vi">Nội dung chính</span><span lang="en">What it covers</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral"><strong>QĐ 1018/QĐ-TTg</strong></td>
+      <td><span lang="vi">Chiến lược phát triển công nghiệp bán dẫn đến 2030, tầm nhìn 2050 — nêu công thức <strong>C = SET + 1</strong> và lộ trình ba giai đoạn</span><span lang="en">The semiconductor industry strategy to 2030, vision 2050 — stating the <strong>C = SET + 1</strong> formula and a three-phase roadmap</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>QĐ 1017/QĐ-TTg</strong></td>
+      <td><span lang="vi">Chương trình phát triển nguồn nhân lực ngành bán dẫn đến 2030, định hướng 2050</span><span lang="en">The programme for developing semiconductor human resources to 2030, oriented to 2050</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>NQ 57-NQ/TW</strong></td>
+      <td><span lang="vi">Đột phá phát triển khoa học, công nghệ, đổi mới sáng tạo và chuyển đổi số quốc gia</span><span lang="en">A breakthrough in science, technology, innovation and national digital transformation</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>NQ 68-NQ/TW</strong></td>
+      <td><span lang="vi">Phát triển kinh tế tư nhân</span><span lang="en">Development of the private sector</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>NQ 59-NQ/TW</strong></td>
+      <td><span lang="vi">Hội nhập quốc tế, trong đó có hội nhập về khoa học công nghệ và đổi mới sáng tạo</span><span lang="en">International integration, including in science, technology and innovation</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Công thức <strong>C = SET + 1</strong> trong Quyết định 1018 đọc là: C — chip;
+S — chuyên biệt hoá; E — điện tử; T — nhân tài; và "+1" chính là Việt Nam. Các mục tiêu đặt ra cho
+năm 2030 gồm 100 công ty thiết kế chip, 1 nhà máy sản xuất chip, 10 nhà máy đóng gói và kiểm thử,
+cùng 50.000 kỹ sư bán dẫn.</p>
+<p lang="en">The <strong>C = SET + 1</strong> formula in Decision 1018 reads: C — chip;
+S — specialisation; E — electronics; T — talent; and the "+1" is Vietnam itself. The targets set for
+2030 include 100 chip design companies, one fabrication plant, ten packaging and test plants, and
+50,000 semiconductor engineers.</p>
+<div class="callout">
+  <span lang="vi"><strong>Cần nói cho rõ.</strong> Những chính sách ấy là kết quả của rất nhiều
+  nguồn đóng góp: các bộ ngành, các viện, doanh nghiệp, chuyên gia trong nước và cộng đồng người
+  Việt ở nhiều quốc gia. Tôi là một trong hàng trăm người ngồi trong những buổi trao đổi đó, và
+  phần của tôi chỉ là vài ý kiến trong một nhóm nhỏ. Tôi kể lại ở đây không phải để nhận công, mà
+  vì tôi nghĩ bản thân cái <em>cơ chế</em> này — nhà nước chủ động đi hỏi người làm nghề ở nước
+  ngoài — đáng được biết đến nhiều hơn.</span>
+  <span lang="en"><strong>To be clear.</strong> Those policies are the product of very many sources:
+  ministries, institutes, companies, domestic experts and Vietnamese communities in many countries.
+  I was one of hundreds of people sitting in those exchanges, and my part was a few opinions inside
+  a small group. I recount it here not to claim credit, but because I think the <em>mechanism</em>
+  itself — a state that goes out and asks practitioners working abroad — deserves to be better
+  known.</span>
+</div>
+
+<h2><span lang="vi">4. Diễn đàn Trí thức trẻ Việt Nam toàn cầu lần thứ VI</span><span lang="en">4. The 6th Global Vietnamese Young Intellectuals Forum</span></h2>
+<p lang="vi">Ngày <strong>19/7/2025</strong>, Diễn đàn Trí thức trẻ Việt Nam toàn cầu lần thứ VI
+được tổ chức tại Trường Đại học VinUniversity, Hà Nội, với <strong>201 đại biểu</strong> từ trong
+nước và nhiều quốc gia. Tôi nhận được lời mời tham dự và trình bày một tham luận.</p>
+<p lang="en">On <strong>19 July 2025</strong>, the 6th Global Vietnamese Young Intellectuals Forum was
+held at VinUniversity in Hanoi, with <strong>201 delegates</strong> from Vietnam and many other
+countries. I was invited to attend and to give a presentation.</p>
+<p lang="vi">Điều tôi nhớ nhất về diễn đàn không phải phần trình bày của mình, mà là những cuộc nói
+chuyện bên lề: một người làm sinh học ở Nhật, một người làm vật liệu ở Pháp, một người làm AI ở Mỹ,
+và rất nhiều người đang làm việc ở trong nước. Mỗi người mang về một mảnh của một bức tranh mà
+không ai nhìn được trọn vẹn.</p>
+<p lang="en">What I remember most about the forum is not my own talk but the conversations in the
+margins: someone working in biology in Japan, someone in materials in France, someone in AI in the
+United States, and a great many people working at home. Each carried back one piece of a picture
+nobody can see whole.</p>
+
+<h2><span lang="vi">5. Tham luận: mô hình K-Belt của Hàn Quốc</span><span lang="en">5. The talk: Korea's K-Belt model</span></h2>
+<p lang="vi">Tham luận của tôi có tên <em>"Chiến lược bán dẫn của Hàn Quốc — định hướng cho Việt
+Nam"</em>. Tôi chọn chủ đề này vì đó đúng là thứ tôi nhìn thấy hằng ngày, chứ không phải thứ tôi
+đọc được.</p>
+<p lang="en">My talk was titled <em>"Korea's semiconductor strategy — directions for Vietnam"</em>.
+I chose it because it is what I actually see every day, rather than something I had read about.</p>
+<p lang="vi"><strong>K-Belt</strong> là chiến lược quốc gia của Hàn Quốc nhằm xây dựng một hệ sinh
+thái bán dẫn toàn diện: nối các trung tâm nghiên cứu, nhà máy sản xuất và đơn vị thiết kế thành một
+mạng lưới liên kết chặt chẽ về mặt địa lý lẫn tổ chức. Theo những con số tôi tổng hợp trong bài
+trình bày, quy mô cam kết gồm đầu tư tổng thể khoảng 450 tỷ USD đến năm 2030, miễn giảm thuế lên
+đến 260 tỷ USD cho đầu tư R&amp;D và cơ sở vật chất, và trợ cấp 50% chi phí xây dựng hạ tầng năng
+lượng cho nhà máy bán dẫn.</p>
+<p lang="en"><strong>K-Belt</strong> is Korea's national strategy for building a comprehensive
+semiconductor ecosystem: linking research centres, fabrication plants and design houses into a
+tightly connected network, geographically as well as organisationally. By the figures I compiled for
+the talk, the commitment includes roughly 450 billion USD of total investment to 2030, tax relief of
+up to 260 billion USD for R&amp;D and facility investment, and a 50% subsidy on the cost of building
+energy infrastructure for semiconductor plants.</p>
+<p lang="vi">Kết quả thấy được ở tầng tôi đang đứng: một làn sóng start-up fabless về phần cứng AI,
+IC quản lý năng lượng, cảm biến thông minh — và một mặt bằng chung được nâng lên cho cả những tập
+đoàn lớn. Chính công ty tôi làm là một mắt xích nhỏ trong mạng lưới đó, dùng tài nguyên của nó và
+được nó định hướng.</p>
+<p lang="en">The result, seen from where I stand: a wave of fabless start-ups in AI hardware, power
+management ICs and smart sensors — and a general floor raised for the large corporations too. The
+company I work for is itself one small link in that network, using its resources and taking its
+direction from it.</p>
+
+<h2><span lang="vi">6. Bốn đề xuất tôi đưa ra</span><span lang="en">6. The four things I proposed</span></h2>
+<ol lang="vi">
+  <li><strong>Đầu tư dài hạn, dựng dần từng mắt xích</strong> của hệ sinh thái thay vì kỳ vọng một
+      bước nhảy — đúng tinh thần đã có trong C = SET + 1 và các nghị quyết, quyết định kể trên.</li>
+  <li><strong>Phát triển nhân lực bằng giáo dục gắn với doanh nghiệp</strong>: trường dạy đúng thứ
+      doanh nghiệp cần, doanh nghiệp tham gia vào chương trình. Đây là chỗ Hàn Quốc làm rất bài bản
+      và cũng là chỗ dễ học theo nhất vì không cần vốn lớn.</li>
+  <li><strong>Hỗ trợ start-up fabless</strong> và tham gia vào hệ sinh thái quốc tế — Hàn Quốc, Mỹ,
+      Trung Quốc, Nga — thay vì cố dựng một hệ sinh thái khép kín.</li>
+  <li><strong>Hợp tác quốc tế một cách cụ thể</strong>: chú trọng mời chuyên gia nước ngoài, và —
+      điều hay bị quên — cả chuyên gia bán hàng. Một con chip tốt mà không bán được thì chuỗi
+      không khép lại.</li>
+</ol>
+<ol lang="en">
+  <li><strong>Invest for the long term and build the links one at a time</strong> rather than hoping
+      for a single leap — which is the spirit already present in C = SET + 1 and the resolutions and
+      decisions listed above.</li>
+  <li><strong>Grow people through education tied to industry</strong>: universities teaching what
+      companies actually need, companies taking part in the curriculum. Korea does this
+      systematically, and it is the easiest part to copy because it needs no large capital.</li>
+  <li><strong>Support fabless start-ups</strong> and join international ecosystems — Korea, the
+      United States, China, Russia — instead of trying to build a closed one.</li>
+  <li><strong>Make international cooperation concrete</strong>: bring in foreign specialists and —
+      the part usually forgotten — sales specialists too. A good chip that cannot be sold leaves the
+      chain unclosed.</li>
+</ol>
+
+<h2><span lang="vi">7. Người kỹ sư ở xa thật sự làm được gì</span><span lang="en">7. What an engineer far from home can actually do</span></h2>
+<p lang="vi">Nếu phải rút lại thành vài điều thực tế, tôi nghĩ là thế này:</p>
+<p lang="en">If I had to reduce it to a few practical things, I would say this:</p>
+<ul lang="vi">
+  <li><strong>Kể lại cơ chế, đừng chỉ kể kết quả.</strong> Con số đầu tư thì ai cũng tra được.
+      Thứ khó thấy từ xa là <em>cách</em> một hệ sinh thái nối các mắt xích với nhau — và đó lại
+      chính là thứ người ở trong nhìn rõ.</li>
+  <li><strong>Nói từ chỗ mình đứng.</strong> Tôi là kỹ sư cấp senior, không phải chuyên gia hoạch
+      định chính sách. Góp ý đúng tầm của mình thì có ích; nói quá tầm thì thành nhiễu.</li>
+  <li><strong>Có mặt khi được mời.</strong> Phần lớn cơ hội đóng góp của tôi đến từ việc đơn giản
+      là có mặt ở những buổi gặp mà đáng lẽ tôi có thể viện cớ bận.</li>
+  <li><strong>Kết nối hai đầu.</strong> Người ở nhà cần biết bên này vận hành ra sao; bên này cần
+      biết ở nhà đang thiếu gì. Một kỹ sư đứng giữa có thể làm cái việc nhỏ là dịch hai thứ đó cho
+      nhau.</li>
+  <li><strong>Viết lại.</strong> Một buổi nói chuyện thì bay đi; một trang ghi chép thì còn lại —
+      đó cũng là lý do có trang web này.</li>
+</ul>
+<ul lang="en">
+  <li><strong>Describe the mechanism, not just the outcome.</strong> Investment figures are
+      searchable by anyone. What is hard to see from a distance is <em>how</em> an ecosystem joins
+      its links together — and that is precisely what someone inside can see.</li>
+  <li><strong>Speak from where you stand.</strong> I am a senior engineer, not a policy expert.
+      Contributing at your own level is useful; speaking above it is noise.</li>
+  <li><strong>Turn up when invited.</strong> Most of my chances to contribute came simply from being
+      present at meetings I could easily have excused myself from.</li>
+  <li><strong>Connect the two ends.</strong> People at home need to know how things run here; people
+      here need to know what is missing at home. An engineer standing in between can do the small
+      job of translating one to the other.</li>
+  <li><strong>Write it down.</strong> A conversation evaporates; a page of notes remains — which is
+      part of why this site exists.</li>
+</ul>
+<p lang="vi">Không có việc nào trong số đó là đóng góp lớn. Nhưng cộng lại, qua nhiều người và nhiều
+năm, tôi tin là chúng có trọng lượng hơn vẻ ngoài khiêm tốn của từng việc một.</p>
+<p lang="en">None of these is a large contribution. But added up, across many people and many years,
+I believe they weigh more than each of them modestly appears to.</p>
+
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://nic.gov.vn/" target="_blank" rel="noopener" data-i18n="neutral">Trung tâm Đổi mới sáng tạo Quốc gia (NIC)</a>
+      — <span lang="vi">đơn vị chủ trì mạng lưới đổi mới sáng tạo Việt Nam, trong đó có mạng lưới
+      tại Hàn Quốc (VINK) nói ở trên.</span>
+      <span lang="en">the agency behind Vietnam's innovation networks, including the Korea network
+      (VINK) mentioned above.</span></li>
+  <li><a href="https://vanban.chinhphu.vn/" target="_blank" rel="noopener" data-i18n="neutral">Cổng thông tin văn bản của Chính phủ</a>
+      — <span lang="vi">tra toàn văn các văn bản nêu trong bài theo số hiệu: 1018/QĐ-TTg,
+      1017/QĐ-TTg, 57-NQ/TW, 68-NQ/TW, 59-NQ/TW. Tôi dẫn cổng tra cứu thay vì một đường dẫn sâu,
+      vì đường dẫn sâu vào các cổng này thường đổi.</span>
+      <span lang="en">search the documents cited above by their numbers: 1018/QĐ-TTg, 1017/QĐ-TTg,
+      57-NQ/TW, 68-NQ/TW, 59-NQ/TW. I link the search portal rather than a deep link, because deep
+      links into these portals tend to move.</span></li>
+  <li><a href="../index.html#s2" data-i18n="neutral">AI, Lượng tử &amp; Mã sửa lỗi</a>
+      — <span lang="vi">phần kỹ thuật của trang này, nơi tôi viết về chính công việc hằng ngày nói ở trên.</span>
+      <span lang="en">the technical section of this site, where I write about the daily work described above.</span></li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s3"><span lang="vi">← Nghĩ suy cùng đất nước</span><span lang="en">← Thoughts on our country</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
