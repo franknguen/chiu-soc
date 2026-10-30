@@ -309,18 +309,39 @@
     for (i = 0; i < ct2.length; i++) if (ct2[i] !== ctilde[i]) return false;
     return true;
   }
-  function prepare(msg, ctx) {
+  /* ---------- M' : ML-DSA thuần (Alg. 2) và HashML-DSA (Alg. 4) ---------- */
+  var PH = {                                   // arc của OID 2.16.840.1.101.3.4.2.<arc>
+    'SHA2-256':  { arc: 1,  fn: function (m) { return root.PQCSHA2.sha256(m); } },
+    'SHA2-512':  { arc: 3,  fn: function (m) { return root.PQCSHA2.sha512(m); } },
+    'SHA3-256':  { arc: 8,  fn: function (m) { return H.sha3_256(m); } },
+    'SHA3-512':  { arc: 10, fn: function (m) { return H.sha3_512(m); } },
+    'SHAKE-128': { arc: 11, fn: function (m) { return H.shake128xof(m).squeeze(32); } },
+    'SHAKE-256': { arc: 12, fn: function (m) { return H.shake256(m, 64); } }
+  };
+  function oidDer(arc) { return new Uint8Array([0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, arc]); }
+  function prepare(msg, ctx, ph) {
     ctx = ctx || new Uint8Array(0);
     if (ctx.length > 255) throw new Error('ctx > 255 byte');
-    return cat([new Uint8Array([0, ctx.length]), ctx, msg]);
+    if (!ph || ph === 'none')
+      return cat([new Uint8Array([0, ctx.length]), ctx, msg]);
+    var e = PH[ph];
+    if (!e) throw new Error('hàm pre-hash không hỗ trợ: ' + ph);
+    return cat([new Uint8Array([1, ctx.length]), ctx, oidDer(e.arc), e.fn(msg)]);
   }
 
   root.MLDSA = {
     PARAMS: PARAMS, sizes: sizes, prepare: prepare,
     keygenInternal: keygenInternal, signInternal: signInternal, verifyInternal: verifyInternal,
-    keygen: function (name) { return keygenInternal(PARAMS[name], H.randomBytes(32)); },
-    sign: function (name, sk, msg, ctx) { return signInternal(PARAMS[name], sk, prepare(msg, ctx), H.randomBytes(32)); },
-    signDet: function (name, sk, msg, ctx) { return signInternal(PARAMS[name], sk, prepare(msg, ctx), new Uint8Array(32)); },
-    verify: function (name, pk, msg, sig, ctx) { return verifyInternal(PARAMS[name], pk, prepare(msg, ctx), sig); }
+    PH_NAMES: Object.keys(PH), oidDer: oidDer,
+    keygen: function (name, seed) { return keygenInternal(PARAMS[name], seed || H.randomBytes(32)); },
+    sign: function (name, sk, msg, ctx, ph, rnd) {
+      return signInternal(PARAMS[name], sk, prepare(msg, ctx, ph), rnd || H.randomBytes(32));
+    },
+    signDet: function (name, sk, msg, ctx, ph) {
+      return signInternal(PARAMS[name], sk, prepare(msg, ctx, ph), new Uint8Array(32));
+    },
+    verify: function (name, pk, msg, sig, ctx, ph) {
+      return verifyInternal(PARAMS[name], pk, prepare(msg, ctx, ph), sig);
+    }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

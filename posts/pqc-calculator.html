@@ -170,6 +170,28 @@ li{ margin-bottom:8px; }
 .nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35);
   padding:12px 16px; border-radius:12px; font-size:.9em; }
 
+
+.grp{
+  margin:26px 0 10px; font-size:.78rem; font-weight:800; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--accent);
+  padding-bottom:6px; border-bottom:1px solid rgba(20,83,143,.16);
+}
+.fld{ margin:0 0 14px; }
+.fld label{
+  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  font-size:.82em; font-weight:700; color:var(--muted); margin-bottom:5px;
+}
+.fld .len{ font-weight:600; font-variant-numeric:tabular-nums; color:var(--accent2); }
+.fld textarea{
+  width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.76em; line-height:1.65; color:#27323f; background:#fbfcfe;
+  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:9px 11px;
+  resize:vertical; word-break:break-all;
+}
+.fld textarea[readonly]{ background:#f1f4f8; color:#55606d; }
+.fld textarea:focus{ outline:2px solid rgba(42,157,143,.45); outline-offset:1px; }
+#kem-status, #dsa-status{ margin-top:12px; }
+
 /* PDF đọc ngay trên trang (ẩn thanh công cụ của trình xem) */
 .pdfview{ margin:20px 0 10px; }
 .pdfview iframe{
@@ -296,30 +318,46 @@ FIPS 204). This page lets you run both — key generation, encapsulation, signin
     <select id="kem-set" data-i18n="neutral">
       <option>ML-KEM-512</option><option selected>ML-KEM-768</option><option>ML-KEM-1024</option>
     </select>
-    <button class="btn ghost" id="kem-reset" type="button"><span lang="vi">Làm lại từ đầu</span><span lang="en">Start over</span></button>
+    <button class="btn" id="kem-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate keys</span></button>
+    <button class="btn ghost" id="kem-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear</span></button>
   </div>
 
-  <div class="step">
-    <h4><span lang="vi">Bước 1 — Bên nhận sinh cặp khoá</span><span lang="en">Step 1 — the receiver generates a key pair</span></h4>
-    <p class="hint"><span lang="vi">Khoá công khai <em>ek</em> sẽ được gửi đi; khoá bí mật <em>dk</em> ở lại trong máy.</span><span lang="en">The public key <em>ek</em> gets sent out; the secret key <em>dk</em> stays on this machine.</span></p>
-    <button class="btn" id="kem-keygen" type="button"><span lang="vi">Sinh khoá</span><span lang="en">Generate</span></button>
-    <div id="kem-out1"></div>
+  <h4 class="grp"><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
+  <div class="fld">
+    <label for="kem-ek"><span lang="vi">Khoá công khai — ek</span><span lang="en">Public Key — ek</span>
+      <span class="len" id="kem-ek-len"></span></label>
+    <textarea id="kem-ek" rows="3" spellcheck="false" placeholder="hex"></textarea>
+  </div>
+  <div class="fld">
+    <label for="kem-dk"><span lang="vi">Khoá bí mật — dk</span><span lang="en">Private Key — dk</span>
+      <span class="len" id="kem-dk-len"></span></label>
+    <textarea id="kem-dk" rows="3" spellcheck="false" placeholder="hex"></textarea>
   </div>
 
-  <div class="step">
-    <h4><span lang="vi">Bước 2 — Bên gửi đóng gói</span><span lang="en">Step 2 — the sender encapsulates</span></h4>
-    <p class="hint"><span lang="vi">Dùng <em>ek</em> nhận được, bên gửi tạo ra bản mã <em>ct</em> và một khoá chung <em>K</em>. Chỉ <em>ct</em> được gửi đi.</span><span lang="en">From the <em>ek</em> it received, the sender produces a ciphertext <em>ct</em> and a shared key <em>K</em>. Only <em>ct</em> travels.</span></p>
-    <button class="btn" id="kem-encaps" type="button" disabled><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span></button>
-    <div id="kem-out2"></div>
+  <h4 class="grp"><span lang="vi">Đóng gói — bên gửi</span><span lang="en">Encapsulation — sender</span></h4>
+  <p class="hint"><span lang="vi">Dùng <em>khoá công khai</em> ở trên. Sinh ra bản mã và khoá chung; chỉ bản mã được gửi đi.</span><span lang="en">Uses the <em>Public Key</em> above. Produces a ciphertext and a shared secret; only the ciphertext travels.</span></p>
+  <button class="btn" id="kem-encaps" type="button"><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span></button>
+  <div class="fld">
+    <label for="kem-ct"><span lang="vi">Bản mã — ct</span><span lang="en">Ciphertext — ct</span>
+      <span class="len" id="kem-ct-len"></span></label>
+    <textarea id="kem-ct" rows="3" spellcheck="false" placeholder="hex"></textarea>
+  </div>
+  <div class="fld">
+    <label for="kem-ss"><span lang="vi">Khoá chung — K</span><span lang="en">Shared Secret — K</span>
+      <span class="len" id="kem-ss-len"></span></label>
+    <textarea id="kem-ss" rows="2" spellcheck="false" placeholder="hex"></textarea>
   </div>
 
-  <div class="step">
-    <h4><span lang="vi">Bước 3 — Bên nhận giải đóng gói</span><span lang="en">Step 3 — the receiver decapsulates</span></h4>
-    <p class="hint"><span lang="vi">Nếu <em>K′</em> trùng <em>K</em> thì hai bên đã có chung 32 byte bí mật mà không hề gửi nó qua đường truyền.</span><span lang="en">If <em>K′</em> equals <em>K</em>, both sides now hold the same 32 secret bytes, which were never sent across the wire.</span></p>
-    <button class="btn" id="kem-decaps" type="button" disabled><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span></button>
-    <button class="btn ghost" id="kem-tamper" type="button" disabled><span lang="vi">Lật 1 bit của ct rồi thử lại</span><span lang="en">Flip one bit of ct and retry</span></button>
-    <div id="kem-out3"></div>
+  <h4 class="grp"><span lang="vi">Giải đóng gói — bên nhận</span><span lang="en">Decapsulation — receiver</span></h4>
+  <p class="hint"><span lang="vi">Dùng <em>khoá bí mật</em> và <em>bản mã</em> ở trên. Bạn có thể sửa bản mã rồi chạy lại để thấy cơ chế từ chối ngầm.</span><span lang="en">Uses the <em>Private Key</em> and the <em>Ciphertext</em> above. Edit the ciphertext and run again to see implicit rejection.</span></p>
+  <button class="btn" id="kem-decaps" type="button"><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span></button>
+  <button class="btn ghost" id="kem-flip" type="button"><span lang="vi">Lật 1 bit của bản mã</span><span lang="en">Flip one bit of the ciphertext</span></button>
+  <div class="fld">
+    <label for="kem-ss2"><span lang="vi">Khoá tính lại — K′</span><span lang="en">Recovered Secret — K′</span>
+      <span class="len" id="kem-ss2-len"></span></label>
+    <textarea id="kem-ss2" rows="2" spellcheck="false" placeholder="hex"></textarea>
   </div>
+  <div id="kem-status"></div>
 </section>
 
 <section class="panel" id="panel-dsa" role="tabpanel" aria-labelledby="tab-dsa" hidden>
@@ -328,31 +366,102 @@ FIPS 204). This page lets you run both — key generation, encapsulation, signin
     <select id="dsa-set" data-i18n="neutral">
       <option>ML-DSA-44</option><option selected>ML-DSA-65</option><option>ML-DSA-87</option>
     </select>
-    <label for="dsa-msg"><span lang="vi">Thông điệp</span><span lang="en">Message</span></label>
-    <input type="text" id="dsa-msg" value="Hello post-quantum world"/>
-    <button class="btn ghost" id="dsa-reset" type="button"><span lang="vi">Làm lại từ đầu</span><span lang="en">Start over</span></button>
+    <button class="btn" id="dsa-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate keys</span></button>
+    <button class="btn ghost" id="dsa-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear</span></button>
   </div>
 
-  <div class="step">
-    <h4><span lang="vi">Bước 1 — Người ký sinh cặp khoá</span><span lang="en">Step 1 — the signer generates a key pair</span></h4>
-    <button class="btn" id="dsa-keygen" type="button"><span lang="vi">Sinh khoá</span><span lang="en">Generate</span></button>
-    <div id="dsa-out1"></div>
+  <h4 class="grp"><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
+  <div class="fld">
+    <label for="dsa-pk"><span lang="vi">Khoá công khai — pk</span><span lang="en">Public Key — pk</span>
+      <span class="len" id="dsa-pk-len"></span></label>
+    <textarea id="dsa-pk" rows="3" spellcheck="false" placeholder="hex"></textarea>
+  </div>
+  <div class="fld">
+    <label for="dsa-sk"><span lang="vi">Khoá bí mật — sk</span><span lang="en">Private Key — sk</span>
+      <span class="len" id="dsa-sk-len"></span></label>
+    <textarea id="dsa-sk" rows="3" spellcheck="false" placeholder="hex"></textarea>
   </div>
 
-  <div class="step">
-    <h4><span lang="vi">Bước 2 — Ký thông điệp</span><span lang="en">Step 2 — sign the message</span></h4>
-    <p class="hint"><span lang="vi">ML-DSA ký bằng cách thử rồi loại: mỗi lần thử sinh một chữ ký ứng viên, chỉ chữ ký nào đủ "nhỏ" mới được nhận. Số lần lặp hiện bên dưới.</span><span lang="en">ML-DSA signs by trial and rejection: each attempt makes a candidate signature, and only one small enough is accepted. The iteration count is shown below.</span></p>
-    <button class="btn" id="dsa-sign" type="button" disabled><span lang="vi">Ký</span><span lang="en">Sign</span></button>
-    <div id="dsa-out2"></div>
+  <h4 class="grp"><span lang="vi">Thông điệp</span><span lang="en">Message</span></h4>
+  <div class="ctrl">
+    <label for="dsa-enc"><span lang="vi">Dạng nhập</span><span lang="en">Input as</span></label>
+    <select id="dsa-enc">
+      <option value="text"><span lang="vi">văn bản</span><span lang="en">text</span></option>
+      <option value="hex" data-i18n="neutral">hex</option>
+    </select>
+    <label for="dsa-ctx"><span lang="vi">Ngữ cảnh (ctx, hex, ≤ 255 byte)</span><span lang="en">Context (ctx, hex, ≤ 255 bytes)</span></label>
+    <input type="text" id="dsa-ctx" placeholder="(trống / empty)"/>
+  </div>
+  <div class="fld">
+    <label for="dsa-msg"><span lang="vi">Nội dung</span><span lang="en">Content</span>
+      <span class="len" id="dsa-msg-len"></span></label>
+    <textarea id="dsa-msg" rows="2" spellcheck="false">Hello post-quantum world</textarea>
+  </div>
+  <div class="ctrl">
+    <label for="dsa-ph"><span lang="vi">Pre-hash</span><span lang="en">Pre-hash</span></label>
+    <select id="dsa-ph">
+      <option value="none"><span lang="vi">không — ML-DSA thuần</span><span lang="en">none — pure ML-DSA</span></option>
+      <option value="SHA2-256" data-i18n="neutral">SHA2-256</option>
+      <option value="SHA2-512" data-i18n="neutral">SHA2-512</option>
+      <option value="SHA3-256" data-i18n="neutral">SHA3-256</option>
+      <option value="SHA3-512" data-i18n="neutral">SHA3-512</option>
+      <option value="SHAKE-128" data-i18n="neutral">SHAKE-128</option>
+      <option value="SHAKE-256" data-i18n="neutral">SHAKE-256</option>
+    </select>
+  </div>
+  <div class="fld">
+    <label for="dsa-mp"><span lang="vi">M′ thực sự được ký (tính từ các ô trên)</span><span lang="en">M′ actually signed (computed from the fields above)</span>
+      <span class="len" id="dsa-mp-len"></span></label>
+    <textarea id="dsa-mp" rows="2" spellcheck="false" readonly></textarea>
   </div>
 
-  <div class="step">
-    <h4><span lang="vi">Bước 3 — Xác minh</span><span lang="en">Step 3 — verify</span></h4>
-    <button class="btn" id="dsa-verify" type="button" disabled><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
-    <button class="btn ghost" id="dsa-tamper" type="button" disabled><span lang="vi">Sửa thông điệp rồi xác minh lại</span><span lang="en">Alter the message and verify again</span></button>
-    <div id="dsa-out3"></div>
+  <h4 class="grp"><span lang="vi">Chữ ký</span><span lang="en">Signature</span></h4>
+  <button class="btn" id="dsa-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button>
+  <button class="btn" id="dsa-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
+  <button class="btn ghost" id="dsa-flip" type="button"><span lang="vi">Lật 1 bit của chữ ký</span><span lang="en">Flip one bit of the signature</span></button>
+  <div class="fld">
+    <label for="dsa-sig"><span lang="vi">Chữ ký</span><span lang="en">Signature</span>
+      <span class="len" id="dsa-sig-len"></span></label>
+    <textarea id="dsa-sig" rows="3" spellcheck="false" placeholder="hex"></textarea>
   </div>
+  <div id="dsa-status"></div>
 </section>
+
+<h2><span lang="vi">Các ô trên màn hình nghĩa là gì</span><span lang="en">What the fields on screen mean</span></h2>
+<p lang="vi">Mọi ô đều sửa được: bạn có thể dán khoá, bản mã hay chữ ký lấy từ nơi khác vào rồi chạy
+tiếp, chứ không bắt buộc đi theo đúng ba bước.</p>
+<p lang="en">Every field is editable: you can paste a key, a ciphertext or a signature from somewhere
+else and carry on, rather than being forced through a fixed three-step wizard.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Ô</span><span lang="en">Field</span></th>
+  <th><span lang="vi">Nghĩa</span><span lang="en">What it is</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral"><strong>Public Key</strong> · ek / pk</td>
+      <td><span lang="vi">Khoá công khai — đem gửi cho người khác. Bên gửi dùng nó để đóng gói; người xác minh dùng nó để kiểm chữ ký.</span><span lang="en">The public key — the one you hand out. A sender encapsulates to it; a verifier checks signatures against it.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Private Key</strong> · dk / sk</td>
+      <td><span lang="vi">Khoá bí mật — không bao giờ rời máy. Dùng để giải đóng gói hoặc để ký.</span><span lang="en">The secret key — it never leaves the machine. Used to decapsulate, or to sign.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Ciphertext</strong> · ct</td>
+      <td><span lang="vi">Thứ duy nhất đi trên đường truyền trong trao đổi khoá. Bản thân khoá chung không bao giờ được gửi.</span><span lang="en">The only thing that travels in a key exchange. The shared secret itself is never sent.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Shared Secret</strong> · K</td>
+      <td><span lang="vi">32 byte mà hai bên cùng có được. Thường được đưa tiếp vào một hàm dẫn xuất khoá để tạo khoá phiên.</span><span lang="en">The 32 bytes both sides end up with. In practice it is fed into a key-derivation function to make session keys.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Message</strong></td>
+      <td><span lang="vi">Nội dung cần ký. Nhập dạng văn bản hoặc dạng hex — hai dạng cho ra chuỗi byte khác nhau, nên chữ ký cũng khác.</span><span lang="en">The content being signed. Enter it as text or as hex — the two give different byte strings, hence different signatures.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Context</strong> · ctx</td>
+      <td><span lang="vi">Chuỗi tuỳ chọn tối đa 255 byte, do chuẩn đưa vào để một chữ ký ký trong bối cảnh này không dùng lại được ở bối cảnh khác. Ký với ctx nào thì phải xác minh với đúng ctx đó.</span><span lang="en">An optional string of up to 255 bytes, added by the standard so that a signature made in one setting cannot be replayed in another. Verify with exactly the ctx you signed with.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Pre-hash</strong></td>
+      <td><span lang="vi">Chọn giữa <em>ML-DSA thuần</em> (ký thẳng thông điệp) và <em>HashML-DSA</em> (băm thông điệp trước, rồi ký giá trị băm). Dạng pre-hash có ích khi thông điệp rất lớn hoặc khi nó được băm ở một nơi khác.</span><span lang="en">Chooses between <em>pure ML-DSA</em> (sign the message itself) and <em>HashML-DSA</em> (hash the message first, then sign the digest). The pre-hash form helps when the message is huge, or when it is hashed somewhere else entirely.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>M′</strong></td>
+      <td><span lang="vi">Chuỗi byte thực sự được ký, do trang tự dựng từ ba ô trên. Đây là chỗ nhìn thấy rõ nhất khác biệt giữa hai dạng: thuần bắt đầu bằng <code>00</code>, pre-hash bắt đầu bằng <code>01</code> rồi tới mã định danh của hàm băm.</span><span lang="en">The byte string actually signed, assembled by the page from the three fields above. It is where the difference shows most plainly: the pure form starts with <code>00</code>, the pre-hash form starts with <code>01</code> followed by the hash function's identifier.</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Thử đổi một ký tự trong ngữ cảnh rồi bấm xác minh mà không ký lại — chữ ký bị từ chối
+ngay, dù thông điệp không đổi. Đó chính là tác dụng của ngữ cảnh.</p>
+<p lang="en">Change one character of the context and press verify without re-signing — the signature
+is rejected at once, even though the message is untouched. That is exactly what the context is for.</p>
 
 <h2><span lang="vi">Các con số nói lên điều gì</span><span lang="en">What the numbers are telling you</span></h2>
 <p lang="vi">Thứ đập vào mắt người làm phần cứng không phải tốc độ mà là <strong>kích thước</strong>.
@@ -456,8 +565,10 @@ library. Because it is hand-written, it has to be proved. I did three things:</p
   <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
 </div>
 </article>
+</main>
 
 <script src="assets/pqc-mlkem.js"></script>
+<script src="assets/pqc-sha2.js"></script>
 <script src="assets/pqc-mldsa.js"></script>
 <script src="assets/pqc-vectors.js"></script>
 <script>
@@ -465,54 +576,51 @@ library. Because it is hand-written, it has to be proved. I did three things:</p
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   function bi(vi, en) { return '<span lang="vi">' + vi + '</span><span lang="en">' + en + '</span>'; }
-  function hex(a, limit) {
-    var s = '', n = limit ? Math.min(limit, a.length) : a.length, i;
-    for (i = 0; i < n; i++) s += ('0' + a[i].toString(16)).slice(-2);
-    return s + (n < a.length ? ' …' : '');
+  function hex(a) { var s = '', i; for (i = 0; i < a.length; i++) s += ('0' + a[i].toString(16)).slice(-2); return s; }
+  function unhex(s) {
+    s = (s || '').replace(/[\s:]/g, '');
+    if (s.length % 2) throw new Error('odd');
+    if (s.length && !/^[0-9a-fA-F]+$/.test(s)) throw new Error('bad');
+    var a = new Uint8Array(s.length / 2), i;
+    for (i = 0; i < a.length; i++) a[i] = parseInt(s.substr(2 * i, 2), 16);
+    return a;
   }
   function num(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
-  function kv(rows) {
-    var h = '<dl class="kv">', i;
-    for (i = 0; i < rows.length; i++) h += '<dt>' + rows[i][0] + '</dt><dd>' + rows[i][1] + '</dd>';
-    return h + '</dl>';
+  function setLen(id, bytes) {
+    $(id).innerHTML = bytes == null ? '' :
+      '<span data-i18n="neutral">' + num(bytes) + ' B</span>';
   }
-  function box(label, bytes) {
-    return '<div style="margin-top:10px"><div style="font-size:.8em;color:var(--muted);font-weight:700">' +
-      label + '</div><div class="hexbox">' + hex(bytes, 96) + '</div></div>';
-  }
-  function ms(t) { return '<span data-i18n="neutral">' + t.toFixed(1) + ' ms</span>'; }
+  function note(id, cls, html) { $(id).innerHTML = '<span class="pill ' + cls + '">' + html + '</span>'; }
   function timed(fn) { var t0 = performance.now(); var r = fn(); return { r: r, t: performance.now() - t0 }; }
+  function ms(t) { return ' <span data-i18n="neutral">· ' + t.toFixed(1) + ' ms</span>'; }
+  function err(id, e) {
+    note(id, 'bad', bi('Lỗi: ', 'Error: ') + '<span data-i18n="neutral">' + (e && e.message ? e.message : e) + '</span>');
+  }
+  function badHex(id, what) {
+    note(id, 'bad', bi('Ô ' + what + ' không phải hex hợp lệ.', 'The ' + what + ' field is not valid hex.'));
+  }
 
   /* ---------- tự kiểm chứng ---------- */
-  async function sha256hex(bytes) {
-    var d = await crypto.subtle.digest('SHA-256', bytes.buffer ? bytes.slice().buffer : bytes);
-    return hex(new Uint8Array(d));
-  }
-  function fromHex(s) { var a = new Uint8Array(s.length / 2), i; for (i = 0; i < a.length; i++) a[i] = parseInt(s.substr(2 * i, 2), 16); return a; }
-
+  async function sha256hex(b) { return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', b.slice().buffer))); }
   $('bt-selftest').addEventListener('click', async function () {
-    var st = $('st-status'), det = $('st-detail'), lines = [], pass = 0, total = 0, V = window.PQC_VECTORS;
-    st.className = 'pill wait';
-    st.innerHTML = bi('đang chạy…', 'running…');
+    var st = $('st-status'), det = $('st-detail'), lines = [], pass = 0, total = 0, V = window.PQC_VECTORS, name;
+    st.className = 'pill wait'; st.innerHTML = bi('đang chạy…', 'running…');
     det.hidden = false; det.textContent = '';
     await new Promise(function (r) { setTimeout(r, 30); });
     if (!window.crypto || !crypto.subtle) {
-      st.className = 'pill bad';
-      st.innerHTML = bi('trình duyệt không có crypto.subtle', 'this browser has no crypto.subtle');
-      return;
+      st.className = 'pill bad'; st.innerHTML = bi('trình duyệt không có crypto.subtle', 'this browser has no crypto.subtle'); return;
     }
-    function chk(label, got, want) { total++; if (got === want) { pass++; } else { lines.push('FAIL ' + label + '\n  got  ' + got + '\n  want ' + want); } }
-    var name;
+    function chk(l, g, w) { total++; if (g === w) pass++; else lines.push('FAIL ' + l + '\n  got  ' + g + '\n  want ' + w); }
     for (name in V.mlkem) {
       var v = V.mlkem[name], p = MLKEM.PARAMS[name];
-      var kg = MLKEM.keygenInternal(p, fromHex(v.d), fromHex(v.z));
-      var en = MLKEM.encapsInternal(p, kg.ek, fromHex(v.m));
+      var kg = MLKEM.keygenInternal(p, unhex(v.d), unhex(v.z));
+      var en = MLKEM.encapsInternal(p, kg.ek, unhex(v.m));
       var de = MLKEM.decapsInternal(p, kg.dk, en.ct);
       chk(name + ' ek', await sha256hex(kg.ek), v.ek_sha256);
       chk(name + ' dk', await sha256hex(kg.dk), v.dk_sha256);
       chk(name + ' ct', await sha256hex(en.ct), v.ct_sha256);
       chk(name + ' K', hex(en.K), v.K);
-      chk(name + ' K′', hex(de.K), v.K);
+      chk(name + " K'", hex(de.K), v.K);
       var bad = Uint8Array.from(en.ct); bad[0] ^= 1;
       chk(name + ' implicit-reject', hex(MLKEM.decapsInternal(p, kg.dk, bad).K), v.K_implicit_reject);
       lines.push(name + ': ek=' + kg.ek.length + ' dk=' + kg.dk.length + ' ct=' + en.ct.length + ' OK');
@@ -521,16 +629,16 @@ library. Because it is hand-written, it has to be proved. I did three things:</p
     }
     for (name in V.mldsa) {
       var w = V.mldsa[name], q = MLDSA.PARAMS[name];
-      var kg2 = MLDSA.keygenInternal(q, fromHex(w.xi));
-      var Mp = MLDSA.prepare(fromHex(w.msg));
-      var sg = MLDSA.signInternal(q, kg2.sk, Mp, fromHex(w.rnd));
-      chk(name + ' pk', await sha256hex(kg2.pk), w.pk_sha256);
-      chk(name + ' sk', await sha256hex(kg2.sk), w.sk_sha256);
+      var k2 = MLDSA.keygenInternal(q, unhex(w.xi));
+      var Mp = MLDSA.prepare(unhex(w.msg));
+      var sg = MLDSA.signInternal(q, k2.sk, Mp, unhex(w.rnd));
+      chk(name + ' pk', await sha256hex(k2.pk), w.pk_sha256);
+      chk(name + ' sk', await sha256hex(k2.sk), w.sk_sha256);
       chk(name + ' sig', await sha256hex(sg.sig), w.sig_sha256);
-      chk(name + ' verify', String(MLDSA.verifyInternal(q, kg2.pk, Mp, sg.sig)), 'true');
+      chk(name + ' verify', String(MLDSA.verifyInternal(q, k2.pk, Mp, sg.sig)), 'true');
       var bs = Uint8Array.from(sg.sig); bs[0] ^= 1;
-      chk(name + ' tampered', String(MLDSA.verifyInternal(q, kg2.pk, Mp, bs)), 'false');
-      lines.push(name + ': pk=' + kg2.pk.length + ' sk=' + kg2.sk.length + ' sig=' + sg.sig.length + ' OK');
+      chk(name + ' tampered', String(MLDSA.verifyInternal(q, k2.pk, Mp, bs)), 'false');
+      lines.push(name + ': pk=' + k2.pk.length + ' sk=' + k2.sk.length + ' sig=' + sg.sig.length + ' OK');
       det.textContent = lines.join('\n');
       await new Promise(function (r) { setTimeout(r, 0); });
     }
@@ -541,111 +649,144 @@ library. Because it is hand-written, it has to be proved. I did three things:</p
   });
 
   /* ---------- tabs ---------- */
-  function selectTab(which) {
-    var kem = which === 'kem';
+  function selectTab(kem) {
     $('tab-kem').setAttribute('aria-selected', String(kem));
     $('tab-dsa').setAttribute('aria-selected', String(!kem));
     $('panel-kem').hidden = !kem; $('panel-dsa').hidden = kem;
   }
-  $('tab-kem').addEventListener('click', function () { selectTab('kem'); });
-  $('tab-dsa').addEventListener('click', function () { selectTab('dsa'); });
+  $('tab-kem').addEventListener('click', function () { selectTab(true); });
+  $('tab-dsa').addEventListener('click', function () { selectTab(false); });
 
   /* ---------- ML-KEM ---------- */
-  var K = {};
-  function kemReset() {
-    K = {}; ['kem-out1', 'kem-out2', 'kem-out3'].forEach(function (i) { $(i).innerHTML = ''; });
-    $('kem-encaps').disabled = true; $('kem-decaps').disabled = true; $('kem-tamper').disabled = true;
+  function kemLens() {
+    [['kem-ek', 'kem-ek-len'], ['kem-dk', 'kem-dk-len'], ['kem-ct', 'kem-ct-len'],
+     ['kem-ss', 'kem-ss-len'], ['kem-ss2', 'kem-ss2-len']].forEach(function (p) {
+      try { setLen(p[1], unhex($(p[0]).value).length); } catch (e) { setLen(p[1], null); }
+    });
   }
-  $('kem-reset').addEventListener('click', kemReset);
-  $('kem-set').addEventListener('change', kemReset);
+  ['kem-ek', 'kem-dk', 'kem-ct', 'kem-ss', 'kem-ss2'].forEach(function (i) {
+    $(i).addEventListener('input', kemLens);
+  });
+  $('kem-clear').addEventListener('click', function () {
+    ['kem-ek', 'kem-dk', 'kem-ct', 'kem-ss', 'kem-ss2'].forEach(function (i) { $(i).value = ''; });
+    $('kem-status').innerHTML = ''; kemLens();
+  });
   $('kem-keygen').addEventListener('click', function () {
-    var name = $('kem-set').value, o = timed(function () { return MLKEM.keygen(name); });
-    K.name = name; K.ek = o.r.ek; K.dk = o.r.dk;
-    $('kem-out1').innerHTML = kv([
-      [bi('khoá công khai ek', 'public key ek'), '<span data-i18n="neutral">' + num(K.ek.length) + ' byte</span>'],
-      [bi('khoá bí mật dk', 'secret key dk'), '<span data-i18n="neutral">' + num(K.dk.length) + ' byte</span>'],
-      [bi('thời gian', 'time'), ms(o.t)]
-    ]) + box(bi('ek (96 byte đầu)', 'ek (first 96 bytes)'), K.ek);
-    $('kem-encaps').disabled = false; $('kem-decaps').disabled = true; $('kem-tamper').disabled = true;
-    $('kem-out2').innerHTML = ''; $('kem-out3').innerHTML = '';
+    try {
+      var o = timed(function () { return MLKEM.keygen($('kem-set').value); });
+      $('kem-ek').value = hex(o.r.ek); $('kem-dk').value = hex(o.r.dk);
+      $('kem-ct').value = ''; $('kem-ss').value = ''; $('kem-ss2').value = '';
+      kemLens();
+      note('kem-status', 'ok', bi('Đã sinh cặp khoá', 'Key pair generated') + ms(o.t));
+    } catch (e) { err('kem-status', e); }
   });
   $('kem-encaps').addEventListener('click', function () {
-    var o = timed(function () { return MLKEM.encaps(K.name, K.ek); });
-    K.ct = o.r.ct; K.K = o.r.K;
-    $('kem-out2').innerHTML = kv([
-      [bi('bản mã ct', 'ciphertext ct'), '<span data-i18n="neutral">' + num(K.ct.length) + ' byte</span>'],
-      [bi('khoá chung K', 'shared key K'), '<span data-i18n="neutral">' + hex(K.K) + '</span>'],
-      [bi('thời gian', 'time'), ms(o.t)]
-    ]) + box(bi('ct (96 byte đầu)', 'ct (first 96 bytes)'), K.ct);
-    $('kem-decaps').disabled = false; $('kem-tamper').disabled = false; $('kem-out3').innerHTML = '';
+    var ek;
+    try { ek = unhex($('kem-ek').value); } catch (e) { return badHex('kem-status', bi('khoá công khai', 'Public Key')); }
+    try {
+      var o = timed(function () { return MLKEM.encaps($('kem-set').value, ek); });
+      $('kem-ct').value = hex(o.r.ct); $('kem-ss').value = hex(o.r.K); $('kem-ss2').value = '';
+      kemLens();
+      note('kem-status', 'ok', bi('Đã đóng gói', 'Encapsulated') + ms(o.t));
+    } catch (e) { err('kem-status', e); }
   });
-  function kemShowDecaps(ct, tampered) {
-    var o = timed(function () { return MLKEM.decaps(K.name, K.dk, ct); });
-    var same = hex(o.r.K) === hex(K.K);
-    $('kem-out3').innerHTML = kv([
-      [bi('khoá K′ tính lại', 'recovered key K′'), '<span data-i18n="neutral">' + hex(o.r.K) + '</span>'],
-      [bi('so với K', 'against K'), same
-        ? '<span class="pill ok">' + bi('TRÙNG — hai bên có chung bí mật', 'MATCH — both sides share the secret') + '</span>'
-        : '<span class="pill bad">' + bi('KHÁC', 'DIFFERENT') + '</span>'],
-      [bi('thời gian', 'time'), ms(o.t)]
-    ]) + (tampered ? '<p class="hint" style="margin-top:10px">' +
-        bi('Chú ý: không hề có thông báo lỗi nào. Bên nhận trả về một khoá trông bình thường nhưng khác — đó là <em>từ chối ngầm</em> của FIPS 203.',
-           'Note: there was no error message at all. The receiver returned an ordinary-looking but different key — that is FIPS 203\'s <em>implicit rejection</em>.') + '</p>' : '');
-  }
-  $('kem-decaps').addEventListener('click', function () { kemShowDecaps(K.ct, false); });
-  $('kem-tamper').addEventListener('click', function () {
-    var bad = Uint8Array.from(K.ct); bad[0] ^= 1; kemShowDecaps(bad, true);
+  $('kem-decaps').addEventListener('click', function () {
+    var dk, ct;
+    try { dk = unhex($('kem-dk').value); } catch (e) { return badHex('kem-status', bi('khoá bí mật', 'Private Key')); }
+    try { ct = unhex($('kem-ct').value); } catch (e) { return badHex('kem-status', bi('bản mã', 'Ciphertext')); }
+    try {
+      var o = timed(function () { return MLKEM.decaps($('kem-set').value, dk, ct); });
+      $('kem-ss2').value = hex(o.r.K); kemLens();
+      var same = $('kem-ss').value.trim().toLowerCase() === hex(o.r.K);
+      if (!$('kem-ss').value.trim())
+        note('kem-status', 'wait', bi('Đã tính K′ (chưa có K để so)', 'K′ computed (no K to compare)') + ms(o.t));
+      else if (same)
+        note('kem-status', 'ok', bi('K′ TRÙNG K — hai bên có chung bí mật', 'K′ MATCHES K — both sides share the secret') + ms(o.t));
+      else
+        note('kem-status', 'bad', bi('K′ KHÁC K — bản mã đã bị sửa. Chú ý: không có lỗi nào được báo, đó là <em>từ chối ngầm</em> của FIPS 203.',
+          'K′ DIFFERS from K — the ciphertext was altered. Note that no error was raised: this is FIPS 203 <em>implicit rejection</em>.') + ms(o.t));
+    } catch (e) { err('kem-status', e); }
+  });
+  $('kem-flip').addEventListener('click', function () {
+    var ct;
+    try { ct = unhex($('kem-ct').value); } catch (e) { return badHex('kem-status', bi('bản mã', 'Ciphertext')); }
+    if (!ct.length) return;
+    ct[0] ^= 1; $('kem-ct').value = hex(ct); kemLens();
+    note('kem-status', 'wait', bi('Đã lật bit đầu của bản mã — bấm Giải đóng gói', 'First bit of the ciphertext flipped — press Decapsulate'));
   });
 
   /* ---------- ML-DSA ---------- */
-  var S = {};
-  function dsaReset() {
-    S = {}; ['dsa-out1', 'dsa-out2', 'dsa-out3'].forEach(function (i) { $(i).innerHTML = ''; });
-    $('dsa-sign').disabled = true; $('dsa-verify').disabled = true; $('dsa-tamper').disabled = true;
+  function msgBytes() {
+    var v = $('dsa-msg').value;
+    return $('dsa-enc').value === 'hex' ? unhex(v) : new TextEncoder().encode(v);
   }
-  $('dsa-reset').addEventListener('click', dsaReset);
-  $('dsa-set').addEventListener('change', dsaReset);
+  function ctxBytes() { return unhex($('dsa-ctx').value); }
+  function phValue() { var v = $('dsa-ph').value; return v === 'none' ? null : v; }
+  function refreshMp() {
+    try {
+      var Mp = MLDSA.prepare(msgBytes(), ctxBytes(), phValue());
+      $('dsa-mp').value = hex(Mp); setLen('dsa-mp-len', Mp.length);
+      setLen('dsa-msg-len', msgBytes().length);
+      return Mp;
+    } catch (e) { $('dsa-mp').value = ''; setLen('dsa-mp-len', null); return null; }
+  }
+  ['dsa-msg', 'dsa-ctx'].forEach(function (i) { $(i).addEventListener('input', refreshMp); });
+  ['dsa-enc', 'dsa-ph'].forEach(function (i) { $(i).addEventListener('change', refreshMp); });
+  function dsaLens() {
+    [['dsa-pk', 'dsa-pk-len'], ['dsa-sk', 'dsa-sk-len'], ['dsa-sig', 'dsa-sig-len']].forEach(function (p) {
+      try { setLen(p[1], unhex($(p[0]).value).length); } catch (e) { setLen(p[1], null); }
+    });
+  }
+  ['dsa-pk', 'dsa-sk', 'dsa-sig'].forEach(function (i) { $(i).addEventListener('input', dsaLens); });
+  $('dsa-clear').addEventListener('click', function () {
+    ['dsa-pk', 'dsa-sk', 'dsa-sig'].forEach(function (i) { $(i).value = ''; });
+    $('dsa-status').innerHTML = ''; dsaLens(); refreshMp();
+  });
   $('dsa-keygen').addEventListener('click', function () {
-    var name = $('dsa-set').value, o = timed(function () { return MLDSA.keygen(name); });
-    S.name = name; S.pk = o.r.pk; S.sk = o.r.sk;
-    $('dsa-out1').innerHTML = kv([
-      [bi('khoá công khai pk', 'public key pk'), '<span data-i18n="neutral">' + num(S.pk.length) + ' byte</span>'],
-      [bi('khoá bí mật sk', 'secret key sk'), '<span data-i18n="neutral">' + num(S.sk.length) + ' byte</span>'],
-      [bi('thời gian', 'time'), ms(o.t)]
-    ]) + box(bi('pk (96 byte đầu)', 'pk (first 96 bytes)'), S.pk);
-    $('dsa-sign').disabled = false; $('dsa-verify').disabled = true; $('dsa-tamper').disabled = true;
-    $('dsa-out2').innerHTML = ''; $('dsa-out3').innerHTML = '';
+    try {
+      var o = timed(function () { return MLDSA.keygen($('dsa-set').value); });
+      $('dsa-pk').value = hex(o.r.pk); $('dsa-sk').value = hex(o.r.sk); $('dsa-sig').value = '';
+      dsaLens();
+      note('dsa-status', 'ok', bi('Đã sinh cặp khoá', 'Key pair generated') + ms(o.t));
+    } catch (e) { err('dsa-status', e); }
   });
   $('dsa-sign').addEventListener('click', function () {
-    S.msg = new TextEncoder().encode($('dsa-msg').value);
-    var o = timed(function () { return MLDSA.sign(S.name, S.sk, S.msg); });
-    S.sig = o.r.sig;
-    $('dsa-out2').innerHTML = kv([
-      [bi('chữ ký', 'signature'), '<span data-i18n="neutral">' + num(S.sig.length) + ' byte</span>'],
-      [bi('số lần thử', 'attempts'), '<span data-i18n="neutral">' + o.r.iterations + '</span>'],
-      [bi('thời gian', 'time'), ms(o.t)]
-    ]) + box(bi('chữ ký (96 byte đầu)', 'signature (first 96 bytes)'), S.sig);
-    $('dsa-verify').disabled = false; $('dsa-tamper').disabled = false; $('dsa-out3').innerHTML = '';
+    var sk, msg, ctx;
+    try { sk = unhex($('dsa-sk').value); } catch (e) { return badHex('dsa-status', bi('khoá bí mật', 'Private Key')); }
+    try { msg = msgBytes(); } catch (e) { return badHex('dsa-status', bi('thông điệp', 'Message')); }
+    try { ctx = ctxBytes(); } catch (e) { return badHex('dsa-status', bi('ngữ cảnh', 'Context')); }
+    try {
+      var o = timed(function () { return MLDSA.sign($('dsa-set').value, sk, msg, ctx, phValue()); });
+      $('dsa-sig').value = hex(o.r.sig); dsaLens(); refreshMp();
+      note('dsa-status', 'ok', bi('Đã ký sau ', 'Signed after ') +
+        '<span data-i18n="neutral">' + o.r.iterations + '</span>' + bi(' lần thử', ' attempts') + ms(o.t));
+    } catch (e) { err('dsa-status', e); }
   });
-  function dsaShowVerify(msg, altered) {
-    var o = timed(function () { return MLDSA.verify(S.name, S.pk, msg, S.sig); });
-    $('dsa-out3').innerHTML = kv([
-      [bi('kết quả', 'result'), o.r
-        ? '<span class="pill ok">' + bi('HỢP LỆ', 'VALID') + '</span>'
-        : '<span class="pill bad">' + bi('BỊ TỪ CHỐI', 'REJECTED') + '</span>'],
-      [bi('thời gian', 'time'), ms(o.t)]
-    ]) + (altered ? '<p class="hint" style="margin-top:10px">' +
-        bi('Thông điệp đã bị thêm một ký tự, nên chữ ký cũ không còn khớp.',
-           'One character was appended to the message, so the old signature no longer matches.') + '</p>' : '');
-  }
-  $('dsa-verify').addEventListener('click', function () { dsaShowVerify(S.msg, false); });
-  $('dsa-tamper').addEventListener('click', function () {
-    var m = new Uint8Array(S.msg.length + 1); m.set(S.msg); m[S.msg.length] = 33;
-    dsaShowVerify(m, true);
+  $('dsa-verify').addEventListener('click', function () {
+    var pk, sig, msg, ctx;
+    try { pk = unhex($('dsa-pk').value); } catch (e) { return badHex('dsa-status', bi('khoá công khai', 'Public Key')); }
+    try { sig = unhex($('dsa-sig').value); } catch (e) { return badHex('dsa-status', bi('chữ ký', 'Signature')); }
+    try { msg = msgBytes(); } catch (e) { return badHex('dsa-status', bi('thông điệp', 'Message')); }
+    try { ctx = ctxBytes(); } catch (e) { return badHex('dsa-status', bi('ngữ cảnh', 'Context')); }
+    try {
+      var o = timed(function () { return MLDSA.verify($('dsa-set').value, pk, msg, sig, ctx, phValue()); });
+      if (o.r) note('dsa-status', 'ok', bi('Chữ ký HỢP LỆ', 'Signature VALID') + ms(o.t));
+      else note('dsa-status', 'bad', bi('Chữ ký BỊ TỪ CHỐI — khoá, thông điệp, ngữ cảnh hoặc pre-hash không khớp lúc ký.',
+        'Signature REJECTED — the key, message, context or pre-hash does not match what was signed.') + ms(o.t));
+    } catch (e) { err('dsa-status', e); }
   });
+  $('dsa-flip').addEventListener('click', function () {
+    var sig;
+    try { sig = unhex($('dsa-sig').value); } catch (e) { return badHex('dsa-status', bi('chữ ký', 'Signature')); }
+    if (!sig.length) return;
+    sig[0] ^= 1; $('dsa-sig').value = hex(sig); dsaLens();
+    note('dsa-status', 'wait', bi('Đã lật bit đầu của chữ ký — bấm Xác minh', 'First bit of the signature flipped — press Verify'));
+  });
+
+  kemLens(); dsaLens(); refreshMp();
 })();
 </script>
-</main>
+
 
 <footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
 
