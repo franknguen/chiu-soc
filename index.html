@@ -244,7 +244,7 @@ footer a:hover{ text-decoration:underline; }
       <ul>
         <li><a href="index.html"><span lang="vi">Trang chủ</span><span lang="en">Home</span></a></li>
         <li><a href="#s1"><span lang="vi">Thiết kế vi mạch</span><span lang="en">Chip design</span></a></li>
-        <li><a href="#s2"><span lang="vi">AI &amp; Lượng tử</span><span lang="en">AI &amp; Quantum</span></a></li>
+        <li><a href="#s2"><span lang="vi">Mật mã &amp; AI</span><span lang="en">Cryptography &amp; AI</span></a></li>
         <li><a href="#s3"><span lang="vi">Nghĩ suy cùng đất nước</span><span lang="en">Thoughts on our country</span></a></li>
         <li><a href="#s4"><span lang="vi">Vần thơ &amp; Giai điệu</span><span lang="en">Poetry &amp; Melody</span></a></li>
         <li><a href="#about"><span lang="vi">Giới thiệu</span><span lang="en">About</span></a></li>
@@ -277,10 +277,11 @@ footer a:hover{ text-decoration:underline; }
        Beyond the technical work there is also <em>Thoughts on our country</em> and
        <em>Poetry &amp; Melody</em> — room for the things outside the chip.</p>
     <div class="hero-chips">
+      <span class="chip"><span lang="vi">Mật mã hậu lượng tử (PQC)</span><span lang="en">Post-quantum cryptography (PQC)</span></span>
+      <span class="chip"><span lang="vi">Thuật toán mật mã</span><span lang="en">Cryptographic algorithms</span></span>
       <span class="chip">SoC / ASIC</span>
       <span class="chip">RTL Design / Verification</span>
       <span class="chip"><span lang="vi">Mã sửa lỗi</span><span lang="en">Error correction code</span></span>
-      <span class="chip"><span lang="vi">Thuật toán mật mã</span><span lang="en">Cryptographic algorithms</span></span>
       <span class="chip"><span lang="vi">EDA mã nguồn mở</span><span lang="en">Open-source EDA</span></span>
     </div>
   </div>
@@ -291,7 +292,7 @@ footer a:hover{ text-decoration:underline; }
   <h2><span lang="vi">Mục lục</span><span lang="en">Contents</span></h2>
   <ul>
     <li><a href="#s1"><span lang="vi">Thiết kế vi mạch — RTL, SoC &amp; Công cụ</span><span lang="en">Chip design — RTL, SoC &amp; tools</span></a></li>
-    <li><a href="#s2"><span lang="vi">AI, Lượng tử &amp; Mã sửa lỗi</span><span lang="en">AI, Quantum &amp; Error-Correcting Codes</span></a></li>
+    <li><a href="#s2"><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">Post-Quantum Cryptography, AI &amp; Error-Correcting Codes</span></a></li>
     <li><a href="#s3"><span lang="vi">Nghĩ suy cùng đất nước</span><span lang="en">Thoughts on our country</span></a></li>
     <li><a href="#s4"><span lang="vi">Vần thơ &amp; Giai điệu</span><span lang="en">Poetry &amp; Melody</span></a></li>
   </ul>
@@ -374,13 +375,17 @@ footer a:hover{ text-decoration:underline; }
 
 <!-- ===== Section 2 ===== -->
 <section class="entry" id="s2">
-<h2><span lang="vi">AI, Lượng tử &amp; Mã sửa lỗi</span><span lang="en">AI, Quantum &amp; Error-Correcting Codes</span></h2>
-<p lang="vi">Ba hướng tôi đang theo và tự học: tác tử AI trong công việc thiết kế, máy tính lượng tử,
-   và mã sửa lỗi. Nhìn thì xa nhau, nhưng cả ba gặp nhau ở một chỗ: đều phải sống chung với sai sót,
-   và đều cần một cách kiểm chứng đáng tin.</p>
-<p lang="en">Three directions I follow and keep learning: AI agents in design work, quantum computing,
-   and error-correcting codes. They look unrelated, but all three meet at the same place — each must
-   live with errors, and each needs a way of checking that can be trusted.</p>
+<h2><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">Post-Quantum Cryptography, AI &amp; Error-Correcting Codes</span></h2>
+<p lang="vi"><strong>Ưu tiên số một của tôi lúc này là mật mã hậu lượng tử</strong> — những thuật
+   toán sẽ thay thế RSA và đường cong elliptic khi máy tính lượng tử đủ lớn, cùng việc đưa chúng
+   xuống phần cứng. Quanh đó là hai hướng đi kèm: tác tử AI trong công việc thiết kế, và mã sửa lỗi.
+   Ba thứ nhìn thì xa nhau, nhưng gặp nhau ở một chỗ — đều phải sống chung với sai sót, và đều cần
+   một cách kiểm chứng đáng tin.</p>
+<p lang="en"><strong>My first priority right now is post-quantum cryptography</strong> — the
+   algorithms that will replace RSA and elliptic curves once quantum computers grow large enough,
+   and the work of getting them into hardware. Around it sit two companion directions: AI agents in
+   design work, and error-correcting codes. The three look unrelated, but they meet at the same
+   place — each must live with errors, and each needs a way of checking that can be trusted.</p>
 <ol class="art-list">
   <li class="art-item">
     <div class="art-title">
@@ -582,19 +587,23 @@ footer a:hover{ text-decoration:underline; }
   <div>
     <h3><span lang="vi">Chủ đề quan tâm</span><span lang="en">Interests</span></h3>
     <ul lang="vi">
+      <li><strong>Mật mã hậu lượng tử (PQC) — ưu tiên số một</strong>: ML-KEM, ML-DSA, và chuyện
+          sinh, lưu, huỷ khoá cho thiết bị biên</li>
+      <li>Thuật toán mật mã trên phần cứng: khối tăng tốc, kiểm chứng bằng vector chuẩn của NIST</li>
       <li>Thiết kế RTL và kiến trúc SoC: bus AMBA (APB/AHB/AXI), tích hợp IP, điều khiển bộ nhớ</li>
       <li>Chạy mô hình AI trên thiết bị biên: lượng tử hoá, khối tăng tốc, ngân sách bộ nhớ và điện năng</li>
       <li>Máy tính lượng tử và mã sửa lỗi lượng tử — nền nghiên cứu cũ, nay soi lại vào ECC phần cứng</li>
-      <li>Mật mã hậu lượng tử (PQC) và chuyện sinh, lưu, huỷ khoá cho thiết bị biên</li>
       <li>Mã sửa lỗi trên phần cứng — từ mã khối cổ điển (Hamming, BCH, Reed–Solomon) tới mã hiện đại
           (LDPC, Polar) và bộ giải mã kênh dựa trên AI</li>
       <li>Verification và ASIC flow mã nguồn mở (Yosys, OpenLane 2, Sky130)</li>
     </ul>
     <ul lang="en">
+      <li><strong>Post-quantum cryptography (PQC) — first priority</strong>: ML-KEM, ML-DSA, and
+          generating, storing and destroying keys on edge devices</li>
+      <li>Cryptographic algorithms in hardware: accelerator blocks, verification against NIST's own vectors</li>
       <li>RTL design and SoC architecture: AMBA buses (APB/AHB/AXI), IP integration, memory controllers</li>
       <li>Running AI models on edge devices: quantisation, accelerator blocks, memory and power budgets</li>
       <li>Quantum computing and quantum error correction — my research background, now read back into hardware ECC</li>
-      <li>Post-quantum cryptography (PQC), and generating, storing and destroying keys on edge devices</li>
       <li>Error-correcting codes in hardware — from the classical block codes (Hamming, BCH,
           Reed–Solomon) to the modern ones (LDPC, polar) and AI-based channel decoders</li>
       <li>Verification and the open-source ASIC flow (Yosys, OpenLane 2, Sky130)</li>
