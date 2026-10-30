@@ -79,6 +79,15 @@ p{ margin:0 0 14px; }
 ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
 li{ margin-bottom:8px; }
 
+/* khung video nhúng */
+.video{
+  position:relative; width:100%; aspect-ratio:16/9;
+  border-radius:14px; overflow:hidden; margin:22px 0 10px;
+  background:#0f1b2d; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.video-cap{ font-size:.82em; color:var(--muted); margin:0 0 6px; text-align:center; }
+
 /* tranh bìa gốc + chỗ nghe */
 .cover{ margin:0 0 10px; }
 .cover img{
@@ -171,6 +180,17 @@ than anything he wrote.</p>
   </figcaption>
 </figure>
 
+<div class="video">
+  <iframe src="https://www.youtube-nocookie.com/embed/8oRb-8DO3PM"
+          title="Chuyen ngay xua - 2026 arrangement" loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+<p class="video-cap">
+  <span lang="vi">"Chuyện ngày xưa" — sáng tác Trúc Phương · bản phối mới 2026, kênh <em>Quán Nửa Đêm</em>.</span>
+  <span lang="en">"Chuyện ngày xưa" — composed by Trúc Phương · a 2026 arrangement, channel <em>Quán Nửa Đêm</em>.</span>
+</p>
+
 <div class="listen">
   <span class="listen-label"><span lang="vi">Nghe ở đâu</span><span lang="en">Where to listen</span></span>
   <a href="https://www.youtube.com/results?search_query=Chuy%E1%BB%87n+ng%C3%A0y+x%C6%B0a+Tr%C3%BAc+Ph%C6%B0%C6%A1ng" target="_blank" rel="noopener">
@@ -180,12 +200,12 @@ than anything he wrote.</p>
   <a href="https://www.youtube.com/watch?v=8oRb-8DO3PM" target="_blank" rel="noopener">
     <span lang="vi">Bản phối 2026 tôi đang nghe</span><span lang="en">The 2026 arrangement I listen to</span></a>
   <p class="note">
-    <span lang="vi">Hai đường dẫn đầu là <em>tìm kiếm</em>, không phải một video cụ thể — nên chúng
-      không chết khi một bản tải lên nào đó bị gỡ. Đường dẫn thứ ba có thể hỏng một ngày nào đó;
-      lúc ấy bài viết này vẫn còn nguyên.</span>
-    <span lang="en">The first two are <em>searches</em>, not one particular video — so they survive
-      when some upload is taken down. The third may break one day; this article will still be here
-      when it does.</span>
+    <span lang="vi">Nếu khung phát ở trên không hiện (trình duyệt chặn, hoặc bản tải lên đó bị gỡ),
+      hai đường dẫn đầu là <em>tìm kiếm</em> chứ không trỏ vào một video cụ thể — nên chúng vẫn
+      dùng được.</span>
+    <span lang="en">If the player above does not appear (a browser blocking it, or that upload taken
+      down), the first two links are <em>searches</em> rather than one particular video, so they
+      keep working.</span>
   </p>
 </div>
 
@@ -295,27 +315,25 @@ do with circuits, and yet I keep thinking the two share one thing: both are abou
 something for a long time, adjusting it patiently, and knowing that the best part usually comes
 from what you are willing to take away rather than what you add.</p>
 
-<h2><span lang="vi">Ghi chú kỹ thuật: vì sao trang này không nhúng video</span><span lang="en">A technical note: why this page embeds no video</span></h2>
-<p lang="vi">Ban đầu trang này nhúng thẳng một video. Tôi bỏ đi vì hai lý do. <strong>Thứ nhất là
-bản quyền</strong>: bài hát vẫn trong thời hạn bảo hộ, và bản ghi âm là một quyền riêng nữa thuộc
-về người thực hiện — tải về rồi tự đăng lại không phải là cách lách, đó đúng là điều mà luật cấm.
-<strong>Thứ hai là tuổi thọ của đường dẫn</strong>: một video có thể bị gỡ bất cứ lúc nào, và khi
-đó khung nhúng chỉ còn là một ô đen ghi "video không khả dụng".</p>
-<p lang="en">This page used to embed a video directly. I removed it for two reasons.
-<strong>First, copyright</strong>: the song is still protected, and the recording carries a second
-right belonging to whoever made it — downloading and re-posting it is not a loophole, it is the
-thing the law actually forbids. <strong>Second, link rot</strong>: a video can be taken down at any
-moment, and the embed then becomes a black box reading "video unavailable".</p>
-<p lang="vi">Cách sửa không phải là đi tìm chỗ lưu khác, mà là <strong>đổi cái gì là nội dung
-chính</strong>. Phần thuộc về trang này — bài viết, tranh minh hoạ ở trên — nằm ngay trong kho mã
-nguồn, không ai gỡ được. Mọi bản thu chỉ còn là chỗ tham chiếu, và tham chiếu thì trỏ bằng
-<em>tìm kiếm</em> chứ không trỏ vào một video duy nhất. Đây đúng là nguyên tắc tôi vẫn dùng khi
-thiết kế: đừng để một điểm hỏng duy nhất làm chết cả hệ thống.</p>
-<p lang="en">The fix is not to find somewhere else to host it, but to <strong>change what counts as
-the content</strong>. What belongs to this page — the writing, the drawing above — sits in the
-repository itself, where nobody can remove it. Any recording is only a reference, and a reference
-should point through a <em>search</em> rather than at one single video. This is the same principle
-I work by in design: never let one point of failure take the whole system down.</p>
+<h2><span lang="vi">Ghi chú kỹ thuật: nghe bằng cách nào</span><span lang="en">A technical note: how you listen here</span></h2>
+<p lang="vi">Khung phát ở trên là trình phát của YouTube được nhúng vào, không phải tệp nhạc nằm
+trên trang này. Khác biệt ấy quan trọng: nhúng là <strong>kênh phát hành có bản quyền</strong> —
+lượt xem vẫn được tính, quảng cáo vẫn chạy, tiền vẫn về đúng chỗ. Tải bản ghi về rồi tự đăng lại
+thì ngược hẳn, và đó là việc tôi không làm.</p>
+<p lang="en">The player above is YouTube's own, embedded — not an audio file sitting on this site.
+That distinction matters: embedding is the <strong>licensed distribution channel</strong>, so the
+view still counts, the advertising still runs, and the money still goes where it should. Downloading
+a recording and re-posting it is the opposite of that, and is something I do not do.</p>
+<p lang="vi">Cái giá của việc nhúng là <strong>tuổi thọ đường dẫn</strong>: nếu bản tải lên kia bị
+gỡ, khung phát sẽ chỉ còn một ô trống. Tôi chấp nhận cái giá đó, nhưng không để nó kéo theo cả bài
+viết — nên phần thuộc về trang này (bài viết, tranh minh hoạ phía trên) nằm ngay trong kho mã nguồn,
+và hai đường dẫn dự phòng trỏ bằng <em>tìm kiếm</em> chứ không trỏ vào một video duy nhất. Khung
+phát hỏng thì trang vẫn đọc được, vẫn nghe được.</p>
+<p lang="en">The price of embedding is <strong>link rot</strong>: if that upload is taken down, the
+player becomes an empty box. I accept that price, but I do not let it take the article with it —
+what belongs to this page (the writing, the drawing above) lives in the repository itself, and the
+two fallback links point through a <em>search</em> rather than at one single video. If the player
+breaks, the page still reads, and you can still listen.</p>
 
 <h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
 <ul class="refs">

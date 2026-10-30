@@ -9,7 +9,8 @@ Không framework, không bước build: mở `index.html` là chạy.
 ```
 index.html          trang chủ: giới thiệu + mục lục + 4 chuyên mục (#s1..#s4) + #about
 posts/              mỗi bài là một file HTML độc lập, cũng song ngữ
-posts/assets/       ảnh, hình SVG tự vẽ, PDF bài giảng, và mã JavaScript của máy tính PQC
+posts/assets/       ảnh, hình SVG tự vẽ, PDF bài giảng, và mã JavaScript của hai máy tính PQC
+                    (ML-KEM / ML-DSA và SMAUG-T / HAETAE)
 ```
 
 Chuyên mục:
@@ -136,6 +137,47 @@ Nguyên tắc của mã:
 
 Giới hạn: mã viết để **học**, không để bảo vệ dữ liệu thật — không chống tấn công kênh bên, thời
 gian chạy phụ thuộc dữ liệu, khoá nằm trong bộ nhớ JavaScript.
+
+## Máy tính KpqC — `posts/kpqc-calculator.html`
+
+Trang anh em của máy tính PQC, cho hai thuật toán lattice mà cuộc thi KpqC của Hàn Quốc chọn năm 2025:
+**SMAUG-T** (trao đổi khoá; TiMER, SMAUG-T128 / 192 / 256) và **HAETAE** (chữ ký; HAETAE-2 / 3 / 5).
+Cùng ba thẻ, cùng cách tương tác, cùng các ô và nút. Khác ở chỗ:
+
+- **Phiên bản được ghi rõ:** SMAUG-T mã tham chiếu 1.2.0 (đặc tả 260521), HAETAE mã tham chiếu 1.2.0
+  (đặc tả 260904, bộ lấy mẫu mới từ 260825). Đặc tả của cả hai đổi trong năm 2026; đổi phiên bản thì
+  phải sinh lại vector và chạy lại bộ kiểm thử.
+- **Nút "Nạp ví dụ KAT chính thức"** thay cho khoá mẫu RFC: điền đầu vào của mục count = 0 trong file KAT
+  của nhóm tác giả, rồi báo từng bước (khoá, bản mã / chữ ký) có trùng file đó không.
+- **Chỉ có khoá thô** (nhị phân / hex / Base64), nhận theo độ dài, vì hai thuật toán chưa có OID hay định
+  dạng file chuẩn. TiMER và SMAUG-T128 có khoá cùng kích thước: trang chọn mức đang mở và nói rõ. File
+  PEM / DER của ML-KEM / ML-DSA được nhận ra và chỉ sang trang máy tính PQC.
+- **SMAUG-T:** μ dài 16 byte với TiMER, 32 byte với các mức khác; khoá bí mật có mã 2 bit bằng 3 hoặc sai
+  trọng số Hamming bị từ chối trước khi giải đóng gói (mã tham chiếu C không kiểm hai điều này).
+- **HAETAE:** không có pre-hash; ô M′ = độ dài ngữ cảnh ‖ ngữ cảnh ‖ thông điệp; chữ ký sai được gọi
+  đúng tên lý do (sai độ dài, rANS, phần đệm, chuẩn, thử thách); số lần thử của mỗi lần ký được hiện ra.
+
+Các file (nạp theo thứ tự này; ba file đầu dùng chung với trang ML-KEM / ML-DSA):
+
+| file | nội dung | biến toàn cục |
+|---|---|---|
+| `assets/pqc-mlkem.js`, `pqc-sha2.js`, `pqc-mldsa.js`, `pqc-tools.js` | tầng Keccak, SHA-2, định dạng dữ liệu, đọc file khoá (để nhận ra file ML-KEM / ML-DSA) | `PQCHash`, `PQCSHA2`, `MLDSA`, `PQCTools` |
+| `assets/pqc-smaugt.js` | SMAUG-T: keygen / encaps / decaps, `skCheck`, `pkFromSk` | `SMAUGT` |
+| `assets/pqc-haetae.js` | HAETAE: keygen / sign / verify (lý do thất bại có tên), `pkFromSk` | `HAETAE` |
+| `assets/kpqc-tools.js` | kích thước, nhận dạng khoá thô theo độ dài, `pairCheck` | `KPQCTools` |
+| `assets/kpqc-vectors.js` | đầu vào + giá trị băm của mục KAT chính thức count = 0, vector seed cố định | `KPQC_VECTORS` |
+| `assets/kpqc-calc-ui.js` | giao diện ba thẻ, thông báo song ngữ, nút KAT, nút tự kiểm chứng | `KPQCCalc` (cửa cho kiểm thử tự động) |
+
+Kiểm chứng: nút "Chạy kiểm chứng" chạy 77 phép kiểm trong trình duyệt (tầng Keccak, mục KAT chính thức
+count = 0 và một seed cố định cho mỗi bộ tham số, chữ ký sai, bộ chuyển đổi). Ngoài repo: 453 phép so
+từng byte với cả 21 mục KAT chính thức (12 SMAUG-T, 9 HAETAE) và một mô hình tham chiếu; 71 phép kiểm
+giao diện bằng trình duyệt giả lập, soát hai ngôn ngữ sau mỗi cú bấm; 32 đột biến cố ý — 30 bị bắt, hai còn lại là hai giới hạn
+được ghi rõ: ngưỡng chuẩn B″ của bộ xác minh HAETAE không với tới được bằng chữ ký giải mã được, và 32 bit
+thấp nhất của bảng Gaussian 83 bit (sai ở đó chỉ đổi khoảng một mẫu trong 2^51). Mã HAETAE dùng `BigInt`
+(Chrome 67+, Firefox 68+, Safari 14+).
+
+Khi sửa trang này, giữ cùng quy tắc như máy tính PQC ở trên (chuỗi `bi()`, bộ ba `id`, bấm kiểm chứng phải ra
+toàn xanh).
 
 ## Thêm một bài mới
 

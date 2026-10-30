@@ -312,6 +312,11 @@
   /* state: 'match' | 'other' (khoá bí mật của cặp khác) | 'corrupt' (hỏng / không nhất quán) | 'missing'.
      rows: [id, true/false/null] theo thứ tự đã kiểm. Cùng thang kiểm như trang mẫu (getPublicKey(sk) rồi khứ hồi),
      thêm kiểm tra đầu vào FIPS 203, tr và t0 của ML-DSA (RFC 9881 C.4) và seed (chỉ để thông tin). */
+  function pctMessage(pk) {                     // thông điệp của phép thử khứ hồi: tất định theo pk
+    var pre = new TextEncoder().encode('pairwise consistency check|'), b = new Uint8Array(pre.length + pk.length);
+    b.set(pre); b.set(pk, pre.length);
+    return root.PQCHash.sha3_256(b);
+  }
   function pairCheck(name, pk, sk, seed) {
     var a = info(name), rows = [], bad = false, ok;
     if (!pk || !sk || pk.length !== a.pk || sk.length !== a.sk) { rows.push(['len', false]); return { state: 'missing', rows: rows }; }
@@ -334,7 +339,7 @@
     if (kem) {                                  // khứ hồi: đóng gói tới pk rồi giải bằng sk
       ok = false;
       if (ekOk && dkOk) {
-        var en = MLKEM.encapsInternal(P, pk, MLKEM.randomBytes(32));
+        var en = MLKEM.encapsInternal(P, pk, pctMessage(pk));
         ok = eq(en.K, MLKEM.decapsInternal(P, sk, en.ct).K);
       }
     } else {

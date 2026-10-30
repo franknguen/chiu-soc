@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Thử SMAUG-T và HAETAE ngay trên trình duyệt — ChiU·SoC"
+      data-title-en="Try SMAUG-T and HAETAE in your browser — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thử SMAUG-T và HAETAE ngay trên trình duyệt — ChiU·SoC</title>
+<meta name="description" content="Máy tính KpqC chạy hoàn toàn trong trình duyệt: SMAUG-T trao đổi khoá năm bước và HAETAE ký số có ngữ cảnh, bảy bộ tham số, khoá thô, kiểm tra cặp khoá, ví dụ KAT chính thức và nút tự kiểm chứng."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:22px 0 7px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+/* thư viện ảnh */
+.gallery{ display:grid; gap:16px; margin:22px 0 26px; }
+.gallery.two{ grid-template-columns:repeat(2,1fr); }
+@media(max-width:620px){ .gallery.two{ grid-template-columns:1fr; } }
+.gallery figure{ margin:0; }
+.gallery img{
+  display:block; width:100%; height:auto; border-radius:13px;
+  box-shadow:0 8px 24px rgba(15,27,45,.18); background:#e9eef5;
+}
+.gallery figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; line-height:1.55; }
+.diagram{ margin:22px 0 10px; }
+.diagram img{ display:block; width:100%; height:auto; border-radius:14px;
+  border:1px solid rgba(20,83,143,.14); background:#f7f9fc; }
+.diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; }
+
+/* ===== máy tính PQC ===== */
+.selftest{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  margin:20px 0 10px; padding:16px 18px; border-radius:14px;
+  background:rgba(42,157,143,.07); border:1px solid rgba(42,157,143,.28);
+}
+.st-note{ flex:1 1 260px; font-size:.84em; color:var(--muted); line-height:1.6; }
+.btn{
+  font:inherit; font-size:.88em; font-weight:700; cursor:pointer;
+  color:#fff; border:0; padding:9px 18px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.btn:disabled{ opacity:.5; cursor:default; }
+.btn.ghost{ background:none; color:var(--accent); border:1px solid rgba(20,83,143,.3); }
+.btn.sm{ font-size:.8em; padding:6px 13px; }
+.hexbox{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.78em; line-height:1.6; white-space:pre-wrap; word-break:break-all;
+  background:#0f1b2d; color:#9fd0c8; border-radius:10px;
+  padding:10px 12px; margin:8px 0 0; max-height:200px; overflow:auto;
+}
+.pill{ display:inline-block; font-size:.78em; font-weight:700; padding:3px 11px; border-radius:999px; }
+.pill.ok{ background:rgba(42,157,143,.16); color:#15695f; }
+.pill.bad{ background:rgba(190,30,45,.12); color:#9b1d28; }
+.pill.wait{ background:rgba(234,179,8,.16); color:#8a6100; }
+.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35);
+  padding:12px 16px; border-radius:12px; font-size:.9em; }
+
+.tabs{ display:flex; gap:8px; margin:26px 0 0; flex-wrap:wrap; }
+.tab{
+  font:inherit; font-size:.9em; font-weight:700; cursor:pointer;
+  background:#fff; color:var(--muted); border:1px solid rgba(20,83,143,.2);
+  padding:10px 18px; border-radius:12px 12px 0 0; border-bottom:0;
+}
+.tab[aria-selected="true"]{ color:var(--accent); box-shadow:inset 0 3px 0 var(--accent2); }
+.panel{
+  border:1px solid rgba(20,83,143,.2); border-radius:0 14px 14px 14px;
+  padding:18px 18px 14px; background:#fbfcfe; margin-bottom:26px;
+}
+.panel[hidden]{ display:none; }
+.bar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin:0 0 14px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.chips-l{ font-size:.74rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:6px; }
+.chip{ position:relative; display:inline-flex; }
+.chip input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+.chip > span{
+  font-size:.8em; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid rgba(20,83,143,.25); color:var(--accent); background:#fff; white-space:nowrap;
+}
+.chip input:checked + span{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input:focus-visible + span{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.chip input:disabled{ cursor:not-allowed; }
+.chip input:disabled + span{ color:#9aa4b1; background:#f3f5f8; border-style:dashed; text-decoration:line-through; }
+
+/* năm bước của trao đổi khoá: bên nhận lệch trái, bên gửi lệch phải */
+.flow{ display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:12px 0; }
+.actor{ font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.actor.recv{ grid-column:1/6; color:var(--accent); }
+.actor.send{ grid-column:6/11; color:#1f7f74; text-align:right; }
+.card{
+  min-width:0; background:#fff; border:1px solid rgba(20,83,143,.15); border-radius:14px;
+  padding:14px 16px 4px; transition:box-shadow .2s;
+}
+.card.recv{ grid-column:1/9; border-left:4px solid var(--accent); }
+.card.send{ grid-column:3/11; border-left:4px solid var(--accent2); }
+.card.full{ grid-column:1/-1; border-left:4px solid var(--accent); }
+.card.next{ box-shadow:0 0 0 3px rgba(42,157,143,.28); }
+.card h4{ display:flex; align-items:center; gap:10px; margin:0 0 10px; font-size:.98rem; }
+.no{
+  display:inline-grid; place-items:center; flex:none; width:26px; height:26px; border-radius:50%;
+  background:rgba(20,83,143,.1); color:var(--accent); font-size:.8rem; font-weight:800;
+}
+.card.done > h4 .no{ background:var(--accent2); color:#fff; }
+.who{ margin-left:auto; font-size:.7rem; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.arrow{ grid-column:1/-1; display:flex; align-items:center; gap:10px; font-size:.82em; color:var(--muted); }
+.arrow::before, .arrow::after{ content:""; flex:1 1 20px; border-top:2px dashed rgba(20,83,143,.22); }
+.arrow .lbl{
+  display:inline-flex; gap:8px; align-items:center; text-align:center;
+  padding:4px 12px; border-radius:999px; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.arrow.lit .lbl{ background:rgba(42,157,143,.12); color:#15695f; border-color:rgba(42,157,143,.35); }
+.arrow .no{ width:22px; height:22px; font-size:.72rem; }
+@media(max-width:640px){
+  .card.recv, .card.send{ grid-column:1/-1; }
+  .actor{ display:none; }
+}
+.row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 12px; }
+.chk{ display:inline-flex; gap:7px; align-items:center; font-size:.84em; font-weight:600; color:var(--muted); cursor:pointer; }
+.chk input{ accent-color:var(--accent2); width:16px; height:16px; }
+.hint{ font-size:.82em; color:var(--muted); margin:0 0 10px; line-height:1.6; }
+
+.fld{ margin:0 0 12px; }
+.fld-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:4px; }
+.fld-head label{ font-size:.82em; font-weight:700; color:var(--muted); }
+.cnt{ font-size:.74em; font-weight:700; font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap; }
+.cnt.ok{ color:#15695f; }
+.cnt.warn{ color:#8a6100; }
+.cnt.bad{ color:#9b1d28; }
+.fld textarea{
+  display:block; width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.74em; line-height:1.6; color:#27323f; background:#fbfcfe;
+  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:8px 10px;
+  resize:vertical; word-break:break-all; max-height:9.6em;
+}
+.fld.big textarea{ max-height:none; min-height:18em; }
+.fld textarea[readonly]{ background:#f1f4f8; color:#55606d; }
+.fld textarea:focus{ outline:2px solid rgba(42,157,143,.45); outline-offset:1px; }
+.tools{ display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; margin-top:5px; }
+.tools:empty{ display:none; }
+.tools button{
+  font:inherit; font-size:.7em; font-weight:700; cursor:pointer; padding:2px 9px;
+  border-radius:7px; border:1px solid rgba(20,83,143,.18); background:#fff; color:var(--accent);
+}
+.tools button:hover{ background:rgba(20,83,143,.07); }
+.tools button[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.tools .gap{ flex:1 1 8px; }
+.tools .flash{ font-size:.72em; font-weight:700; color:#15695f; }
+
+.result{
+  grid-column:1/-1; margin:8px 0 4px; padding:11px 14px; border-radius:12px;
+  font-size:.9em; line-height:1.6; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.result.ok{ background:rgba(42,157,143,.1); border-color:rgba(42,157,143,.38); color:#11574f; }
+.result.bad{ background:rgba(190,30,45,.06); border-color:rgba(190,30,45,.3); color:#8c1a24; }
+.result.info{ color:#2d3748; }
+.result .sub{ display:block; font-size:.9em; color:var(--muted); margin-top:2px; }
+.result .ic{ font-weight:800; margin-right:6px; }
+.pairline{ font-size:.84em; margin:2px 0 12px; padding:9px 12px; border-radius:10px; background:#f6f8fb; }
+.pairline:empty{ display:none; }
+.pairline.ok{ background:rgba(42,157,143,.09); color:#11574f; }
+.pairline.bad{ background:rgba(190,30,45,.06); color:#8c1a24; }
+.pairline summary{ cursor:pointer; font-size:.92em; color:var(--muted); margin-top:3px; }
+.pairline ul{ list-style:none; padding:0; margin:6px 0 2px; }
+.pairline li{ margin:0 0 3px; color:#2d3748; }
+.pairline li b{ display:inline-block; width:1.4em; }
+.ph-note{ font-size:.82em; color:#8a6100; margin:6px 0 0; }
+.ph-note:empty{ display:none; }
+details.pem{ margin:0 0 12px; font-size:.84em; }
+details.pem summary{ cursor:pointer; color:var(--accent); font-weight:700; }
+details.pem pre{ max-height:190px; font-size:.78em; margin:6px 0 0; }
+#file-in{ display:none; }
+
+/* PDF đọc ngay trên trang (ẩn thanh công cụ của trình xem) */
+.pdfview{ margin:20px 0 10px; }
+.pdfview iframe{
+  display:block; width:100%; height:clamp(380px, 74vh, 700px);
+  border:1px solid rgba(20,83,143,.18); border-radius:14px; background:#f7f9fc;
+}
+.pdfview-note{
+  display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
+  margin:10px 0 26px; font-size:.83em; color:var(--muted); line-height:1.6;
+}
+.pdfview-note a{
+  font-weight:700; color:var(--accent); text-decoration:none;
+  padding:5px 14px; border-radius:999px; background:rgba(20,83,143,.08);
+}
+.pdfview-note a:hover{ background:rgba(20,83,143,.15); }
+.pdfview-note .meta-note{ flex:1 1 240px; margin:0; }
+
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.7;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:8px 12px; text-align:left; vertical-align:top; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px;
+}
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">Thử SMAUG-T và HAETAE ngay trên trình duyệt</span><span lang="en">Try SMAUG-T and HAETAE in your browser</span></h1>
+<div class="meta"><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi · 31/10/2026 · Frank Nguyen</span><span lang="en">PQC, AI &amp; ECC · 31 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Song song với NIST, Hàn Quốc tổ chức cuộc thi mật mã hậu lượng tử của riêng mình,
+<strong>KpqC</strong>, và chọn ra bốn thuật toán vào đầu năm 2025. Hai thuật toán dựa trên lattice trong số
+đó là <strong>SMAUG-T</strong> (trao đổi khoá) và <strong>HAETAE</strong> (chữ ký số) — họ hàng gần của
+ML-KEM và ML-DSA nhưng đưa ra những lựa chọn thiết kế khác. Trang này cho bạn chạy thử cả hai, với đúng cách
+tương tác của <a href="pqc-calculator.html">máy tính ML-KEM / ML-DSA</a>, <em>hoàn toàn trong máy bạn</em>.</p>
+<p class="lede" lang="en">Alongside NIST, South Korea ran its own post-quantum competition,
+<strong>KpqC</strong>, and selected four algorithms in early 2025. The two lattice-based ones among them
+are <strong>SMAUG-T</strong> (key exchange) and <strong>HAETAE</strong> (digital signatures) — close
+relatives of ML-KEM and ML-DSA that make different design choices. This page lets you run both, with the
+same interaction as the <a href="pqc-calculator.html">ML-KEM / ML-DSA calculator</a>, <em>entirely on your
+own machine</em>.</p>
+
+<noscript>
+  <p class="nojs"><span lang="vi">Phần tính toán cần JavaScript. Phần giải thích bên dưới vẫn đọc được bình thường.</span><span lang="en">The calculator needs JavaScript. The explanations below read fine without it.</span></p>
+</noscript>
+
+<div class="selftest">
+  <button class="btn" id="bt-selftest" type="button"><span lang="vi">Chạy kiểm chứng</span><span lang="en">Run the self-test</span></button>
+  <span id="st-status" class="pill wait"><span lang="vi">chưa chạy</span><span lang="en">not run yet</span></span>
+  <span class="st-note">
+    <span lang="vi">Chạy lại bảy bộ tham số và so với mục KAT chính thức của nhóm tác giả (file kết quả
+      biết trước đi kèm mã tham chiếu), cùng các vector seed cố định lấy từ một mô hình tham chiếu đã khớp KAT.
+      Bạn tự thấy bằng chứng, không phải tin lời tôi.</span>
+    <span lang="en">Replays all seven parameter sets and compares them with the authors' official KAT entries
+      (the known-answer files shipped with the reference code), plus fixed-seed vectors from a reference model
+      that matches those KATs. You see the evidence rather than take my word.</span>
+  </span>
+</div>
+<div id="st-detail" class="hexbox" hidden></div>
+
+<input type="file" id="file-in" aria-hidden="true" tabindex="-1"/>
+
+<div class="tabs" role="tablist">
+  <button class="tab" id="tab-kem" type="button" role="tab" aria-selected="true" aria-controls="panel-kem">
+    <span lang="vi">Trao đổi khoá · SMAUG-T</span><span lang="en">Key exchange · SMAUG-T</span></button>
+  <button class="tab" id="tab-dsa" type="button" role="tab" aria-selected="false" aria-controls="panel-dsa">
+    <span lang="vi">Ký &amp; xác minh · HAETAE</span><span lang="en">Sign &amp; verify · HAETAE</span></button>
+  <button class="tab" id="tab-cvt" type="button" role="tab" aria-selected="false" aria-controls="panel-cvt">
+    <span lang="vi">Chuyển đổi dữ liệu</span><span lang="en">Data converter</span></button>
+</div>
+
+<!-- ================================================================ SMAUG-T -->
+<section class="panel" id="panel-kem" role="tabpanel" aria-labelledby="tab-kem">
+  <div class="bar">
+    <div class="chips" role="radiogroup" aria-labelledby="kem-set-l">
+      <span class="chips-l" id="kem-set-l"><span lang="vi">Mức an toàn</span><span lang="en">Security level</span></span>
+      <label class="chip"><input type="radio" name="kem-set" value="TiMER"/><span>TiMER</span></label>
+      <label class="chip"><input type="radio" name="kem-set" value="SMAUG-T128" checked/><span>SMAUG-T128</span></label>
+      <label class="chip"><input type="radio" name="kem-set" value="SMAUG-T192"/><span>SMAUG-T192</span></label>
+      <label class="chip"><input type="radio" name="kem-set" value="SMAUG-T256"/><span>SMAUG-T256</span></label>
+    </div>
+    <button class="btn ghost sm" id="kem-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear all</span></button>
+  </div>
+
+  <div class="flow">
+    <div class="actor recv"><span lang="vi">Bên nhận — giữ cặp khoá</span><span lang="en">Receiver — owns the key pair</span></div>
+    <div class="actor send"><span lang="vi">Bên gửi — chỉ biết khoá công khai</span><span lang="en">Sender — knows only the public key</span></div>
+
+    <section class="card recv" id="kem-c1">
+      <h4><span class="no">1</span><span lang="vi">Sinh cặp khoá</span><span lang="en">Key pair</span>
+        <span class="who"><span lang="vi">bên nhận</span><span lang="en">receiver</span></span></h4>
+      <div class="row">
+        <button class="btn" id="kem-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+        <label class="chk"><input type="checkbox" id="kem-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+        <button class="btn ghost sm" id="kem-kat" type="button"><span lang="vi">Nạp ví dụ KAT chính thức</span><span lang="en">Load the official KAT example</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-seed">Seed · d ‖ seed</label><span class="cnt" id="kem-seed-cnt"></span></div>
+        <textarea id="kem-seed" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-seed-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-pk"><span lang="vi">Khoá công khai — pk</span><span lang="en">Public key — pk</span></label><span class="cnt" id="kem-pk-cnt"></span></div>
+        <textarea id="kem-pk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-pk-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-sk"><span lang="vi">Khoá bí mật — sk</span><span lang="en">Private key — sk</span></label><span class="cnt" id="kem-sk-cnt"></span></div>
+        <textarea id="kem-sk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-sk-tools"></div>
+      </div>
+      <div class="pairline" id="kem-pair" role="status"></div>
+    </section>
+
+    <div class="arrow" id="kem-a2"><span class="lbl"><span class="no">2</span><span id="kem-a2-txt"></span><span aria-hidden="true">→</span></span></div>
+
+    <section class="card send" id="kem-c3">
+      <h4><span class="no">3</span><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span>
+        <span class="who"><span lang="vi">bên gửi</span><span lang="en">sender</span></span></h4>
+      <div class="row">
+        <button class="btn" id="kem-encaps" type="button"><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span></button>
+        <label class="chk"><input type="checkbox" id="kem-m-rnd" checked/><span lang="vi">μ ngẫu nhiên</span><span lang="en">random μ</span></label>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-m"><span lang="vi">Thông điệp ngẫu nhiên — μ</span><span lang="en">Random message — μ</span></label><span class="cnt" id="kem-m-cnt"></span></div>
+        <textarea id="kem-m" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-m-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-ct"><span lang="vi">Bản mã — ct</span><span lang="en">Ciphertext — ct</span></label><span class="cnt" id="kem-ct-cnt"></span></div>
+        <textarea id="kem-ct" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-ct-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-ss"><span lang="vi">Khoá chung của bên gửi — K</span><span lang="en">Shared secret, sender — K</span></label><span class="cnt" id="kem-ss-cnt"></span></div>
+        <textarea id="kem-ss" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-ss-tools"></div>
+      </div>
+      <p class="hint"><span lang="vi">Bản mã được gửi cho bên nhận. Khoá chung ở lại bên gửi và không bao giờ đi trên đường truyền: bên nhận tự tính lại nó.</span><span lang="en">The ciphertext goes to the receiver. The shared secret stays with the sender and never travels: the receiver recomputes it.</span></p>
+    </section>
+
+    <div class="arrow" id="kem-a4"><span class="lbl"><span aria-hidden="true">←</span><span class="no">4</span><span id="kem-a4-txt"></span></span></div>
+
+    <section class="card recv" id="kem-c5">
+      <h4><span class="no">5</span><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span>
+        <span class="who"><span lang="vi">bên nhận</span><span lang="en">receiver</span></span></h4>
+      <div class="row">
+        <button class="btn" id="kem-decaps" type="button"><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span></button>
+        <button class="btn ghost sm" id="kem-flip" type="button"><span lang="vi">Lật 1 bit của bản mã</span><span lang="en">Flip one ciphertext bit</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-ss2"><span lang="vi">Khoá chung của bên nhận — K′</span><span lang="en">Shared secret, receiver — K′</span></label><span class="cnt" id="kem-ss2-cnt"></span></div>
+        <textarea id="kem-ss2" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-ss2-tools"></div>
+      </div>
+    </section>
+
+    <div class="result info" id="kem-result" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ================================================================ HAETAE -->
+<section class="panel" id="panel-dsa" role="tabpanel" aria-labelledby="tab-dsa" hidden>
+  <div class="bar">
+    <div class="chips" role="radiogroup" aria-labelledby="dsa-set-l">
+      <span class="chips-l" id="dsa-set-l"><span lang="vi">Mức an toàn</span><span lang="en">Security level</span></span>
+      <label class="chip"><input type="radio" name="dsa-set" value="HAETAE-2" checked/><span>HAETAE-2</span></label>
+      <label class="chip"><input type="radio" name="dsa-set" value="HAETAE-3"/><span>HAETAE-3</span></label>
+      <label class="chip"><input type="radio" name="dsa-set" value="HAETAE-5"/><span>HAETAE-5</span></label>
+    </div>
+    <button class="btn ghost sm" id="dsa-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear all</span></button>
+  </div>
+
+  <div class="flow">
+    <section class="card full" id="dsa-c1">
+      <h4><span class="no">1</span><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
+      <div class="row">
+        <button class="btn" id="dsa-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+        <label class="chk"><input type="checkbox" id="dsa-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+        <button class="btn ghost sm" id="dsa-kat" type="button"><span lang="vi">Nạp ví dụ KAT chính thức</span><span lang="en">Load the official KAT example</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-seed">Seed</label><span class="cnt" id="dsa-seed-cnt"></span></div>
+        <textarea id="dsa-seed" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-seed-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-pk"><span lang="vi">Khoá kiểm tra (công khai) — vk</span><span lang="en">Verification key (public) — vk</span></label><span class="cnt" id="dsa-pk-cnt"></span></div>
+        <textarea id="dsa-pk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-pk-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-sk"><span lang="vi">Khoá bí mật — sk</span><span lang="en">Private key — sk</span></label><span class="cnt" id="dsa-sk-cnt"></span></div>
+        <textarea id="dsa-sk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-sk-tools"></div>
+      </div>
+      <div class="pairline" id="dsa-pair" role="status"></div>
+    </section>
+
+    <section class="card full" id="dsa-c2">
+      <h4><span class="no">2</span><span lang="vi">Thông điệp</span><span lang="en">Message</span></h4>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-msg"><span lang="vi">Thông điệp cần ký</span><span lang="en">Message to sign</span></label><span class="cnt" id="dsa-msg-cnt"></span></div>
+        <textarea id="dsa-msg" rows="2" spellcheck="false" autocomplete="off">Hello post-quantum world</textarea>
+        <div class="tools" id="dsa-msg-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-ctx"><span lang="vi">Ngữ cảnh — tuỳ chọn, tối đa 255 byte</span><span lang="en">Context — optional, up to 255 bytes</span></label><span class="cnt" id="dsa-ctx-cnt"></span></div>
+        <textarea id="dsa-ctx" rows="1" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-ctx-tools"></div>
+      </div>
+      <p class="hint"><span lang="vi">HAETAE không có chế độ pre-hash: thông điệp luôn được băm cùng khoá kiểm tra, theo đúng một cách.</span><span lang="en">HAETAE has no pre-hash mode: the message is always hashed together with the verification key, in exactly one way.</span></p>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-mp"><span lang="vi">M′ — độ dài ngữ cảnh ‖ ngữ cảnh ‖ thông điệp</span><span lang="en">M′ — context length ‖ context ‖ message</span></label><span class="cnt" id="dsa-mp-cnt"></span></div>
+        <textarea id="dsa-mp" rows="2" spellcheck="false" readonly></textarea>
+        <div class="tools" id="dsa-mp-tools"></div>
+      </div>
+    </section>
+
+    <section class="card full" id="dsa-c3">
+      <h4><span class="no">3</span><span lang="vi">Chữ ký</span><span lang="en">Signature</span></h4>
+      <div class="row">
+        <button class="btn" id="dsa-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button>
+        <button class="btn" id="dsa-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
+        <label class="chk"><input type="checkbox" id="dsa-rnd-rnd" checked/><span lang="vi">rnd ngẫu nhiên</span><span lang="en">random rnd</span></label>
+        <button class="btn ghost sm" id="dsa-rnd0" type="button"><span lang="vi">rnd = 0 (ký tất định)</span><span lang="en">rnd = 0 (deterministic)</span></button>
+        <button class="btn ghost sm" id="dsa-flip" type="button"><span lang="vi">Lật 1 bit của chữ ký</span><span lang="en">Flip one signature bit</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-rnd"><span lang="vi">Bí mật ngẫu nhiên của lần ký — rnd</span><span lang="en">Per-signature randomness — rnd</span></label><span class="cnt" id="dsa-rnd-cnt"></span></div>
+        <textarea id="dsa-rnd" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-rnd-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-sig"><span lang="vi">Chữ ký</span><span lang="en">Signature</span></label><span class="cnt" id="dsa-sig-cnt"></span></div>
+        <textarea id="dsa-sig" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-sig-tools"></div>
+      </div>
+    </section>
+
+    <div class="result info" id="dsa-result" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ================================================================ bộ chuyển đổi -->
+<section class="panel" id="panel-cvt" role="tabpanel" aria-labelledby="tab-cvt" hidden>
+  <p class="hint"><span lang="vi">Khoá và chữ ký lấy từ nơi khác thường không ở dạng hex: có khi là mảng C trong mã nguồn tham chiếu, mảng Java, hay Base64 trong một file cấu hình. Dán vào đây để đổi qua lại; mỗi ô của hai thẻ kia cũng có sẵn nút đổi định dạng.</span><span lang="en">Keys and signatures copied from elsewhere are often not hex: a C array in reference source code, a Java array, Base64 in a config file. Paste them here to convert; every field in the other two tabs has the same format buttons.</span></p>
+  <div class="chips" role="radiogroup" aria-labelledby="cvt-in-l">
+    <span class="chips-l" id="cvt-in-l"><span lang="vi">Đầu vào</span><span lang="en">Input</span></span>
+    <label class="chip"><input type="radio" name="cvt-in" value="auto" checked/><span><span lang="vi">Tự nhận (hex / mảng C / Java / thập phân)</span><span lang="en">Auto (hex / C / Java / decimal array)</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-in" value="base64"/><span>Base64</span></label>
+    <label class="chip"><input type="radio" name="cvt-in" value="text"/><span><span lang="vi">Văn bản (UTF-8)</span><span lang="en">Text (UTF-8)</span></span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="cvt-in"><span lang="vi">Dữ liệu vào</span><span lang="en">Input data</span></label><span class="cnt" id="cvt-in-cnt"></span></div>
+    <textarea id="cvt-in" rows="4" spellcheck="false" autocomplete="off">{ 0x4B, 0x70, 0x71, 0x43, -1, 127 }</textarea>
+    <div class="tools" id="cvt-in-tools"></div>
+  </div>
+  <div class="chips" role="radiogroup" aria-labelledby="cvt-out-l">
+    <span class="chips-l" id="cvt-out-l"><span lang="vi">Đầu ra</span><span lang="en">Output</span></span>
+    <label class="chip"><input type="radio" name="cvt-out" value="hex" checked/><span>Hex</span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="HEX"/><span><span lang="vi">Hex hoa</span><span lang="en">Hex upper</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="spaced"/><span><span lang="vi">Hex cách</span><span lang="en">Hex spaced</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="colon"/><span><span lang="vi">Hex hai chấm</span><span lang="en">Hex colon</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="c"/><span><span lang="vi">Mảng C</span><span lang="en">C array</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="java"/><span><span lang="vi">Mảng Java</span><span lang="en">Java array</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="base64"/><span>Base64</span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="text"/><span><span lang="vi">Văn bản</span><span lang="en">Text</span></span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="cvt-out"><span lang="vi">Kết quả</span><span lang="en">Result</span></label><span class="cnt" id="cvt-out-cnt"></span></div>
+    <textarea id="cvt-out" rows="4" spellcheck="false" readonly></textarea>
+    <div class="tools" id="cvt-out-tools"></div>
+  </div>
+  <div class="row"><button class="btn ghost sm" id="cvt-use" type="button"><span lang="vi">Dùng kết quả làm đầu vào</span><span lang="en">Use the result as input</span></button></div>
+  <div class="result info" id="cvt-result" role="status" aria-live="polite"></div>
+</section>
+
+<h2><span lang="vi">KpqC là gì</span><span lang="en">What KpqC is</span></h2>
+<p lang="vi">KpqC (Korean Post-Quantum Cryptography) là cuộc thi do nhóm nghiên cứu KpqC của Hàn Quốc tổ chức
+từ cuối năm 2021, theo cách NIST đã làm. Đầu năm 2025 cuộc thi chọn bốn thuật toán: <strong>NTRU+</strong> và
+<strong>SMAUG-T</strong> cho trao đổi khoá, <strong>HAETAE</strong> và <strong>AIMer</strong> cho chữ ký. Được
+chọn chưa có nghĩa là đã thành chuẩn: theo trang chính thức của hai thuật toán, sau vòng cuối nhóm tác giả
+được bổ sung người để soạn tài liệu Tiêu chuẩn Hàn Quốc (KS). Đặc tả vẫn còn thay đổi — chính vì thế trang
+này ghi rõ phiên bản nó hiện thực.</p>
+<p lang="en">KpqC (Korean Post-Quantum Cryptography) is a competition run by South Korea's KpqC research group
+from late 2021, in the way NIST did it. In early 2025 it selected four algorithms: <strong>NTRU+</strong> and
+<strong>SMAUG-T</strong> for key exchange, <strong>HAETAE</strong> and <strong>AIMer</strong> for signatures.
+Selected does not yet mean standardised: according to the two algorithms' official pages, after the final
+round the teams were joined by new members to write the Korean Standard (KS) documentation. The
+specifications are still moving — which is exactly why this page states the version it implements.</p>
+
+<h2><span lang="vi">Các ô trên màn hình nghĩa là gì</span><span lang="en">What the fields on screen mean</span></h2>
+<p lang="vi">Mọi ô đều sửa được: dán khoá, bản mã hay chữ ký lấy từ nơi khác (hex, Base64, mảng C hay mảng
+Java) rồi chạy tiếp từ giữa chừng. Bộ đếm cạnh mỗi ô cho biết số byte đang có trên số byte cần.</p>
+<p lang="en">Every field is editable: paste a key, a ciphertext or a signature from somewhere else (hex,
+Base64, a C or Java array) and carry on from the middle. The counter beside each field shows how many bytes
+it holds out of how many are needed.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Ô</span><span lang="en">Field</span></th>
+  <th><span lang="vi">Nghĩa</span><span lang="en">What it is</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral"><strong>Seed</strong> · d ‖ seed</td>
+      <td><span lang="vi">SMAUG-T: 64 byte — 32 byte <code>d</code> chỉ dùng cho từ chối ngầm, rồi 32 byte sinh ra cặp khoá, đúng thứ tự mà mã tham chiếu rút từ bộ sinh ngẫu nhiên. HAETAE: 32 byte. Bỏ dấu "seed ngẫu nhiên" và gõ seed cố định thì lần nào cũng ra cùng cặp khoá.</span><span lang="en">SMAUG-T: 64 bytes — 32 bytes of <code>d</code>, used only for implicit rejection, then 32 bytes that generate the key pair, in the order the reference code draws them from its random generator. HAETAE: 32 bytes. Untick "random seed" and type a fixed one to get the same key pair every time.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>pk / vk</strong> · <strong>sk</strong></td>
+      <td><span lang="vi">Khoá công khai (HAETAE gọi là khoá kiểm tra vk) và khoá bí mật. Ở cả hai thuật toán, khoá bí mật chứa sẵn một bản khoá công khai bên trong.</span><span lang="en">The public key (HAETAE calls it the verification key vk) and the private key. In both algorithms the private key carries a copy of the public key inside it.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>μ</strong></td>
+      <td><span lang="vi">Thông điệp ngẫu nhiên bên gửi chọn cho một lần đóng gói: 32 byte, riêng TiMER chỉ 16 byte. Cùng pk và cùng μ thì luôn ra cùng bản mã.</span><span lang="en">The random message the sender picks for one encapsulation: 32 bytes, only 16 for TiMER. The same pk and the same μ always give the same ciphertext.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>ct</strong> · <strong>K / K′</strong></td>
+      <td><span lang="vi">Bản mã — thứ duy nhất đi trên đường truyền — và khoá chung 32 byte mỗi bên tự tính.</span><span lang="en">The ciphertext — the only thing that travels — and the 32-byte shared secret each side computes for itself.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Message</strong> · <strong>Context</strong> · <strong>M′</strong></td>
+      <td><span lang="vi">Thông điệp cần ký và chuỗi ngữ cảnh tuỳ chọn. M′ là thứ thực sự được băm cùng khoá kiểm tra: một byte độ dài ngữ cảnh, ngữ cảnh, rồi thông điệp. So với ML-DSA thì thiếu byte <code>00</code> / <code>01</code> ở đầu — HAETAE không có chế độ pre-hash nên không cần phân biệt.</span><span lang="en">The message to sign and an optional context string. M′ is what is actually hashed with the verification key: one byte of context length, the context, then the message. Compared with ML-DSA the leading <code>00</code> / <code>01</code> byte is missing — HAETAE has no pre-hash mode, so there is nothing to tell apart.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>rnd</strong></td>
+      <td><span lang="vi">32 byte ngẫu nhiên trộn vào mỗi lần ký. Đặt rnd = 0 thì ký tất định: cùng khoá, cùng thông điệp, cùng chữ ký.</span><span lang="en">32 random bytes mixed into every signature. Set rnd = 0 for deterministic signing: same key, same message, same signature.</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2><span lang="vi">SMAUG-T khác ML-KEM ở đâu</span><span lang="en">How SMAUG-T differs from ML-KEM</span></h2>
+<ul lang="vi">
+  <li><strong>Hai bài toán thay vì một.</strong> Khoá công khai dựa trên MLWE (cộng nhiễu nhỏ, như ML-KEM),
+      nhưng bản mã dựa trên MLWR: thay vì cộng nhiễu, bên gửi <em>làm tròn</em> kết quả xuống một modulus nhỏ
+      hơn. Phần bị làm tròn mất đi chính là nhiễu — không cần sinh thêm.</li>
+  <li><strong>Mọi modulus là luỹ thừa của 2.</strong> q = 1024 hoặc 2048, p = 256 hoặc 512. Rút gọn modulo chỉ
+      là cắt bit và làm tròn chỉ là dịch phải. Cái giá: q − 1 không chia hết cho 512 nên không có NTT, phép nhân
+      đa thức phải làm cách khác.</li>
+  <li><strong>Khoá bí mật thưa.</strong> Mỗi đa thức của khoá bí mật chỉ có đúng h<sub>s</sub> hệ số khác 0
+      (bằng ±1), còn lại là 0, nên phép nhân với nó chỉ là cộng / trừ vài chục bản dịch vòng. Khoá bí mật cũng
+      nhỏ hơn nhiều: mỗi hệ số chỉ cần 2 bit.</li>
+  <li><strong>Từ chối ngầm dùng lại hàm băm G</strong>: khi bản mã sai, khoá trả về là G(d ‖ H(ct)), không có hàm
+      J riêng như ML-KEM.</li>
+  <li><strong>TiMER</strong> là biến thể nhỏ nhất: thông điệp 128 bit được mã bằng một mã sửa lỗi D2 nên bản mã
+      ngắn hơn SMAUG-T128 64 byte, đổi lại tỉ lệ giải mã sai cao hơn.</li>
+</ul>
+<ul lang="en">
+  <li><strong>Two problems instead of one.</strong> The public key rests on MLWE (add small noise, as ML-KEM
+      does), but the ciphertext rests on MLWR: instead of adding noise, the sender <em>rounds</em> the result
+      down to a smaller modulus. The part rounded away is the noise — none has to be generated.</li>
+  <li><strong>Every modulus is a power of 2.</strong> q = 1024 or 2048, p = 256 or 512. Reducing modulo is just
+      dropping bits and rounding is just a right shift. The price: q − 1 is not divisible by 512, so there is no
+      NTT and polynomial multiplication has to be done another way.</li>
+  <li><strong>A sparse secret.</strong> Each polynomial of the secret key has exactly h<sub>s</sub> non-zero
+      coefficients (each ±1), the rest 0, so multiplying by it is just adding / subtracting a few dozen rotated
+      copies. The secret key is much smaller too: each coefficient needs only 2 bits.</li>
+  <li><strong>Implicit rejection reuses the hash G</strong>: when the ciphertext is wrong the key returned is
+      G(d ‖ H(ct)), with no separate function J as in ML-KEM.</li>
+  <li><strong>TiMER</strong> is the smallest variant: its 128-bit message is encoded with a D2 error-correcting
+      code, so the ciphertext is 64 bytes shorter than SMAUG-T128's, at the cost of a higher decryption-failure
+      rate.</li>
+</ul>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Bộ tham số</span><span lang="en">Parameter set</span></th>
+  <th><span lang="vi">Mức NIST</span><span lang="en">NIST level</span></th>
+  <th>k</th><th>q</th><th>p</th><th>p′</th><th>h<sub>s</sub></th>
+  <th>pk</th><th>sk</th><th>ct</th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">TiMER</td><td class="num">1</td><td class="num">2</td><td class="num">1 024</td><td class="num">256</td><td class="num">8</td><td class="num">70</td><td class="num">672</td><td class="num">832</td><td class="num">608</td></tr>
+  <tr><td data-i18n="neutral">SMAUG-T128</td><td class="num">1</td><td class="num">2</td><td class="num">1 024</td><td class="num">256</td><td class="num">32</td><td class="num">70</td><td class="num">672</td><td class="num">832</td><td class="num">672</td></tr>
+  <tr><td data-i18n="neutral">SMAUG-T192</td><td class="num">3</td><td class="num">3</td><td class="num">2 048</td><td class="num">512</td><td class="num">16</td><td class="num">88</td><td class="num">1 088</td><td class="num">1 312</td><td class="num">992</td></tr>
+  <tr><td data-i18n="neutral">SMAUG-T256</td><td class="num">5</td><td class="num">4</td><td class="num">2 048</td><td class="num">512</td><td class="num">128</td><td class="num">87</td><td class="num">1 440</td><td class="num">1 728</td><td class="num">1 376</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">h<sub>s</sub> là số hệ số khác 0 của <em>mỗi</em> đa thức trong khoá bí mật; pk, sk, ct tính bằng byte.
+So với ML-KEM cùng mức, khoá bí mật nhỏ hơn 45–49% và bản mã nhỏ hơn 9–13%.</p>
+<p lang="en">h<sub>s</sub> is the number of non-zero coefficients in <em>each</em> polynomial of the secret key;
+pk, sk and ct are in bytes. Against ML-KEM at the same level, the secret key is 45–49% smaller and the
+ciphertext 9–13% smaller.</p>
+
+<h2><span lang="vi">HAETAE khác ML-DSA ở đâu</span><span lang="en">How HAETAE differs from ML-DSA</span></h2>
+<ul lang="vi">
+  <li><strong>Cùng một khung, khác cách lấy mẫu.</strong> Cả hai đều theo kiểu "Fiat–Shamir có từ chối": thử
+      một chữ ký, nếu nó để lộ thông tin về khoá bí mật thì bỏ và thử lại. ML-DSA lấy mẫu trong một
+      <em>hình hộp</em>; HAETAE lấy mẫu đều trong một <em>hình cầu nhiều chiều</em> và dùng phân bố "hai mode"
+      (z = y ± c·s, dấu chọn ngẫu nhiên). Phép từ chối nhờ đó chặt hơn, chữ ký nhỏ hơn.</li>
+  <li><strong>Hệ số 16 bit.</strong> q = 64 513, nhỏ hơn hẳn 8 380 417 của ML-DSA, và vẫn đủ để có NTT 256 điểm
+      (64 512 = 512 × 126).</li>
+  <li><strong>Chữ ký được nén bằng mã entropy rANS</strong>, rồi đệm 0 tới một độ dài cố định
+      (1 474 / 2 349 / 2 948 byte). Vì thế bộ xác minh còn kiểm cả phần đệm.</li>
+  <li><strong>Thời gian ký là ngẫu nhiên</strong> — số lần thử thay đổi theo từng chữ ký; trang hiện con số đó
+      sau mỗi lần ký. Sinh khoá cũng có vòng từ chối: khoá bí mật nào quá "lớn" (theo một chặn trên của giá trị
+      kỳ dị, tính bằng FFT dấu phẩy tĩnh) thì bị bỏ.</li>
+  <li><strong>Không có pre-hash</strong>, nhưng có ngữ cảnh tối đa 255 byte như ML-DSA.</li>
+</ul>
+<ul lang="en">
+  <li><strong>Same framework, different sampling.</strong> Both follow "Fiat–Shamir with aborts": try a
+      signature, and if it would leak information about the secret key, discard it and try again. ML-DSA
+      samples in a <em>box</em>; HAETAE samples uniformly in a <em>hyperball</em> and uses a "bimodal"
+      distribution (z = y ± c·s, sign chosen at random). The rejection is tighter as a result, and the
+      signature smaller.</li>
+  <li><strong>16-bit coefficients.</strong> q = 64,513, far below ML-DSA's 8,380,417, and still enough for a
+      256-point NTT (64,512 = 512 × 126).</li>
+  <li><strong>The signature is compressed with rANS entropy coding</strong>, then zero-padded to a fixed length
+      (1,474 / 2,349 / 2,948 bytes). The verifier therefore checks the padding too.</li>
+  <li><strong>Signing time is random</strong> — the number of attempts varies from signature to signature;
+      the page shows it after each one. Key generation has a rejection loop as well: a secret key that is too
+      "large" (by an upper bound on its singular values, computed with a fixed-point FFT) is discarded.</li>
+  <li><strong>No pre-hash</strong>, but a context of up to 255 bytes, as in ML-DSA.</li>
+</ul>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Bộ tham số</span><span lang="en">Parameter set</span></th>
+  <th>(k, l)</th>
+  <th><span lang="vi">Khoá kiểm tra</span><span lang="en">Verification key</span></th>
+  <th><span lang="vi">Khoá bí mật</span><span lang="en">Secret key</span></th>
+  <th><span lang="vi">Chữ ký</span><span lang="en">Signature</span></th>
+  <th><span lang="vi">So với ML-DSA cùng mức</span><span lang="en">Against ML-DSA, same level</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">HAETAE-2</td><td class="num">(2, 4)</td><td class="num">992</td><td class="num">1 408</td><td class="num">1 474</td><td data-i18n="neutral">ML-DSA-44: 1 312 · 2 560 · 2 420</td></tr>
+  <tr><td data-i18n="neutral">HAETAE-3</td><td class="num">(3, 6)</td><td class="num">1 472</td><td class="num">2 112</td><td class="num">2 349</td><td data-i18n="neutral">ML-DSA-65: 1 952 · 4 032 · 3 309</td></tr>
+  <tr><td data-i18n="neutral">HAETAE-5</td><td class="num">(4, 7)</td><td class="num">2 080</td><td class="num">2 752</td><td class="num">2 948</td><td data-i18n="neutral">ML-DSA-87: 2 592 · 4 896 · 4 627</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Kích thước tính bằng byte. Chữ ký HAETAE nhỏ hơn ML-DSA cùng mức 29–39%, nghĩa là ít dung lượng và băng
+thông hơn ở mọi nơi chữ ký phải được lưu hay truyền đi — trong chứng chỉ, trong gói cập nhật phần mềm.</p>
+<p lang="en">Sizes in bytes. HAETAE signatures are 29–39% smaller than ML-DSA's at the same level, which means less
+storage and bandwidth wherever a signature has to be kept or sent — in certificates, in software update packages.</p>
+
+<h2><span lang="vi">Khoá thô và kiểm tra cặp khoá</span><span lang="en">Raw keys and the key-pair check</span></h2>
+<p lang="vi">SMAUG-T và HAETAE chưa có mã định danh (OID) hay định dạng file khoá chuẩn như RFC 9935 / RFC 9881 của
+ML-KEM / ML-DSA, nên nút "Nạp file" chỉ nhận khoá thô (nhị phân, hex hay Base64) và nhận ra thuật toán theo độ
+dài. Một trường hợp đáng chú ý: TiMER và SMAUG-T128 có khoá cùng kích thước (672 và 832 byte), nên trang chọn mức
+đang mở và nói rõ điều đó. Nạp một file khoá ML-KEM / ML-DSA vào đây thì trang chỉ bạn sang
+<a href="pqc-calculator.html">máy tính kia</a>.</p>
+<p lang="en">SMAUG-T and HAETAE have no identifiers (OIDs) or standard key-file formats yet, unlike RFC 9935 /
+RFC 9881 for ML-KEM / ML-DSA, so the "Load file" button accepts raw keys only (binary, hex or Base64) and
+recognises the algorithm by length. One case worth noticing: TiMER and SMAUG-T128 have keys of the same sizes
+(672 and 832 bytes), so the page picks the level that is open and says so. Load an ML-KEM / ML-DSA key file
+here and the page points you to <a href="pqc-calculator.html">the other calculator</a>.</p>
+<p lang="vi">Dòng kiểm tra cặp khoá trả lời cùng câu hỏi như trang ML-KEM / ML-DSA, với ba câu trả lời
+<em>khớp</em> / <em>thuộc cặp khác</em> / <em>khoá bí mật bị hỏng</em>. Bài học "phần ẩn" cũng lặp lại: đổi
+<code>d</code> trong khoá bí mật SMAUG-T, hay 32 byte bí mật dùng để sinh ngẫu nhiên khi ký trong khoá HAETAE,
+thì mọi phép kiểm vẫn xanh — chỉ seed mới cho thấy khoá đã khác.</p>
+<p lang="en">The key-pair check line answers the same question as on the ML-KEM / ML-DSA page, with three
+answers <em>match</em> / <em>belongs to another pair</em> / <em>the private key is corrupted</em>. The
+"hidden part" lesson repeats too: change <code>d</code> in a SMAUG-T private key, or the 32 secret bytes a
+HAETAE key uses to derive its signing randomness, and every check stays green — only the seed reveals that
+the key has changed.</p>
+
+<h2><span lang="vi">Phiên bản nào</span><span lang="en">Which version</span></h2>
+<p lang="vi">Cả hai thuật toán đã đổi trong năm 2026, và một máy tính không nói rõ phiên bản thì không kiểm được.
+Trang này hiện thực <strong>SMAUG-T mã tham chiếu 1.2.0</strong> (đặc tả phiên bản 260521 — trang chính thức ghi
+rằng bản 1.1.1 trước đó có lỗi hiện thực) và <strong>HAETAE mã tham chiếu 1.2.0</strong> (bộ lấy mẫu siêu cầu đổi ở
+đặc tả 260825; bản mới nhất là 260904). Với HAETAE, khoá sinh ra giống hệt bản 1.1.2; chỉ chữ ký là khác.</p>
+<p lang="en">Both algorithms changed in 2026, and a calculator that does not state its version cannot be checked.
+This page implements <strong>SMAUG-T reference code 1.2.0</strong> (specification version 260521 — the official
+page notes that the earlier 1.1.1 had implementation bugs) and <strong>HAETAE reference code 1.2.0</strong> (the
+hyperball sampler changed in specification 260825; the latest is 260904). For HAETAE, keys come out identical to
+version 1.1.2; only the signatures differ.</p>
+
+<h2><span lang="vi">Vì sao có nút "lật 1 bit"</span><span lang="en">Why there is a "flip one bit" button</span></h2>
+<p lang="vi">Như ML-KEM, SMAUG-T không báo lỗi khi bản mã bị sửa: bên nhận vẫn trả ra một khoá 32 byte trông bình
+thường, chỉ là không trùng khoá của bên gửi — <em>từ chối ngầm</em>, để kẻ tấn công không học được gì từ thông báo
+lỗi. HAETAE thì trả lời thẳng đúng / sai, và còn nói vì sao sai: sai độ dài, giải mã rANS thất bại, phần đệm khác 0,
+chuẩn của chữ ký vượt ngưỡng, hay thử thách tính lại không khớp.</p>
+<p lang="en">Like ML-KEM, SMAUG-T raises no error when the ciphertext is altered: the receiver still returns an
+ordinary-looking 32-byte key that simply differs from the sender's — <em>implicit rejection</em>, so an attacker
+learns nothing from error messages. HAETAE answers true or false directly, and even says why it failed: wrong
+length, rANS decoding failed, non-zero padding, the signature's norm over the bound, or a recomputed challenge
+that does not match.</p>
+
+<h2><span lang="vi">Mã này có đáng tin không</span><span lang="en">Can this code be trusted</span></h2>
+<p lang="vi">Phần tính toán là mã JavaScript tôi tự viết theo đặc tả và mã tham chiếu của hai thuật toán, không dùng
+thư viện ngoài. Tôi làm bốn việc để chứng minh nó:</p>
+<p lang="en">The calculator is JavaScript I wrote myself following the two algorithms' specifications and
+reference code, with no external library. I did four things to prove it:</p>
+<ul lang="vi">
+  <li>So <em>từng byte</em> với mọi mục KAT chính thức đi kèm mã tham chiếu (12 mục SMAUG-T, 9 mục HAETAE) và với một
+      mô hình tham chiếu độc lập ở các seed cố định, gồm cả các lý do xác minh thất bại và dòng kiểm tra cặp khoá:
+      <span data-i18n="neutral">453</span> phép so, tất cả khớp.</li>
+  <li>Cho một trình duyệt giả lập bấm qua mọi luồng trên trang — <span data-i18n="neutral">71</span> phép kiểm — và
+      sau mỗi cú bấm lại soát xem có câu nào chỉ có một ngôn ngữ không.</li>
+  <li>Cố tình làm hỏng mã <span data-i18n="neutral">32</span> lần và đòi phép kiểm phải đỏ: 30 lần đỏ. Hai lần còn lại
+      là hai chỗ không phép kiểm nào với tới được, và tôi ghi rõ thay vì giấu: ngưỡng chuẩn B″ của bộ xác minh HAETAE
+      (không dựng được chữ ký nào vừa giải mã được vừa vượt ngưỡng), và 32 bit thấp nhất của bảng Gaussian 83 bit
+      (sai ở đó chỉ đổi kết quả khoảng một mẫu trong 2<sup>51</sup> — bảng ấy vì thế được chép bằng chương trình, không gõ tay).</li>
+  <li>Nút "Chạy kiểm chứng" ở đầu trang lặp lại mục KAT đầu tiên của từng bộ tham số ngay trong máy bạn.</li>
+</ul>
+<ul lang="en">
+  <li>Compared <em>byte for byte</em> with every official KAT entry shipped with the reference code (12 for
+      SMAUG-T, 9 for HAETAE) and with an independent reference model at fixed seeds, including the reasons a
+      verification fails and the key-pair check line: <span data-i18n="neutral">453</span> comparisons, all
+      matching.</li>
+  <li>Had a simulated browser click through every flow on the page — <span data-i18n="neutral">71</span> checks —
+      and, after every click, look for any sentence present in one language only.</li>
+  <li>Broke the code on purpose <span data-i18n="neutral">32</span> times and required the tests to go red: 30 went
+      red. The other two are places no test can reach, and I say so rather than hide them: HAETAE's verifier norm
+      bound B″ (no signature can be built that both decodes and exceeds it), and the lowest 32 bits of the 83-bit
+      Gaussian table (an error there changes about one sample in 2<sup>51</sup> — which is why that table is copied
+      by a program, never retyped).</li>
+  <li>The self-test button at the top repeats the first KAT entry of each parameter set on your machine.</li>
+</ul>
+<div class="callout">
+  <span lang="vi"><strong>Đừng dùng mã này để bảo vệ thứ gì thật.</strong> Nó viết cho việc học: không chống tấn
+  công kênh bên, thời gian chạy phụ thuộc dữ liệu (riêng với khoá thưa của SMAUG-T và bộ lấy mẫu của HAETAE, đây
+  chính là chỗ các bài tấn công nhắm vào), và khoá nằm trong bộ nhớ JavaScript.</span>
+  <span lang="en"><strong>Do not protect anything real with this code.</strong> It is written for learning: no
+  side-channel hardening, data-dependent timing (for SMAUG-T's sparse secret and HAETAE's sampler, that is
+  precisely where attacks aim), and keys living in JavaScript memory.</span>
+</div>
+
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://kpqc.cryptolab.co.kr/smaug-t" target="_blank" rel="noopener" data-i18n="neutral">SMAUG-T — specification &amp; reference implementation</a>
+      — <span lang="vi">trang chính thức của nhóm tác giả: đặc tả 260521, mã 1.2.0.</span><span lang="en">the authors' official page: specification 260521, code 1.2.0.</span></li>
+  <li><a href="https://kpqc.cryptolab.co.kr/haetae" target="_blank" rel="noopener" data-i18n="neutral">HAETAE — specification &amp; reference implementation</a>
+      — <span lang="vi">trang chính thức: đặc tả 260904, mã 1.2.0.</span><span lang="en">the official page: specification 260904, code 1.2.0.</span></li>
+  <li><a href="https://www.kpqc.or.kr/" target="_blank" rel="noopener" data-i18n="neutral">KpqC</a>
+      — <span lang="vi">trang của cuộc thi.</span><span lang="en">the competition's site.</span></li>
+  <li><a href="pqc-calculator.html" data-i18n="neutral">ML-KEM &amp; ML-DSA</a>
+      — <span lang="vi">máy tính anh em cho hai chuẩn NIST, cùng cách tương tác.</span><span lang="en">the sibling calculator for the two NIST standards, same interaction.</span></li>
+  <li><a href="https://www.jnet-secure.com/pqc-calculator" target="_blank" rel="noopener" data-i18n="neutral">PQC Calculator — jNet Secure</a>
+      — <span lang="vi">trang mẫu cho cách tương tác của cả hai máy tính. Mã và thiết kế giao diện là của tôi.</span>
+      <span lang="en">the reference for the interaction of both calculators. The code and the visual design are my own.</span></li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">← PQC, AI &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<script src="assets/pqc-mlkem.js"></script>
+<script src="assets/pqc-sha2.js"></script>
+<script src="assets/pqc-mldsa.js"></script>
+<script src="assets/pqc-tools.js"></script>
+<script src="assets/pqc-smaugt.js"></script>
+<script src="assets/pqc-haetae.js"></script>
+<script src="assets/kpqc-tools.js"></script>
+<script src="assets/kpqc-vectors.js"></script>
+<script src="assets/kpqc-calc-ui.js"></script>
+
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
