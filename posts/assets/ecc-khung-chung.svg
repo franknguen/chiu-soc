@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 430" role="img" aria-labelledby="t d">
+  <title id="t">Khung chung của mọi mã sửa lỗi</title>
+  <desc id="d">Hình vẽ gốc: một dây chuyền gồm mã hoá thêm dư thừa, kênh nhiễu, đo hội chứng,
+    định vị lỗi và sửa lỗi; bên dưới là hai làn so sánh cách làm của mã cổ điển và mã lượng tử.</desc>
+  <defs>
+    <linearGradient id="pipe" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#14538f"/><stop offset="100%" stop-color="#2a9d8f"/>
+    </linearGradient>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8595a6"/>
+    </marker>
+  </defs>
+  <rect width="860" height="430" fill="#f7f9fc"/>
+
+  <text x="430" y="36" text-anchor="middle" font-family="Inter,Arial,sans-serif"
+        font-size="16" font-weight="800" fill="#14538f" letter-spacing="1.5">THE SAME FIVE STEPS</text>
+
+  <!-- dây chuyền -->
+  <g font-family="Inter,Arial,sans-serif" text-anchor="middle">
+    <g>
+      <rect x="24"  y="66" width="132" height="70" rx="14" fill="#fff" stroke="#14538f" stroke-opacity=".3"/>
+      <text x="90"  y="96"  font-size="13.5" font-weight="700" fill="#14538f">Encode</text>
+      <text x="90"  y="116" font-size="11" fill="#5f6b7a">add redundancy</text>
+    </g>
+    <g>
+      <rect x="196" y="66" width="132" height="70" rx="14" fill="#fff" stroke="#14538f" stroke-opacity=".3"/>
+      <text x="262" y="96"  font-size="13.5" font-weight="700" fill="#14538f">Noisy channel</text>
+      <text x="262" y="116" font-size="11" fill="#5f6b7a">errors appear</text>
+    </g>
+    <g>
+      <rect x="368" y="66" width="132" height="70" rx="14" fill="#fff" stroke="#2a9d8f" stroke-width="2"/>
+      <text x="434" y="96"  font-size="13.5" font-weight="800" fill="#14538f">Syndrome</text>
+      <text x="434" y="116" font-size="11" fill="#5f6b7a">measure, don't peek</text>
+    </g>
+    <g>
+      <rect x="540" y="66" width="132" height="70" rx="14" fill="#fff" stroke="#14538f" stroke-opacity=".3"/>
+      <text x="606" y="96"  font-size="13.5" font-weight="700" fill="#14538f">Locate</text>
+      <text x="606" y="116" font-size="11" fill="#5f6b7a">which position?</text>
+    </g>
+    <g>
+      <rect x="712" y="66" width="124" height="70" rx="14" fill="#fff" stroke="#14538f" stroke-opacity=".3"/>
+      <text x="774" y="96"  font-size="13.5" font-weight="700" fill="#14538f">Repair</text>
+      <text x="774" y="116" font-size="11" fill="#5f6b7a">flip it back</text>
+    </g>
+    <g stroke="#8595a6" stroke-width="2" marker-end="url(#a)" fill="none">
+      <path d="M158 101 H 190"/><path d="M330 101 H 362"/>
+      <path d="M502 101 H 534"/><path d="M674 101 H 706"/>
+    </g>
+  </g>
+
+  <path d="M24 160 H 836" stroke="url(#pipe)" stroke-width="3" opacity=".35"/>
+
+  <!-- hai làn -->
+  <g font-family="Inter,Arial,sans-serif">
+    <g>
+      <rect x="24" y="186" width="812" height="98" rx="16" fill="#fff" stroke="#14538f" stroke-opacity=".22"/>
+      <text x="48" y="216" font-size="13.5" font-weight="800" fill="#14538f">Classical — bits in a chip</text>
+      <g font-size="11.5" fill="#5f6b7a">
+        <text x="48" y="240">redundancy = extra parity bits stored beside the data</text>
+        <text x="48" y="260">syndrome = the parity bits recomputed and XOR-ed; a plain number</text>
+        <text x="48" y="276">that number names the broken position — flip it and the word is whole</text>
+      </g>
+      <text x="812" y="240" text-anchor="end" font-size="11.5" font-weight="700" fill="#2a9d8f">Hamming · BCH · RS · LDPC</text>
+    </g>
+    <g>
+      <rect x="24" y="300" width="812" height="104" rx="16" fill="#fff" stroke="#14538f" stroke-opacity=".22"/>
+      <text x="48" y="330" font-size="13.5" font-weight="800" fill="#14538f">Quantum — qubits in a lab</text>
+      <g font-size="11.5" fill="#5f6b7a">
+        <text x="48" y="354">redundancy = one logical qubit spread across many physical ones</text>
+        <text x="48" y="374">syndrome = measured on helper qubits, never on the data itself</text>
+        <text x="48" y="390">looking at the data would destroy it — so you look only at the error</text>
+      </g>
+      <text x="812" y="354" text-anchor="end" font-size="11.5" font-weight="700" fill="#2a9d8f">Shor · Steane · surface code</text>
+    </g>
+  </g>
+</svg>

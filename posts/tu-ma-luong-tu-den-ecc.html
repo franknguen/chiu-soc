@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Từ mã sửa lỗi lượng tử đến ECC trong con chip — ChiU·SoC"
+      data-title-en="From quantum error correction to ECC in a chip — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Từ mã sửa lỗi lượng tử đến ECC trong con chip — ChiU·SoC</title>
+<meta name="description" content="Từ mã sửa lỗi lượng tử sang ECC trong chip: khung chung của mọi mã sửa lỗi, khoảng cách Hamming, parity và CRC, Hamming/SECDED, BCH và Reed–Solomon, LDPC và Polar, và chỗ ECC gặp bảo mật qua PUF."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:22px 0 7px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+/* thư viện ảnh */
+.gallery{ display:grid; gap:16px; margin:22px 0 26px; }
+.gallery.two{ grid-template-columns:repeat(2,1fr); }
+@media(max-width:620px){ .gallery.two{ grid-template-columns:1fr; } }
+.gallery figure{ margin:0; }
+.gallery img{
+  display:block; width:100%; height:auto; border-radius:13px;
+  box-shadow:0 8px 24px rgba(15,27,45,.18); background:#e9eef5;
+}
+.gallery figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; line-height:1.55; }
+.diagram{ margin:22px 0 10px; }
+.diagram img{ display:block; width:100%; height:auto; border-radius:14px;
+  border:1px solid rgba(20,83,143,.14); background:#f7f9fc; }
+.diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; }
+.dl{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  margin:20px 0 24px; padding:16px 18px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.16); border-radius:14px;
+}
+.dl a{
+  font-size:.9em; font-weight:700; color:#fff; text-decoration:none;
+  padding:8px 16px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.dl .meta-note{ font-size:.82em; color:var(--muted); flex:1 1 220px; margin:0; }
+
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.7;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:8px 12px; text-align:left; vertical-align:top; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px;
+}
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">Từ mã sửa lỗi lượng tử đến ECC trong con chip</span><span lang="en">From quantum error correction to ECC inside a chip</span></h1>
+<div class="meta"><span lang="vi">AI, Lượng tử &amp; Mã sửa lỗi · 30/10/2026 · Frank Nguyen</span><span lang="en">AI, Quantum &amp; ECC · 30 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Luận án tiến sĩ của tôi là về mã sửa lỗi cho xử lý thông tin lượng tử.
+Bây giờ tôi viết RTL cho những con chip rất đời thường. Có người hỏi hai việc ấy liên quan gì đến
+nhau — và thú thật là lúc mới chuyển sang làm chip, chính tôi cũng chưa trả lời được. Bài này là
+câu trả lời tôi gom lại được sau mấy năm, viết lại từ một bài giảng tôi soạn cho sinh viên.</p>
+<p class="lede" lang="en">My doctoral work was on error-correcting codes for quantum information
+processing. These days I write RTL for very ordinary chips. People ask what the two have to do with
+each other — and honestly, when I first moved into chip design I could not have answered either.
+This is the answer I have gathered over a few years, rewritten from a lecture I prepared for
+students.</p>
+
+<h2><span lang="vi">1. Mã sửa lỗi lượng tử, kể thật ngắn</span><span lang="en">1. Quantum error correction, told very briefly</span></h2>
+<p lang="vi">Một qubit rất dễ hỏng. Nó mất trạng thái chỉ vì một chút nhiễu nhiệt, một dao động
+điện từ, hay đơn giản là thời gian trôi qua. Nếu là bit thường, ta xử lý chuyện đó rất thô sơ: chép
+thành ba bản, lúc đọc thì lấy theo đa số. Với qubit, cách ấy không dùng được, vì hai lý do:</p>
+<p lang="en">A qubit is fragile. It loses its state from a little thermal noise, an electromagnetic
+wobble, or simply the passing of time. With an ordinary bit we handle that crudely: keep three
+copies and take the majority at read time. With a qubit that trick fails, for two reasons:</p>
+<ul lang="vi">
+  <li><strong>Không sao chép được.</strong> Có một định lý nói rằng không tồn tại phép sao chép
+      một trạng thái lượng tử chưa biết. Vậy là không có "ba bản" nào cả.</li>
+  <li><strong>Nhìn vào là hỏng.</strong> Đo một qubit sẽ làm nó sụp về một giá trị cụ thể — đúng
+      cái thông tin ta đang muốn giữ thì bị phá mất khi ta kiểm tra.</li>
+</ul>
+<ul lang="en">
+  <li><strong>You cannot copy it.</strong> A theorem says no machine can duplicate an unknown
+      quantum state. So there are no "three copies" to be had.</li>
+  <li><strong>Looking destroys it.</strong> Measuring a qubit collapses it to a definite value —
+      the very information you are trying to protect is ruined by the act of checking.</li>
+</ul>
+<p lang="vi">Cách đi vòng, do Peter Shor đề xuất năm 1995 và sau đó thành cả một ngành, là: trải
+<em>một</em> qubit mang thông tin lên <em>nhiều</em> qubit vật lý, rồi thay vì đo dữ liệu, ta đo một
+nhóm qubit phụ. Kết quả đo ấy — gọi là <strong>hội chứng</strong> — cho biết <em>đã có lỗi gì, ở
+đâu</em>, mà không hề tiết lộ dữ liệu. Biết lỗi rồi thì sửa.</p>
+<p lang="en">The way around it, proposed by Peter Shor in 1995 and since grown into a field of its
+own, is this: spread <em>one</em> qubit of information across <em>many</em> physical qubits, and
+instead of measuring the data, measure a set of helper qubits. That measurement — called the
+<strong>syndrome</strong> — tells you <em>what went wrong and where</em> without revealing the data
+at all. Once you know the error, you undo it.</p>
+<p lang="vi">Tôi làm phần lý thuyết mã, không phải phần chế tạo máy — nên ở đây tôi chỉ dám kể đến
+mức ý tưởng.</p>
+<p lang="en">I worked on the coding theory, not on building the machines — so I will keep this at
+the level of the idea.</p>
+
+<h2><span lang="vi">2. Điều làm tôi ngạc nhiên khi chuyển sang làm chip</span><span lang="en">2. What surprised me when I moved to chips</span></h2>
+<p lang="vi">Khi bắt đầu đọc các mã sửa lỗi dùng trong bộ nhớ và đường truyền, tôi nhận ra mình đang
+đọc lại đúng cái khung đã quen — chỉ là viết bằng một thứ ngôn ngữ khác, rẻ hơn hàng triệu lần:</p>
+<p lang="en">When I started reading the codes used in memories and links, I realised I was reading
+the same skeleton I already knew — written in a different language, and a million times cheaper:</p>
+
+<figure class="diagram" data-i18n="neutral">
+  <img src="assets/ecc-khung-chung.svg" width="860" height="430"
+       alt="Sơ đồ: dây chuyền năm bước mã hoá, kênh nhiễu, đo hội chứng, định vị, sửa lỗi; bên dưới là hai làn so sánh mã cổ điển và mã lượng tử."/>
+  <figcaption>
+    <span lang="vi">Sơ đồ tôi vẽ cho bài này: cùng một khung năm bước, hai thế giới khác nhau.</span>
+    <span lang="en">A diagram I drew for this article: the same five steps, two different worlds.</span>
+  </figcaption>
+</figure>
+
+<p lang="vi">Chữ <strong>hội chứng</strong> chính là chiếc cầu. Ở chip, hội chứng chỉ là mấy bit
+kiểm được tính lại rồi XOR với bit đã lưu — một con số nhỏ xíu. Ở máy lượng tử, nó là kết quả đo
+trên các qubit phụ. Hai thứ không giống nhau chút nào về vật lý, nhưng đóng đúng một vai: <em>nói
+cho ta biết về lỗi mà không bắt ta phải nhìn vào dữ liệu.</em></p>
+<p lang="en">The word <strong>syndrome</strong> is the bridge. In a chip it is just a few parity
+bits recomputed and XOR-ed against the stored ones — a tiny number. In a quantum machine it is the
+outcome of measuring helper qubits. Physically they have nothing in common, yet they play exactly
+one role: <em>to tell you about the error without making you look at the data.</em></p>
+
+<h2><span lang="vi">3. Trong chip, kênh nào cũng nhiễu</span><span lang="en">3. Inside a chip, every channel is noisy</span></h2>
+<p lang="vi">Một hệ truyền tin, dù là sợi dây hay ô nhớ, đều có chung một hình: nguồn sinh ra
+<em>k</em> bit; bộ mã hoá thêm vào phần dư thừa thành <em>n</em> bit; <em>n</em> bit ấy đi qua một
+môi trường có nhiễu; đầu kia giải mã và trả lại <em>k</em> bit — hy vọng là đúng. Tỉ số
+<em>R = k/n</em> gọi là <strong>tỉ lệ mã</strong>: phần bit thật sự mang tin.</p>
+<p lang="en">A communication system, whether a wire or a memory cell, always has the same shape: a
+source produces <em>k</em> bits; an encoder adds redundancy to make <em>n</em>; those <em>n</em> bits
+cross a noisy medium; the far end decodes and returns <em>k</em> bits — hopefully the right ones.
+The ratio <em>R = k/n</em> is the <strong>code rate</strong>: the fraction of bits that actually
+carry information.</p>
+<p lang="vi">Năm 1948, Claude Shannon chứng minh một điều đáng kinh ngạc: với mọi tỉ lệ mã thấp hơn
+một ngưỡng gọi là dung lượng kênh, <em>tồn tại</em> một mã đưa xác suất lỗi về gần không khi khối
+tin đủ dài. Ông không chỉ ra mã đó là mã nào — gần tám mươi năm qua, phần lớn ngành mã hoá là đi
+tìm những mã vừa tiến gần ngưỡng ấy vừa thực thi được bằng mạch thật.</p>
+<p lang="en">In 1948 Claude Shannon proved something remarkable: for every code rate below a
+threshold called the channel capacity, a code <em>exists</em> whose error probability goes to
+nearly zero as the block grows long. He did not say which code — and for nearly eighty years since,
+much of coding theory has been the search for codes that both approach that limit and can be built
+in real circuits.</p>
+<p lang="vi">Trong một con chip, "nhiễu" rất cụ thể: hạt vũ trụ bắn trúng ô nhớ làm lật một bit;
+điện tích rò rỉ dần trong ô flash; xuyên âm giữa các dây tín hiệu chạy nhanh. Và cái giá của việc
+sửa lỗi cũng rất cụ thể: diện tích, độ trễ và điện năng của bộ mã hoá, bộ giải mã.</p>
+<p lang="en">Inside a chip the "noise" is very concrete: a cosmic particle striking a memory cell and
+flipping a bit; charge leaking out of a flash cell over years; crosstalk between fast neighbouring
+wires. And the cost of fixing it is equally concrete: the area, latency and power of the encoder and
+the decoder.</p>
+
+<h2><span lang="vi">4. Khái niệm gốc: khoảng cách Hamming</span><span lang="en">4. The root idea: Hamming distance</span></h2>
+<p lang="vi">Một mã khối <em>(n, k)</em> biến <em>k</em> bit tin thành từ mã <em>n</em> bit. Điều quan
+trọng: trong <em>2ⁿ</em> mẫu bit có thể có, chỉ <em>2ᵏ</em> mẫu là từ mã hợp lệ. Phần còn lại là
+"vùng cấm" — nhận được một mẫu nằm trong vùng cấm nghĩa là chắc chắn có lỗi.</p>
+<p lang="en">An <em>(n, k)</em> block code turns <em>k</em> information bits into an <em>n</em>-bit
+codeword. The key point: of the <em>2ⁿ</em> possible bit patterns, only <em>2ᵏ</em> are valid
+codewords. The rest is forbidden ground — receiving a pattern there means an error for certain.</p>
+<p lang="vi"><strong>Khoảng cách Hamming</strong> giữa hai chuỗi là số vị trí chúng khác nhau. Giá
+trị nhỏ nhất giữa hai từ mã bất kỳ, gọi là <em>d<sub>min</sub></em>, quyết định toàn bộ sức mạnh
+của mã. Nếu các từ mã cách nhau xa, một vài bit lỗi vẫn chưa đủ đẩy chuỗi nhận được sang gần một
+từ mã khác — và ta chỉ việc chọn từ mã gần nhất.</p>
+<p lang="en"><strong>Hamming distance</strong> between two strings is the number of positions where
+they differ. The smallest distance between any two codewords, written <em>d<sub>min</sub></em>,
+decides everything the code can do. If codewords sit far apart, a few flipped bits still leave the
+received word closest to the original — and we simply pick the nearest codeword.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th>d<sub>min</sub></th>
+  <th><span lang="vi">Phát hiện</span><span lang="en">Detects</span></th>
+  <th><span lang="vi">Sửa</span><span lang="en">Corrects</span></th>
+  <th><span lang="vi">Ví dụ</span><span lang="en">Example</span></th>
+</tr></thead>
+<tbody>
+  <tr><td class="num">2</td><td class="num">1</td><td class="num">0</td><td data-i18n="neutral">Parity</td></tr>
+  <tr><td class="num">3</td><td class="num">2</td><td class="num">1</td><td data-i18n="neutral">Hamming</td></tr>
+  <tr><td class="num">4</td><td class="num">3</td><td><span lang="vi">1 (và phát hiện 2)</span><span lang="en">1 (and detects 2)</span></td><td data-i18n="neutral">SECDED</td></tr>
+  <tr><td class="num">2t + 1</td><td class="num">2t</td><td class="num">t</td><td data-i18n="neutral">BCH, Reed–Solomon</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Nói gọn: phát hiện được tới <em>d<sub>min</sub> − 1</em> lỗi, sửa được tới phần nguyên
+của <em>(d<sub>min</sub> − 1)/2</em>. Toàn bộ phần còn lại của bài chỉ là những cách khác nhau để
+đẩy <em>d<sub>min</sub></em> lên cao mà trả giá ít nhất.</p>
+<p lang="en">In short: you can detect up to <em>d<sub>min</sub> − 1</em> errors and correct up to the
+whole part of <em>(d<sub>min</sub> − 1)/2</em>. Everything that follows is just different ways of
+pushing <em>d<sub>min</sub></em> up while paying as little as possible.</p>
+
+<h2><span lang="vi">5. Bậc thang trong thực tế</span><span lang="en">5. The ladder, in practice</span></h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Mã</span><span lang="en">Code</span></th>
+  <th><span lang="vi">Làm được gì</span><span lang="en">What it does</span></th>
+  <th><span lang="vi">Thường gặp ở</span><span lang="en">Where you meet it</span></th>
+  <th><span lang="vi">Giá phần cứng</span><span lang="en">Hardware cost</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">Parity</td>
+      <td><span lang="vi">phát hiện số lẻ bit lỗi</span><span lang="en">detects an odd number of errors</span></td>
+      <td><span lang="vi">UART, thẻ nhãn cache</span><span lang="en">UART, cache tags</span></td>
+      <td><span lang="vi">một cây XOR</span><span lang="en">one XOR tree</span></td></tr>
+  <tr><td data-i18n="neutral">Checksum / CRC</td>
+      <td><span lang="vi">phát hiện; CRC bắt mọi chuỗi lỗi liên tiếp ngắn</span><span lang="en">detects; CRC catches every short burst</span></td>
+      <td><span lang="vi">Ethernet, USB, PCIe</span><span lang="en">Ethernet, USB, PCIe</span></td>
+      <td><span lang="vi">bộ cộng hoặc thanh ghi dịch</span><span lang="en">an adder or a shift register</span></td></tr>
+  <tr><td data-i18n="neutral">Hamming / SECDED</td>
+      <td><span lang="vi">sửa 1 bit, phát hiện 2 bit</span><span lang="en">fixes one bit, detects two</span></td>
+      <td><span lang="vi">SRAM, DRAM, đường truyền</span><span lang="en">SRAM, DRAM, links</span></td>
+      <td><span lang="vi">cây XOR, một chu kỳ</span><span lang="en">XOR trees, one cycle</span></td></tr>
+  <tr><td data-i18n="neutral">BCH</td>
+      <td><span lang="vi">sửa t bit lỗi rải rác</span><span lang="en">fixes t scattered bit errors</span></td>
+      <td><span lang="vi">flash NOR/NAND, khoá PUF</span><span lang="en">NOR/NAND flash, PUF keys</span></td>
+      <td><span lang="vi">hội chứng + giải phương trình + dò nghiệm</span><span lang="en">syndrome + key equation + root search</span></td></tr>
+  <tr><td data-i18n="neutral">Reed–Solomon</td>
+      <td><span lang="vi">sửa t ký hiệu, tức là lỗi cụm</span><span lang="en">fixes t symbols, i.e. bursts</span></td>
+      <td><span lang="vi">mã QR, CD/DVD, băng từ</span><span lang="en">QR codes, CD/DVD, tape</span></td>
+      <td><span lang="vi">số học trên trường hữu hạn</span><span lang="en">finite-field arithmetic</span></td></tr>
+  <tr><td data-i18n="neutral">LDPC</td>
+      <td><span lang="vi">tiến gần giới hạn Shannon, dùng tin mềm</span><span lang="en">near the Shannon limit, uses soft information</span></td>
+      <td><span lang="vi">dữ liệu 5G, ổ SSD, Wi-Fi</span><span lang="en">5G data, SSDs, Wi-Fi</span></td>
+      <td><span lang="vi">lặp nhiều vòng, tốn bộ nhớ</span><span lang="en">many iterations, lots of memory</span></td></tr>
+  <tr><td data-i18n="neutral">Polar</td>
+      <td><span lang="vi">chứng minh được là đạt dung lượng kênh</span><span lang="en">provably achieves capacity</span></td>
+      <td><span lang="vi">kênh điều khiển 5G</span><span lang="en">5G control channels</span></td>
+      <td><span lang="vi">bộ giải mã tuần tự</span><span lang="en">a sequential decoder</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2><span lang="vi">6. Một ví dụ tự tính được bằng tay</span><span lang="en">6. An example you can work out by hand</span></h2>
+<p lang="vi">Mã Hamming (12, 8) bảo vệ 8 bit dữ liệu bằng 4 bit kiểm. Vì sao đúng 4? Vì hội chứng
+phải đủ chỗ để gọi tên mọi vị trí lỗi và cả trường hợp "không lỗi": cần <em>2ʳ ≥ k + r + 1</em>.
+Với <em>k = 8</em>: <em>r = 3</em> cho 8 &lt; 12 nên không đủ; <em>r = 4</em> cho 16 ≥ 13 nên vừa đủ.</p>
+<p lang="en">The Hamming (12, 8) code protects 8 data bits with 4 check bits. Why exactly four?
+Because the syndrome must have room to name every error position and the "no error" case too:
+you need <em>2ʳ ≥ k + r + 1</em>. For <em>k = 8</em>: <em>r = 3</em> gives 8 &lt; 12, not enough;
+<em>r = 4</em> gives 16 ≥ 13, just enough.</p>
+<p lang="vi">Mẹo đẹp nhất của mã này: đặt các bit kiểm ở vị trí 1, 2, 4, 8 — các luỹ thừa của 2 —
+và cho bit kiểm thứ <em>i</em> phụ trách mọi vị trí có bit thứ <em>i</em> bằng 1 trong chỉ số nhị
+phân. Khi đó hội chứng đọc ra <strong>chính là số thứ tự của vị trí hỏng</strong>:</p>
+<p lang="en">The prettiest trick in this code: put the check bits at positions 1, 2, 4 and 8 — the
+powers of two — and let check bit <em>i</em> cover every position whose index has bit <em>i</em> set.
+The syndrome then reads out as <strong>the number of the broken position itself</strong>:</p>
+<pre lang="vi"><code>dữ liệu D0..D7 = 0 1 0 0 1 1 1 1
+từ mã   (12 bit) = 1 0 0 0 1 0 0 0 1 1 1 1
+nhận được        = 1 0 0 0 0 0 0 0 1 1 1 1     (bit số 5 bị lật)
+
+tính lại 4 phép kiểm  ->  hội chứng = 0101 nhị phân = 5
+                      ->  lật bit số 5  ->  từ mã trở lại nguyên vẹn</code></pre>
+<pre lang="en"><code>data D0..D7      = 0 1 0 0 1 1 1 1
+codeword (12 b)  = 1 0 0 0 1 0 0 0 1 1 1 1
+received         = 1 0 0 0 0 0 0 0 1 1 1 1     (bit 5 flipped)
+
+recompute the 4 parities  ->  syndrome = 0101 binary = 5
+                          ->  flip bit 5  ->  the word is whole again</code></pre>
+<p lang="vi">Thêm một bit kiểm chẵn lẻ trên toàn bộ 12 bit thì <em>d<sub>min</sub></em> lên 4, và ta
+được <strong>SECDED</strong>: sửa được một lỗi, phát hiện được hai lỗi mà không sửa bừa. Đây chính
+là lý do các thanh RAM máy chủ có ECC thường là 64 bit dữ liệu + 8 bit kiểm = 72 bit.</p>
+<p lang="en">Add one more parity bit over all 12 and <em>d<sub>min</sub></em> rises to 4, giving
+<strong>SECDED</strong>: correct one error, detect two without mis-correcting. This is why ECC
+server memory usually comes as 64 data bits + 8 check bits = 72.</p>
+
+<h2><span lang="vi">7. Khi cần sửa nhiều bit: BCH và Reed–Solomon</span><span lang="en">7. When more bits must be fixed: BCH and Reed–Solomon</span></h2>
+<p lang="vi">Muốn sửa nhiều hơn một bit, ta phải rời khỏi số học nhị phân thông thường và bước vào
+<strong>trường hữu hạn</strong> — một tập hữu hạn phần tử mà vẫn cộng, trừ, nhân, chia được bình
+thường. Trong đó phép cộng chính là XOR, còn phép nhân thành phép cộng số mũ. Nhờ có phép chia, ta
+<em>giải</em> được ra vị trí lỗi thay vì phải dò từng bit.</p>
+<p lang="en">To fix more than one bit you must leave ordinary binary arithmetic and step into a
+<strong>finite field</strong> — a finite set of elements where you can still add, subtract, multiply
+and divide. There, addition is simply XOR and multiplication becomes addition of exponents. Because
+division exists, you can <em>solve</em> for the error positions instead of searching bit by bit.</p>
+<p lang="vi">Mã <strong>BCH</strong> (đặt theo tên Bose, Ray-Chaudhuri và Hocquenghem, cuối những năm
+1950) được dựng sao cho đa thức sinh có <em>2t</em> nghiệm liên tiếp trong trường ấy, và điều đó bảo
+đảm <em>d<sub>min</sub> ≥ 2t + 1</em> — tức là sửa được <em>t</em> bit. Ví dụ với
+<em>n = 15, t = 2</em>:</p>
+<p lang="en">A <strong>BCH</strong> code (named after Bose, Ray-Chaudhuri and Hocquenghem, late
+1950s) is built so that its generator polynomial has <em>2t</em> consecutive roots in that field,
+which guarantees <em>d<sub>min</sub> ≥ 2t + 1</em> — that is, it corrects <em>t</em> bits. For
+example with <em>n = 15, t = 2</em>:</p>
+<pre data-i18n="neutral"><code>g(x) = m1(x) · m3(x)
+     = (x⁴ + x + 1) · (x⁴ + x³ + x² + x + 1)
+     = x⁸ + x⁷ + x⁶ + x⁴ + 1          -> bậc 8 / degree 8
+
+8 bit kiểm / check bits  ->  k = 15 − 8 = 7   ->  BCH(15,7), t = 2
+
+n = 15:   t=1 -> (15,11) R=0.73     t=2 -> (15,7) R=0.47     t=3 -> (15,5) R=0.33</code></pre>
+<p lang="vi">Bảng trên cho thấy cái giá rất rõ: muốn sửa thêm một bit thì phải trả thêm bốn bit kiểm,
+và tỉ lệ mã tụt xuống. Không có bữa trưa miễn phí.</p>
+<p lang="en">The table shows the price plainly: each extra bit of correction costs four more check
+bits, and the code rate falls. There is no free lunch.</p>
+<p lang="vi"><strong>Reed–Solomon</strong> là phiên bản làm việc trên <em>ký hiệu</em> thay vì bit:
+mỗi ký hiệu là một nhóm <em>m</em> bit. Một chuỗi lỗi liên tiếp nằm gọn trong một ký hiệu thì chỉ
+tính là <em>một</em> lỗi — nên nó rất hợp với vết xước trên đĩa CD, vết bẩn trên mã QR, hay lỗi cụm
+trên băng từ.</p>
+<p lang="en"><strong>Reed–Solomon</strong> is the version that works on <em>symbols</em> rather than
+bits: each symbol is a group of <em>m</em> bits. A burst of errors that falls inside one symbol
+counts as only <em>one</em> error — which makes it a natural fit for a scratch on a CD, dirt on a QR
+code, or burst damage on tape.</p>
+
+<h2><span lang="vi">8. Chỗ mã sửa lỗi gặp bảo mật: PUF</span><span lang="en">8. Where ECC meets security: PUF</span></h2>
+<p lang="vi">Đây là ứng dụng tôi thấy thú vị nhất. <strong>PUF</strong> (physically unclonable
+function) là cách lấy một "dấu vân tay" từ chính sai số chế tạo của con chip: hai con chip giống hệt
+nhau trên bản vẽ vẫn khác nhau ở mức nanomet, và sự khác biệt ấy đọc ra được thành bit. Cái hay là
+khoá không được <em>lưu</em> ở đâu cả — nó được <em>dựng lại</em> từ vật liệu mỗi khi cần.</p>
+<p lang="en">This is the application I find most interesting. A <strong>PUF</strong> (physically
+unclonable function) takes a "fingerprint" from the chip's own manufacturing variation: two chips
+identical on the drawing still differ at the nanometre scale, and that difference can be read out as
+bits. The beauty is that the key is never <em>stored</em> anywhere — it is <em>rebuilt</em> from the
+silicon whenever it is needed.</p>
+<p lang="vi">Nhưng có một chỗ vướng: dấu vân tay ấy hơi khác nhau mỗi lần đọc. Một phần nhỏ số ô
+không ổn định, và con số đó tăng lên khi nhiệt độ chạy từ rất lạnh tới rất nóng. Với việc nhận dạng
+thì vài bit sai không sao — ta chấp nhận ngưỡng. Nhưng với một khoá mã hoá thì <strong>sai một bit
+là hỏng toàn bộ</strong>: khoá lệch một bit sẽ giải mã ra rác.</p>
+<p lang="en">But there is a catch: that fingerprint reads back slightly differently each time. A
+small fraction of cells are unstable, and the fraction grows as temperature swings from very cold to
+very hot. For identification a few wrong bits are fine — you accept a threshold. For a cryptographic
+key, <strong>one wrong bit ruins everything</strong>: a key off by a single bit decrypts to garbage.</p>
+<p lang="vi">Cách giải quyết chính là mã sửa lỗi, dùng theo một kiểu khéo: lúc xuất xưởng, ta đọc
+dấu vân tay gốc và lưu lại <em>hội chứng</em> của nó vào bộ nhớ (gọi là dữ liệu trợ giúp). Dữ liệu
+này công khai cũng được, vì bản thân nó không phải là khoá. Mỗi lần khởi động, chip đọc lại dấu vân
+tay, so với hội chứng đã lưu, tìm ra đúng những bit đã lệch và sửa về — rồi mới băm thành khoá.
+Lệch quá khả năng sửa thì hệ thống báo lỗi, và điều đó bản thân nó cũng là một tín hiệu đáng chú ý.</p>
+<p lang="en">The answer is error correction, used in a clever way: at the factory the original
+fingerprint is read and its <em>syndrome</em> is stored in memory as so-called helper data. That data
+may even be public, because it is not the key. At every power-up the chip re-reads the fingerprint,
+compares against the stored syndrome, finds exactly which bits drifted and flips them back — and only
+then hashes the result into a key. If the drift exceeds what the code can fix, the system raises a
+failure, and that in itself is worth paying attention to.</p>
+<p lang="vi">Trong thực tế, người ta ổn định phần thô trước — bỏ phiếu nhiều lần, đánh dấu những ô
+hay dao động — rồi mới để mã sửa lỗi lo phần còn lại. ECC ở đây không phải để sửa một kênh truyền,
+mà để biến một thứ gần đúng thành một thứ chính xác tuyệt đối.</p>
+<p lang="en">In practice the raw bits are stabilised first — repeated majority voting, masking the
+cells known to be flaky — and only then is the code left to handle the remainder. ECC here is not
+repairing a transmission channel; it is turning something approximately right into something exactly
+right.</p>
+
+<h2><span lang="vi">9. Vách đá và dốc thoải</span><span lang="en">9. A cliff and a slope</span></h2>
+<p lang="vi">Một điểm tôi hay nhắc khi giảng, vì nó đổi cách ta thiết kế hệ thống. BCH có một
+<strong>vách đá</strong>: dưới <em>t</em> lỗi thì sửa đúng gần như tuyệt đối; vượt <em>t</em> một bit
+thôi là hỏng hẳn — và tệ hơn, bộ giải mã có thể "sửa" sang một từ mã sai mà vẫn tưởng mình đúng.
+LDPC thì ngược lại: nó cho một <strong>dốc thoải</strong>, xác suất giải mã thành công giảm dần chứ
+không rơi, nhưng cũng không bao giờ đạt 100%.</p>
+<p lang="en">One point I always stress when teaching, because it changes how systems get designed.
+BCH has a <strong>cliff</strong>: below <em>t</em> errors it is essentially always right; one error
+past <em>t</em> and it fails outright — and worse, the decoder may "correct" towards a wrong codeword
+while believing it succeeded. LDPC is the opposite: it gives a <strong>slope</strong>, where the
+probability of decoding falls gradually rather than dropping, but never reaches 100%.</p>
+<p lang="vi">Hệ quả thực tế rất rõ: cả hai kiểu đều cần một lớp bảo vệ thứ hai, thường là CRC, đặt
+bên trên. Mã sửa lỗi không bao giờ nên là người gác cổng duy nhất.</p>
+<p lang="en">The practical consequence is plain: both kinds need a second layer of protection,
+usually a CRC, sitting on top. An error-correcting code should never be the only guard at the gate.</p>
+
+<h2><span lang="vi">10. Ba điều tôi muốn sinh viên nhớ</span><span lang="en">10. Three things I hope students remember</span></h2>
+<ol lang="vi">
+  <li><strong>Hiểu kênh của mình trước đã.</strong> Lỗi rải rác từng bit, lỗi cụm, hay lỗi kèm
+      thông tin về độ tin cậy? Chọn mã sai kênh thì mã mạnh đến mấy cũng phí.</li>
+  <li><strong>Mọi thứ đều là đánh đổi.</strong> Thêm khả năng sửa thì mất tỉ lệ mã, thêm diện tích,
+      thêm độ trễ, thêm điện. Việc của người thiết kế là tìm điểm cân bằng cho đúng hệ thống của mình.</li>
+  <li><strong>ECC không phải người gác cổng duy nhất.</strong> Vượt quá khả năng, bộ giải mã có thể
+      sai một cách im lặng — và im lặng là kiểu sai nguy hiểm nhất.</li>
+</ol>
+<ol lang="en">
+  <li><strong>Understand your channel first.</strong> Scattered single bits, bursts, or errors that
+      come with reliability information? A strong code aimed at the wrong channel is wasted.</li>
+  <li><strong>Everything is a trade-off.</strong> More correction costs code rate, area, latency and
+      power. The designer's job is finding the balance for their own system.</li>
+  <li><strong>ECC is never the only guard.</strong> Past its limit a decoder can be wrong silently —
+      and silent is the most dangerous way to be wrong.</li>
+</ol>
+
+<h2><span lang="vi">11. Quay lại chỗ bắt đầu</span><span lang="en">11. Back to where this started</span></h2>
+<p lang="vi">Thứ tôi mang được từ phần lượng tử sang công việc hằng ngày không phải là công thức nào
+cả — những công thức ấy nằm ở một thế giới khác hẳn. Thứ mang được là một thói quen suy nghĩ:
+<em>đừng hỏi "dữ liệu có đúng không", hãy hỏi "lỗi trông như thế nào"</em>. Và một sự nghi ngờ
+lành mạnh với bất kỳ bộ giải mã nào không bao giờ chịu báo lỗi — đúng như tôi vẫn viết trong các
+ghi chú khác trên trang này.</p>
+<p lang="en">What I carried from the quantum side into daily work is not any particular formula —
+those live in an entirely different world. What carried over is a habit of thinking: <em>do not ask
+"is the data right", ask "what does the error look like"</em>. And a healthy distrust of any decoder
+that never admits failure — much as I keep writing in the other notes on this site.</p>
+<p lang="vi">Khi dạy phần này cho sinh viên, tôi thường kết bằng một câu hỏi thay vì một kết luận:
+chiếc điện thoại trong túi bạn có DRAM, có bộ nhớ flash, có modem 5G và một cổng USB-C — mỗi thứ
+được bảo vệ bằng mã nào, và vì sao lại là mã đó? Trả lời được câu ấy thì phần lớn bài giảng đã nằm
+trong đầu rồi.</p>
+<p lang="en">When I teach this part I usually close with a question rather than a conclusion: the
+phone in your pocket has DRAM, flash memory, a 5G modem and a USB-C port — which code protects each
+one, and why that code? Answer that, and most of the lecture is already in your head.</p>
+
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li>C. E. Shannon, <em>A Mathematical Theory of Communication</em>, Bell System Technical Journal, 1948.</li>
+  <li>R. W. Hamming, <em>Error Detecting and Error Correcting Codes</em>, Bell System Technical Journal, 1950.</li>
+  <li>P. W. Shor, <em>Scheme for reducing decoherence in quantum computer memory</em>, Physical Review A, 1995
+      — <span lang="vi">khởi đầu của mã sửa lỗi lượng tử.</span><span lang="en">the start of quantum error correction.</span></li>
+  <li>E. Arıkan, <em>Channel Polarization</em>, IEEE Transactions on Information Theory, 2009
+      — <span lang="vi">mã Polar.</span><span lang="en">polar codes.</span></li>
+  <li><span lang="vi">Về phần phần cứng, bài giảng của tôi dựa nhiều vào tài liệu hướng dẫn ISSCC 2018
+      của H.-C. Chang về ECC cho 5G và bộ nhớ, cùng loạt bài nhập môn của S. Southwell (2022).</span>
+      <span lang="en">For the hardware side, my lecture leans on H.-C. Chang's ISSCC 2018 tutorial on
+      ECC for 5G and memory, and on S. Southwell's introductory series (2022).</span></li>
+  <li><a href="md5-rfc1321.html" data-i18n="neutral">MD5</a>
+      — <span lang="vi">ghi chú cùng tinh thần: vì sao một bộ kiểm tra phải chứng minh được nó biết báo đỏ.</span>
+      <span lang="en">a note in the same spirit: why a test suite must prove it can go red.</span></li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← AI, Lượng tử &amp; Mã sửa lỗi</span><span lang="en">← AI, Quantum &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
