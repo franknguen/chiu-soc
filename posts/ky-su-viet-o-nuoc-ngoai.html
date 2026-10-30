@@ -116,17 +116,22 @@ li{ margin-bottom:8px; }
 .diagram img{ display:block; width:100%; height:auto; border-radius:14px;
   border:1px solid rgba(20,83,143,.14); background:#f7f9fc; }
 .diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; }
-.dl{
-  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
-  margin:20px 0 24px; padding:16px 18px;
-  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.16); border-radius:14px;
+/* PDF đọc ngay trên trang (ẩn thanh công cụ của trình xem) */
+.pdfview{ margin:20px 0 10px; }
+.pdfview iframe{
+  display:block; width:100%; height:clamp(380px, 74vh, 700px);
+  border:1px solid rgba(20,83,143,.18); border-radius:14px; background:#f7f9fc;
 }
-.dl a{
-  font-size:.9em; font-weight:700; color:#fff; text-decoration:none;
-  padding:8px 16px; border-radius:999px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
+.pdfview-note{
+  display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
+  margin:10px 0 26px; font-size:.83em; color:var(--muted); line-height:1.6;
 }
-.dl .meta-note{ font-size:.82em; color:var(--muted); flex:1 1 220px; margin:0; }
+.pdfview-note a{
+  font-weight:700; color:var(--accent); text-decoration:none;
+  padding:5px 14px; border-radius:999px; background:rgba(20,83,143,.08);
+}
+.pdfview-note a:hover{ background:rgba(20,83,143,.15); }
+.pdfview-note .meta-note{ flex:1 1 240px; margin:0; }
 
 .tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
 table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
@@ -482,17 +487,18 @@ can purchase. <strong>What does transfer</strong>: the mechanism for connecting 
 tied to industry; and the state carrying the infrastructure no small company can carry. None of
 those three requires being rich first. They require doing things in the right order.</p>
 
-<div class="dl">
-  <a href="assets/k-belt-ttt6-2025.pdf" download>
-    <span lang="vi">Tải bản trình bày (PDF, 2,9 MB)</span><span lang="en">Download the slides (PDF, 2.9 MB)</span></a>
-  <p class="meta-note">
-    <span lang="vi">Bản trình bày của tôi tại Diễn đàn, ngày 19/7/2025 — đăng nguyên trạng, không
-      chỉnh sửa. Một vài hình trong đó trích từ tài liệu công khai của phía Hàn Quốc và được ghi
-      nguồn ngay trên slide.</span>
-    <span lang="en">My own slides from the Forum, 19 July 2025 — posted as presented, unedited. A few
-      figures inside are taken from public Korean material and are credited on the slide itself.</span>
-  </p>
-</div>
+<figure class="pdfview">
+  <iframe src="assets/k-belt-ttt6-2025.pdf#toolbar=0&amp;navpanes=0&amp;statusbar=0&amp;view=FitH"
+          title="K-Belt presentation slides, July 2025" loading="lazy"></iframe>
+</figure>
+<p class="pdfview-note">
+  <a href="assets/k-belt-ttt6-2025.pdf#toolbar=0&amp;navpanes=0&amp;view=FitH" target="_blank" rel="noopener"
+     ><span lang="vi">Mở trong tab mới</span><span lang="en">Open in a new tab</span></a>
+  <span class="meta-note">
+    <span lang="vi">Bản trình bày tại Diễn đàn, ngày 19/7/2025 — đăng nguyên trạng, không chỉnh sửa. Một vài hình trích từ tài liệu công khai phía Hàn Quốc, ghi nguồn ngay trên slide. Nếu khung không hiển thị trên điện thoại, hãy dùng nút mở tab mới.</span>
+    <span lang="en">My slides from the Forum, 19 July 2025 — posted as presented, unedited. A few figures are taken from public Korean material and credited on the slide. If the frame does not render on a phone, use the new-tab button.</span>
+  </span>
+</p>
 
 <h2><span lang="vi">6. Bốn đề xuất tôi đưa ra</span><span lang="en">6. The four things I proposed</span></h2>
 <ol lang="vi">
