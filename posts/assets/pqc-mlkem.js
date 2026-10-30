@@ -100,7 +100,9 @@
     return out;
   };
   function hashOf(rate, pad, data, len) { return new Sponge(rate, pad).absorb(data).squeeze(len); }
+  function sha3_224(d) { return hashOf(144, 0x06, d, 28); }
   function sha3_256(d) { return hashOf(136, 0x06, d, 32); }
+  function sha3_384(d) { return hashOf(104, 0x06, d, 48); }
   function sha3_512(d) { return hashOf(72, 0x06, d, 64); }
   function shake256(d, l) { return hashOf(136, 0x1F, d, l); }
   function shake128xof(d) { return new Sponge(168, 0x1F).absorb(d); }
@@ -319,6 +321,28 @@
     return { K: same ? Uint8Array.from(Kp) : Kbar, rejected: !same };
   }
 
+  /* ---------- kiểm tra đầu vào (FIPS 203 §7.2, §7.3) ---------- */
+  function same(a, b) {
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+  function ekCheck(p, ek) {                      // 'OK' | 'TYPE' (độ dài) | 'MODULUS' (hệ số >= q)
+    var k = p.k, i;
+    if (ek.length !== 384 * k + 32) return 'TYPE';
+    for (i = 0; i < k; i++) {
+      var part = ek.subarray(384 * i, 384 * (i + 1));
+      if (!same(byteEncode(byteDecode(part, 12), 12), part)) return 'MODULUS';
+    }
+    return 'OK';
+  }
+  function dkCheck(p, dk) {                      // 'OK' | 'TYPE' (độ dài) | 'HASH' (H(ek) lưu trong dk sai)
+    var k = p.k;
+    if (dk.length !== 768 * k + 96) return 'TYPE';
+    return same(sha3_256(dk.subarray(384 * k, 768 * k + 32)), dk.subarray(768 * k + 32, 768 * k + 64)) ? 'OK' : 'HASH';
+  }
+  function ekFromDk(p, dk) { return Uint8Array.from(dk.subarray(384 * p.k, 768 * p.k + 32)); }
+
   function randomBytes(n) {
     var a = new Uint8Array(n);
     if (root.crypto && root.crypto.getRandomValues) root.crypto.getRandomValues(a);
@@ -330,6 +354,7 @@
     PARAMS: PARAMS, sizes: sizes, randomBytes: randomBytes,
     paramsOf: function (name) { var p = PARAMS[name]; return { name: name, k: p.k, eta1: p.eta1, eta2: p.eta2, du: p.du, dv: p.dv }; },
     keygenInternal: keygenInternal, encapsInternal: encapsInternal, decapsInternal: decapsInternal,
+    ekCheck: ekCheck, dkCheck: dkCheck, ekFromDk: ekFromDk,
     keygen: function (name) { var p = PARAMS[name]; return keygenInternal(p, randomBytes(32), randomBytes(32)); },
     encaps: function (name, ek) { var p = PARAMS[name]; return encapsInternal(p, ek, randomBytes(32)); },
     decaps: function (name, dk, ct) { return decapsInternal(PARAMS[name], dk, ct); },
@@ -337,7 +362,7 @@
   };
   /* tầng Keccak dùng chung cho ML-DSA */
   root.PQCHash = {
-    sha3_256: sha3_256, sha3_512: sha3_512, shake256: shake256,
+    sha3_224: sha3_224, sha3_256: sha3_256, sha3_384: sha3_384, sha3_512: sha3_512, shake256: shake256,
     shake128xof: shake128xof,
     shake256xof: function (d) { return new Sponge(136, 0x1F).absorb(d); },
     randomBytes: randomBytes

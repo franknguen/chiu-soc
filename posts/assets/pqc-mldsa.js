@@ -309,15 +309,48 @@
     for (i = 0; i < ct2.length; i++) if (ct2[i] !== ctilde[i]) return false;
     return true;
   }
+  /* ---------- kiểm tra khoá bí mật, tính lại pk / tr / t0 từ sk ---------- */
+  function skCheck(p, sk) {                    // 'OK' | 'TYPE' (độ dài) | 'RANGE' (hệ số s1/s2 ngoài [-eta, eta])
+    if (sk.length !== sizes(p).sk) return 'TYPE';
+    var d = skDecode(p, sk), polys = d[3].concat(d[4]), i, j;
+    for (i = 0; i < polys.length; i++) for (j = 0; j < N; j++) if (Math.abs(polys[i][j]) > p.eta) return 'RANGE';
+    return 'OK';
+  }
+  function recompute(p, sk) {                  // t = A·s1 + s2 → (t1, t0): pk tính lại, tr và t0 có khớp sk không
+    var d = skDecode(p, sk), rho = d[0], tr = d[2], s1 = d[3], s2 = d[4], t0 = d[5], i, j;
+    var A = expandA(p, rho);
+    var t = matVec(A, s1.map(ntt), p.k, p.l).map(function (x, idx) { return padd(intt(x), norm(s2[idx])); });
+    var t1 = [], t0ok = true;
+    for (i = 0; i < p.k; i++) {
+      var a1 = new Int32Array(N);
+      for (j = 0; j < N; j++) { var pr = power2round(t[i][j]); a1[j] = pr[0]; if (pr[1] !== t0[i][j]) t0ok = false; }
+      t1.push(a1);
+    }
+    var pk = pkEncode(p, rho, t1), tr2 = H.shake256(pk, 64), trok = true;
+    for (i = 0; i < 64; i++) if (tr2[i] !== tr[i]) trok = false;
+    return { pk: pk, trOk: trok, t0Ok: t0ok };
+  }
+
   /* ---------- M' : ML-DSA thuần (Alg. 2) và HashML-DSA (Alg. 4) ---------- */
-  var PH = {                                   // arc của OID 2.16.840.1.101.3.4.2.<arc>
-    'SHA2-256':  { arc: 1,  fn: function (m) { return root.PQCSHA2.sha256(m); } },
-    'SHA2-512':  { arc: 3,  fn: function (m) { return root.PQCSHA2.sha512(m); } },
-    'SHA3-256':  { arc: 8,  fn: function (m) { return H.sha3_256(m); } },
-    'SHA3-512':  { arc: 10, fn: function (m) { return H.sha3_512(m); } },
-    'SHAKE-128': { arc: 11, fn: function (m) { return H.shake128xof(m).squeeze(32); } },
-    'SHAKE-256': { arc: 12, fn: function (m) { return H.shake256(m, 64); } }
-  };
+  function S2(name) { return function (m) { return root.PQCSHA2[name](m); }; }
+  var PH_LIST = [                              // FIPS 204 §5.4: arc của OID 2.16.840.1.101.3.4.2.<arc>, số byte ra
+    { id: 'SHA2-224',     label: 'SHA-224',     arc: 4,  bytes: 28, fn: S2('sha224') },
+    { id: 'SHA2-256',     label: 'SHA-256',     arc: 1,  bytes: 32, fn: S2('sha256') },
+    { id: 'SHA2-384',     label: 'SHA-384',     arc: 2,  bytes: 48, fn: S2('sha384') },
+    { id: 'SHA2-512',     label: 'SHA-512',     arc: 3,  bytes: 64, fn: S2('sha512') },
+    { id: 'SHA2-512/224', label: 'SHA-512/224', arc: 5,  bytes: 28, fn: S2('sha512_224') },
+    { id: 'SHA2-512/256', label: 'SHA-512/256', arc: 6,  bytes: 32, fn: S2('sha512_256') },
+    { id: 'SHA3-224',     label: 'SHA3-224',    arc: 7,  bytes: 28, fn: function (m) { return H.sha3_224(m); } },
+    { id: 'SHA3-256',     label: 'SHA3-256',    arc: 8,  bytes: 32, fn: function (m) { return H.sha3_256(m); } },
+    { id: 'SHA3-384',     label: 'SHA3-384',    arc: 9,  bytes: 48, fn: function (m) { return H.sha3_384(m); } },
+    { id: 'SHA3-512',     label: 'SHA3-512',    arc: 10, bytes: 64, fn: function (m) { return H.sha3_512(m); } },
+    { id: 'SHAKE-128',    label: 'SHAKE128',    arc: 11, bytes: 32, fn: function (m) { return H.shake128xof(m).squeeze(32); } },
+    { id: 'SHAKE-256',    label: 'SHAKE256',    arc: 12, bytes: 64, fn: function (m) { return H.shake256(m, 64); } }
+  ];
+  var PH = {};
+  PH_LIST.forEach(function (e) { PH[e.id] = e; });
+  /* hàm băm chỉ được dùng khi cho >= lambda bit chống va chạm: (số bit ra) / 2 >= lambda */
+  function prehashAllowed(p, id) { var e = PH[id]; return !!e && e.bytes * 4 >= p.lam; }
   function oidDer(arc) { return new Uint8Array([0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, arc]); }
   function prepare(msg, ctx, ph) {
     ctx = ctx || new Uint8Array(0);
@@ -332,7 +365,8 @@
   root.MLDSA = {
     PARAMS: PARAMS, sizes: sizes, prepare: prepare,
     keygenInternal: keygenInternal, signInternal: signInternal, verifyInternal: verifyInternal,
-    PH_NAMES: Object.keys(PH), oidDer: oidDer,
+    PH_NAMES: Object.keys(PH), PH_LIST: PH_LIST, oidDer: oidDer, prehashAllowed: prehashAllowed,
+    skCheck: skCheck, recompute: recompute,
     keygen: function (name, seed) { return keygenInternal(PARAMS[name], seed || H.randomBytes(32)); },
     sign: function (name, sk, msg, ctx, ph, rnd) {
       return signInternal(PARAMS[name], sk, prepare(msg, ctx, ph), rnd || H.randomBytes(32));

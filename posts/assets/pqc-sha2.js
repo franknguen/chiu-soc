@@ -1,6 +1,8 @@
-/* SHA-256 và SHA-512 (FIPS 180-4) cho tuỳ chọn pre-hash của HashML-DSA.
+/* Họ SHA-2 (FIPS 180-4) cho tuỳ chọn pre-hash của HashML-DSA: SHA-224, SHA-256, SHA-384, SHA-512,
+   SHA-512/224, SHA-512/256.
    Mọi hằng số được TÍNH khi nạp bằng BigInt (căn bậc hai / bậc ba nguyên của các số nguyên tố),
-   không chép bảng — chép 80 hằng số 64 bit bằng tay là cách chắc chắn để lọt một lỗi đánh máy. */
+   không chép bảng — chép 80 hằng số 64 bit bằng tay là cách chắc chắn để lọt một lỗi đánh máy.
+   IV của SHA-512/t cũng được tính đúng như FIPS 180-4 §5.3.6: chạy SHA-512 (IV XOR a5…a5) trên chuỗi "SHA-512/t". */
 (function (root) {
   'use strict';
 
@@ -33,6 +35,7 @@
   var K256 = new Uint32Array(64), H256 = new Uint32Array(8);
   var K512h = new Uint32Array(80), K512l = new Uint32Array(80);
   var H512h = new Uint32Array(8),  H512l = new Uint32Array(8);
+  var H224 = new Uint32Array(8), H384h = new Uint32Array(8), H384l = new Uint32Array(8);
   (function () {
     var i, v;
     for (i = 0; i < 64; i++) K256[i] = Number(frac(PR[i], 3, 32));
@@ -45,6 +48,11 @@
       v = frac(PR[i], 2, 64);
       H512h[i] = Number(v >> 32n); H512l[i] = Number(v & 0xFFFFFFFFn);
     }
+    for (i = 0; i < 8; i++) {                 // số nguyên tố thứ 9..16: SHA-384 lấy 64 bit, SHA-224 lấy 32 bit thấp
+      v = frac(PR[i + 8], 2, 64);
+      H384h[i] = Number(v >> 32n); H384l[i] = Number(v & 0xFFFFFFFFn);
+      H224[i] = H384l[i];
+    }
   })();
 
   function pad(msgLen, blockBytes, lenBytes) {
@@ -53,14 +61,14 @@
     return 1 + padLen + lenBytes;
   }
 
-  function sha256(msg) {
+  function sha256core(msg, iv, outLen) {
     var rot = function (x, n) { return ((x >>> n) | (x << (32 - n))) >>> 0; };
     var tail = pad(msg.length, 64, 8), buf = new Uint8Array(msg.length + tail);
     buf.set(msg); buf[msg.length] = 0x80;
     var bits = msg.length * 8;
     buf[buf.length - 4] = (bits >>> 24) & 0xFF; buf[buf.length - 3] = (bits >>> 16) & 0xFF;
     buf[buf.length - 2] = (bits >>> 8) & 0xFF;  buf[buf.length - 1] = bits & 0xFF;
-    var H = Uint32Array.from(H256), w = new Uint32Array(64), i, t;
+    var H = Uint32Array.from(iv), w = new Uint32Array(64), i, t;
     for (var off = 0; off < buf.length; off += 64) {
       for (i = 0; i < 16; i++)
         w[i] = (buf[off + 4 * i] << 24 | buf[off + 4 * i + 1] << 16 | buf[off + 4 * i + 2] << 8 | buf[off + 4 * i + 3]) >>> 0;
@@ -88,10 +96,10 @@
       out[4 * i] = (H[i] >>> 24) & 0xFF; out[4 * i + 1] = (H[i] >>> 16) & 0xFF;
       out[4 * i + 2] = (H[i] >>> 8) & 0xFF; out[4 * i + 3] = H[i] & 0xFF;
     }
-    return out;
+    return out.slice(0, outLen);
   }
 
-  function sha512(msg) {
+  function sha512core(msg, ivh, ivl, outLen) {
     /* 64 bit = cặp (hi, lo) 32 bit */
     var hi = new Uint32Array(80), lo = new Uint32Array(80);
     function rotrH(h, l, n) { return n < 32 ? ((h >>> n) | (l << (32 - n))) : ((l >>> (n - 32)) | (h << (64 - n))); }
@@ -102,7 +110,7 @@
     buf[buf.length - 5] = (bits / 0x100000000) & 0xFF;
     buf[buf.length - 4] = (bits >>> 24) & 0xFF; buf[buf.length - 3] = (bits >>> 16) & 0xFF;
     buf[buf.length - 2] = (bits >>> 8) & 0xFF;  buf[buf.length - 1] = bits & 0xFF;
-    var Hh = Uint32Array.from(H512h), Hl = Uint32Array.from(H512l), i;
+    var Hh = Uint32Array.from(ivh), Hl = Uint32Array.from(ivl), i;
     for (var off = 0; off < buf.length; off += 128) {
       for (i = 0; i < 16; i++) {
         hi[i] = (buf[off + 8 * i] << 24 | buf[off + 8 * i + 1] << 16 | buf[off + 8 * i + 2] << 8 | buf[off + 8 * i + 3]) >>> 0;
@@ -158,8 +166,30 @@
       out[8 * i + 4] = (Hl[i] >>> 24) & 0xFF; out[8 * i + 5] = (Hl[i] >>> 16) & 0xFF;
       out[8 * i + 6] = (Hl[i] >>> 8) & 0xFF;  out[8 * i + 7] = Hl[i] & 0xFF;
     }
-    return out;
+    return out.slice(0, outLen);
   }
 
-  root.PQCSHA2 = { sha256: sha256, sha512: sha512 };
+  /* IV của SHA-512/t (FIPS 180-4 §5.3.6): SHA-512 với IV XOR a5a5…a5 trên chuỗi ASCII "SHA-512/t" */
+  function ivFor512t(t) {
+    var ih = new Uint32Array(8), il = new Uint32Array(8), i;
+    for (i = 0; i < 8; i++) { ih[i] = (H512h[i] ^ 0xA5A5A5A5) >>> 0; il[i] = (H512l[i] ^ 0xA5A5A5A5) >>> 0; }
+    var name = 'SHA-512/' + t, b = new Uint8Array(name.length);
+    for (i = 0; i < name.length; i++) b[i] = name.charCodeAt(i);
+    var d = sha512core(b, ih, il, 64), oh = new Uint32Array(8), ol = new Uint32Array(8);
+    for (i = 0; i < 8; i++) {
+      oh[i] = (d[8 * i] << 24 | d[8 * i + 1] << 16 | d[8 * i + 2] << 8 | d[8 * i + 3]) >>> 0;
+      ol[i] = (d[8 * i + 4] << 24 | d[8 * i + 5] << 16 | d[8 * i + 6] << 8 | d[8 * i + 7]) >>> 0;
+    }
+    return [oh, ol];
+  }
+  var IV224t = ivFor512t(224), IV256t = ivFor512t(256);
+
+  root.PQCSHA2 = {
+    sha224: function (m) { return sha256core(m, H224, 28); },
+    sha256: function (m) { return sha256core(m, H256, 32); },
+    sha384: function (m) { return sha512core(m, H384h, H384l, 48); },
+    sha512: function (m) { return sha512core(m, H512h, H512l, 64); },
+    sha512_224: function (m) { return sha512core(m, IV224t[0], IV224t[1], 28); },
+    sha512_256: function (m) { return sha512core(m, IV256t[0], IV256t[1], 32); }
+  };
 })(typeof window !== 'undefined' ? window : globalThis);

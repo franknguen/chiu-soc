@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Thử ML-KEM và ML-DSA ngay trên trình duyệt — ChiU·SoC</title>
-<meta name="description" content="Máy tính PQC chạy hoàn toàn trong trình duyệt: ML-KEM (FIPS 203) trao đổi khoá và ML-DSA (FIPS 204) ký số, cả ba bộ tham số mỗi loại, kèm nút tự kiểm chứng với vector tất định."/>
+<meta name="description" content="Máy tính PQC chạy hoàn toàn trong trình duyệt: ML-KEM (FIPS 203) trao đổi khoá năm bước và ML-DSA (FIPS 204) ký số có ngữ cảnh và pre-hash, nạp file khoá PEM / DER, kiểm tra cặp khoá, bộ chuyển đổi dữ liệu, kèm nút tự kiểm chứng."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
@@ -120,9 +120,10 @@ li{ margin-bottom:8px; }
 /* ===== máy tính PQC ===== */
 .selftest{
   display:flex; flex-wrap:wrap; gap:12px; align-items:center;
-  margin:20px 0 26px; padding:16px 18px; border-radius:14px;
+  margin:20px 0 10px; padding:16px 18px; border-radius:14px;
   background:rgba(42,157,143,.07); border:1px solid rgba(42,157,143,.28);
 }
+.st-note{ flex:1 1 260px; font-size:.84em; color:var(--muted); line-height:1.6; }
 .btn{
   font:inherit; font-size:.88em; font-weight:700; cursor:pointer;
   color:#fff; border:0; padding:9px 18px; border-radius:999px;
@@ -130,6 +131,20 @@ li{ margin-bottom:8px; }
 }
 .btn:disabled{ opacity:.5; cursor:default; }
 .btn.ghost{ background:none; color:var(--accent); border:1px solid rgba(20,83,143,.3); }
+.btn.sm{ font-size:.8em; padding:6px 13px; }
+.hexbox{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.78em; line-height:1.6; white-space:pre-wrap; word-break:break-all;
+  background:#0f1b2d; color:#9fd0c8; border-radius:10px;
+  padding:10px 12px; margin:8px 0 0; max-height:200px; overflow:auto;
+}
+.pill{ display:inline-block; font-size:.78em; font-weight:700; padding:3px 11px; border-radius:999px; }
+.pill.ok{ background:rgba(42,157,143,.16); color:#15695f; }
+.pill.bad{ background:rgba(190,30,45,.12); color:#9b1d28; }
+.pill.wait{ background:rgba(234,179,8,.16); color:#8a6100; }
+.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35);
+  padding:12px 16px; border-radius:12px; font-size:.9em; }
+
 .tabs{ display:flex; gap:8px; margin:26px 0 0; flex-wrap:wrap; }
 .tab{
   font:inherit; font-size:.9em; font-weight:700; cursor:pointer;
@@ -139,58 +154,110 @@ li{ margin-bottom:8px; }
 .tab[aria-selected="true"]{ color:var(--accent); box-shadow:inset 0 3px 0 var(--accent2); }
 .panel{
   border:1px solid rgba(20,83,143,.2); border-radius:0 14px 14px 14px;
-  padding:20px 22px; background:#fff; margin-bottom:26px;
+  padding:18px 18px 14px; background:#fbfcfe; margin-bottom:26px;
 }
 .panel[hidden]{ display:none; }
-.ctrl{ display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; margin-bottom:18px; }
-.ctrl label{ font-size:.86em; font-weight:700; color:var(--muted); }
-.ctrl select, .ctrl input[type=text]{
-  font:inherit; font-size:.9em; padding:7px 12px; border-radius:10px;
-  border:1px solid rgba(20,83,143,.25); background:#fbfcfe; color:var(--text);
+.bar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin:0 0 14px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.chips-l{ font-size:.74rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:6px; }
+.chip{ position:relative; display:inline-flex; }
+.chip input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+.chip > span{
+  font-size:.8em; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid rgba(20,83,143,.25); color:var(--accent); background:#fff; white-space:nowrap;
 }
-.ctrl input[type=text]{ flex:1 1 260px; }
-.step{
-  border-left:3px solid var(--accent2); padding:12px 0 12px 16px; margin:0 0 14px;
-}
-.step h4{ margin:0 0 4px; font-size:.95rem; }
-.step .hint{ font-size:.84em; color:var(--muted); margin:0 0 10px; }
-.kv{ display:grid; grid-template-columns:auto 1fr; gap:4px 14px; font-size:.86em; margin:10px 0 0; }
-.kv dt{ color:var(--muted); font-weight:600; }
-.kv dd{ margin:0; font-variant-numeric:tabular-nums; }
-.hexbox{
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:.78em; line-height:1.6; word-break:break-all;
-  background:#0f1b2d; color:#9fd0c8; border-radius:10px;
-  padding:10px 12px; margin:8px 0 0; max-height:116px; overflow:auto;
-}
-.pill{ display:inline-block; font-size:.78em; font-weight:700; padding:3px 11px; border-radius:999px; }
-.pill.ok{ background:rgba(42,157,143,.16); color:#15695f; }
-.pill.bad{ background:rgba(190,30,45,.12); color:#9b1d28; }
-.pill.wait{ background:rgba(234,179,8,.16); color:#8a6100; }
-.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35);
-  padding:12px 16px; border-radius:12px; font-size:.9em; }
+.chip input:checked + span{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input:focus-visible + span{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.chip input:disabled{ cursor:not-allowed; }
+.chip input:disabled + span{ color:#9aa4b1; background:#f3f5f8; border-style:dashed; text-decoration:line-through; }
 
+/* năm bước của trao đổi khoá: bên nhận lệch trái, bên gửi lệch phải */
+.flow{ display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:12px 0; }
+.actor{ font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.actor.recv{ grid-column:1/6; color:var(--accent); }
+.actor.send{ grid-column:6/11; color:#1f7f74; text-align:right; }
+.card{
+  min-width:0; background:#fff; border:1px solid rgba(20,83,143,.15); border-radius:14px;
+  padding:14px 16px 4px; transition:box-shadow .2s;
+}
+.card.recv{ grid-column:1/9; border-left:4px solid var(--accent); }
+.card.send{ grid-column:3/11; border-left:4px solid var(--accent2); }
+.card.full{ grid-column:1/-1; border-left:4px solid var(--accent); }
+.card.next{ box-shadow:0 0 0 3px rgba(42,157,143,.28); }
+.card h4{ display:flex; align-items:center; gap:10px; margin:0 0 10px; font-size:.98rem; }
+.no{
+  display:inline-grid; place-items:center; flex:none; width:26px; height:26px; border-radius:50%;
+  background:rgba(20,83,143,.1); color:var(--accent); font-size:.8rem; font-weight:800;
+}
+.card.done > h4 .no{ background:var(--accent2); color:#fff; }
+.who{ margin-left:auto; font-size:.7rem; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.arrow{ grid-column:1/-1; display:flex; align-items:center; gap:10px; font-size:.82em; color:var(--muted); }
+.arrow::before, .arrow::after{ content:""; flex:1 1 20px; border-top:2px dashed rgba(20,83,143,.22); }
+.arrow .lbl{
+  display:inline-flex; gap:8px; align-items:center; text-align:center;
+  padding:4px 12px; border-radius:999px; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.arrow.lit .lbl{ background:rgba(42,157,143,.12); color:#15695f; border-color:rgba(42,157,143,.35); }
+.arrow .no{ width:22px; height:22px; font-size:.72rem; }
+@media(max-width:640px){
+  .card.recv, .card.send{ grid-column:1/-1; }
+  .actor{ display:none; }
+}
+.row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 12px; }
+.chk{ display:inline-flex; gap:7px; align-items:center; font-size:.84em; font-weight:600; color:var(--muted); cursor:pointer; }
+.chk input{ accent-color:var(--accent2); width:16px; height:16px; }
+.hint{ font-size:.82em; color:var(--muted); margin:0 0 10px; line-height:1.6; }
 
-.grp{
-  margin:26px 0 10px; font-size:.78rem; font-weight:800; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--accent);
-  padding-bottom:6px; border-bottom:1px solid rgba(20,83,143,.16);
-}
-.fld{ margin:0 0 14px; }
-.fld label{
-  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
-  font-size:.82em; font-weight:700; color:var(--muted); margin-bottom:5px;
-}
-.fld .len{ font-weight:600; font-variant-numeric:tabular-nums; color:var(--accent2); }
+.fld{ margin:0 0 12px; }
+.fld-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:4px; }
+.fld-head label{ font-size:.82em; font-weight:700; color:var(--muted); }
+.cnt{ font-size:.74em; font-weight:700; font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap; }
+.cnt.ok{ color:#15695f; }
+.cnt.warn{ color:#8a6100; }
+.cnt.bad{ color:#9b1d28; }
 .fld textarea{
-  width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:.76em; line-height:1.65; color:#27323f; background:#fbfcfe;
-  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:9px 11px;
-  resize:vertical; word-break:break-all;
+  display:block; width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.74em; line-height:1.6; color:#27323f; background:#fbfcfe;
+  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:8px 10px;
+  resize:vertical; word-break:break-all; max-height:9.6em;
 }
+.fld.big textarea{ max-height:none; min-height:18em; }
 .fld textarea[readonly]{ background:#f1f4f8; color:#55606d; }
 .fld textarea:focus{ outline:2px solid rgba(42,157,143,.45); outline-offset:1px; }
-#kem-status, #dsa-status{ margin-top:12px; }
+.tools{ display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; margin-top:5px; }
+.tools:empty{ display:none; }
+.tools button{
+  font:inherit; font-size:.7em; font-weight:700; cursor:pointer; padding:2px 9px;
+  border-radius:7px; border:1px solid rgba(20,83,143,.18); background:#fff; color:var(--accent);
+}
+.tools button:hover{ background:rgba(20,83,143,.07); }
+.tools button[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.tools .gap{ flex:1 1 8px; }
+.tools .flash{ font-size:.72em; font-weight:700; color:#15695f; }
+
+.result{
+  grid-column:1/-1; margin:8px 0 4px; padding:11px 14px; border-radius:12px;
+  font-size:.9em; line-height:1.6; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.result.ok{ background:rgba(42,157,143,.1); border-color:rgba(42,157,143,.38); color:#11574f; }
+.result.bad{ background:rgba(190,30,45,.06); border-color:rgba(190,30,45,.3); color:#8c1a24; }
+.result.info{ color:#2d3748; }
+.result .sub{ display:block; font-size:.9em; color:var(--muted); margin-top:2px; }
+.result .ic{ font-weight:800; margin-right:6px; }
+.pairline{ font-size:.84em; margin:2px 0 12px; padding:9px 12px; border-radius:10px; background:#f6f8fb; }
+.pairline:empty{ display:none; }
+.pairline.ok{ background:rgba(42,157,143,.09); color:#11574f; }
+.pairline.bad{ background:rgba(190,30,45,.06); color:#8c1a24; }
+.pairline summary{ cursor:pointer; font-size:.92em; color:var(--muted); margin-top:3px; }
+.pairline ul{ list-style:none; padding:0; margin:6px 0 2px; }
+.pairline li{ margin:0 0 3px; color:#2d3748; }
+.pairline li b{ display:inline-block; width:1.4em; }
+.ph-note{ font-size:.82em; color:#8a6100; margin:6px 0 0; }
+.ph-note:empty{ display:none; }
+details.pem{ margin:0 0 12px; font-size:.84em; }
+details.pem summary{ cursor:pointer; color:var(--accent); font-weight:700; }
+details.pem pre{ max-height:190px; font-size:.78em; margin:6px 0 0; }
+#file-in{ display:none; }
 
 /* PDF đọc ngay trên trang (ẩn thanh công cụ của trình xem) */
 .pdfview{ margin:20px 0 10px; }
@@ -282,12 +349,13 @@ footer{
 
 <p class="lede" lang="vi">Hai thuật toán hậu lượng tử đầu tiên được NIST chuẩn hoá là
 <strong>ML-KEM</strong> (trao đổi khoá, FIPS 203) và <strong>ML-DSA</strong> (chữ ký số, FIPS 204).
-Trang này cho bạn chạy thử cả hai — sinh khoá, đóng gói, ký, xác minh — <em>hoàn toàn trong máy
-bạn</em>. Không có máy chủ nào, không byte nào rời khỏi trình duyệt.</p>
+Trang này cho bạn chạy thử cả hai — sinh khoá, đóng gói, ký, xác minh, nạp file khoá, kiểm tra cặp
+khoá — <em>hoàn toàn trong máy bạn</em>. Không có máy chủ nào, không byte nào rời khỏi trình duyệt.</p>
 <p class="lede" lang="en">The first two post-quantum algorithms standardised by NIST are
 <strong>ML-KEM</strong> (key exchange, FIPS 203) and <strong>ML-DSA</strong> (digital signatures,
-FIPS 204). This page lets you run both — key generation, encapsulation, signing, verification —
-<em>entirely on your own machine</em>. There is no server; no byte leaves your browser.</p>
+FIPS 204). This page lets you run both — key generation, encapsulation, signing, verification, loading
+key files, checking a key pair — <em>entirely on your own machine</em>. There is no server; no byte
+leaves your browser.</p>
 
 <noscript>
   <p class="nojs"><span lang="vi">Phần tính toán cần JavaScript. Phần giải thích bên dưới vẫn đọc được bình thường.</span><span lang="en">The calculator needs JavaScript. The explanations below read fine without it.</span></p>
@@ -296,142 +364,260 @@ FIPS 204). This page lets you run both — key generation, encapsulation, signin
 <div class="selftest">
   <button class="btn" id="bt-selftest" type="button"><span lang="vi">Chạy kiểm chứng</span><span lang="en">Run the self-test</span></button>
   <span id="st-status" class="pill wait"><span lang="vi">chưa chạy</span><span lang="en">not run yet</span></span>
-  <span style="flex:1 1 260px;font-size:.84em;color:var(--muted)">
-    <span lang="vi">Chạy lại 6 bộ tham số với seed cố định và so với giá trị băm lấy từ mô hình
-      tham chiếu đã đối chiếu vector chuẩn của NIST. Bạn tự thấy bằng chứng, không phải tin lời tôi.</span>
-    <span lang="en">Replays all six parameter sets from fixed seeds and compares the digests against a
-      reference model checked against NIST's own vectors. You see the evidence rather than take my word.</span>
+  <span class="st-note">
+    <span lang="vi">Chạy lại sáu bộ tham số, mười hai hàm băm của pre-hash, các phép kiểm đầu vào và khoá
+      mẫu của RFC 9935 / RFC 9881, rồi so với một mô hình tham chiếu đã đối chiếu vector chuẩn của NIST.
+      Bạn tự thấy bằng chứng, không phải tin lời tôi.</span>
+    <span lang="en">Replays all six parameter sets, the twelve pre-hash functions, the input checks and
+      the RFC 9935 / RFC 9881 example keys, and compares them with a reference model checked against
+      NIST's own vectors. You see the evidence rather than take my word.</span>
   </span>
 </div>
 <div id="st-detail" class="hexbox" hidden></div>
+
+<input type="file" id="file-in" aria-hidden="true" tabindex="-1"/>
 
 <div class="tabs" role="tablist">
   <button class="tab" id="tab-kem" type="button" role="tab" aria-selected="true" aria-controls="panel-kem">
     <span lang="vi">Trao đổi khoá · ML-KEM</span><span lang="en">Key exchange · ML-KEM</span></button>
   <button class="tab" id="tab-dsa" type="button" role="tab" aria-selected="false" aria-controls="panel-dsa">
     <span lang="vi">Ký &amp; xác minh · ML-DSA</span><span lang="en">Sign &amp; verify · ML-DSA</span></button>
+  <button class="tab" id="tab-cvt" type="button" role="tab" aria-selected="false" aria-controls="panel-cvt">
+    <span lang="vi">Chuyển đổi dữ liệu</span><span lang="en">Data converter</span></button>
 </div>
 
+<!-- ================================================================ ML-KEM -->
 <section class="panel" id="panel-kem" role="tabpanel" aria-labelledby="tab-kem">
-  <div class="ctrl">
-    <label for="kem-set"><span lang="vi">Bộ tham số</span><span lang="en">Parameter set</span></label>
-    <select id="kem-set" data-i18n="neutral">
-      <option>ML-KEM-512</option><option selected>ML-KEM-768</option><option>ML-KEM-1024</option>
-    </select>
-    <button class="btn" id="kem-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate keys</span></button>
-    <button class="btn ghost" id="kem-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear</span></button>
+  <div class="bar">
+    <div class="chips" role="radiogroup" aria-labelledby="kem-set-l">
+      <span class="chips-l" id="kem-set-l"><span lang="vi">Mức an toàn</span><span lang="en">Security level</span></span>
+      <label class="chip"><input type="radio" name="kem-set" value="ML-KEM-512"/><span>ML-KEM-512</span></label>
+      <label class="chip"><input type="radio" name="kem-set" value="ML-KEM-768" checked/><span>ML-KEM-768</span></label>
+      <label class="chip"><input type="radio" name="kem-set" value="ML-KEM-1024"/><span>ML-KEM-1024</span></label>
+    </div>
+    <button class="btn ghost sm" id="kem-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear all</span></button>
   </div>
 
-  <h4 class="grp"><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
-  <div class="fld">
-    <label for="kem-ek"><span lang="vi">Khoá công khai — ek</span><span lang="en">Public Key — ek</span>
-      <span class="len" id="kem-ek-len"></span></label>
-    <textarea id="kem-ek" rows="3" spellcheck="false" placeholder="hex"></textarea>
-  </div>
-  <div class="fld">
-    <label for="kem-dk"><span lang="vi">Khoá bí mật — dk</span><span lang="en">Private Key — dk</span>
-      <span class="len" id="kem-dk-len"></span></label>
-    <textarea id="kem-dk" rows="3" spellcheck="false" placeholder="hex"></textarea>
-  </div>
+  <div class="flow">
+    <div class="actor recv"><span lang="vi">Bên nhận — giữ cặp khoá</span><span lang="en">Receiver — owns the key pair</span></div>
+    <div class="actor send"><span lang="vi">Bên gửi — chỉ biết khoá công khai</span><span lang="en">Sender — knows only the public key</span></div>
 
-  <h4 class="grp"><span lang="vi">Đóng gói — bên gửi</span><span lang="en">Encapsulation — sender</span></h4>
-  <p class="hint"><span lang="vi">Dùng <em>khoá công khai</em> ở trên. Sinh ra bản mã và khoá chung; chỉ bản mã được gửi đi.</span><span lang="en">Uses the <em>Public Key</em> above. Produces a ciphertext and a shared secret; only the ciphertext travels.</span></p>
-  <button class="btn" id="kem-encaps" type="button"><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span></button>
-  <div class="fld">
-    <label for="kem-ct"><span lang="vi">Bản mã — ct</span><span lang="en">Ciphertext — ct</span>
-      <span class="len" id="kem-ct-len"></span></label>
-    <textarea id="kem-ct" rows="3" spellcheck="false" placeholder="hex"></textarea>
-  </div>
-  <div class="fld">
-    <label for="kem-ss"><span lang="vi">Khoá chung — K</span><span lang="en">Shared Secret — K</span>
-      <span class="len" id="kem-ss-len"></span></label>
-    <textarea id="kem-ss" rows="2" spellcheck="false" placeholder="hex"></textarea>
-  </div>
+    <section class="card recv" id="kem-c1">
+      <h4><span class="no">1</span><span lang="vi">Sinh cặp khoá</span><span lang="en">Key pair</span>
+        <span class="who"><span lang="vi">bên nhận</span><span lang="en">receiver</span></span></h4>
+      <div class="row">
+        <button class="btn" id="kem-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+        <label class="chk"><input type="checkbox" id="kem-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+        <button class="btn ghost sm" id="kem-rfc" type="button"><span lang="vi">Nạp khoá mẫu RFC 9935</span><span lang="en">Load the RFC 9935 example</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-seed">Seed · d ‖ z</label><span class="cnt" id="kem-seed-cnt"></span></div>
+        <textarea id="kem-seed" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-seed-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-ek"><span lang="vi">Khoá đóng gói (công khai) — ek</span><span lang="en">Encapsulation key (public) — ek</span></label><span class="cnt" id="kem-ek-cnt"></span></div>
+        <textarea id="kem-ek" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-ek-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-dk"><span lang="vi">Khoá giải đóng gói (bí mật) — dk</span><span lang="en">Decapsulation key (private) — dk</span></label><span class="cnt" id="kem-dk-cnt"></span></div>
+        <textarea id="kem-dk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-dk-tools"></div>
+      </div>
+      <div class="pairline" id="kem-pair" role="status"></div>
+      <details class="pem" id="kem-pem" hidden><summary><span lang="vi">Xem file PEM vừa nạp</span><span lang="en">View the PEM file just loaded</span></summary><pre id="kem-pem-text"></pre></details>
+    </section>
 
-  <h4 class="grp"><span lang="vi">Giải đóng gói — bên nhận</span><span lang="en">Decapsulation — receiver</span></h4>
-  <p class="hint"><span lang="vi">Dùng <em>khoá bí mật</em> và <em>bản mã</em> ở trên. Bạn có thể sửa bản mã rồi chạy lại để thấy cơ chế từ chối ngầm.</span><span lang="en">Uses the <em>Private Key</em> and the <em>Ciphertext</em> above. Edit the ciphertext and run again to see implicit rejection.</span></p>
-  <button class="btn" id="kem-decaps" type="button"><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span></button>
-  <button class="btn ghost" id="kem-flip" type="button"><span lang="vi">Lật 1 bit của bản mã</span><span lang="en">Flip one bit of the ciphertext</span></button>
-  <div class="fld">
-    <label for="kem-ss2"><span lang="vi">Khoá tính lại — K′</span><span lang="en">Recovered Secret — K′</span>
-      <span class="len" id="kem-ss2-len"></span></label>
-    <textarea id="kem-ss2" rows="2" spellcheck="false" placeholder="hex"></textarea>
+    <div class="arrow" id="kem-a2"><span class="lbl"><span class="no">2</span><span id="kem-a2-txt"></span><span aria-hidden="true">→</span></span></div>
+
+    <section class="card send" id="kem-c3">
+      <h4><span class="no">3</span><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span>
+        <span class="who"><span lang="vi">bên gửi</span><span lang="en">sender</span></span></h4>
+      <div class="row">
+        <button class="btn" id="kem-encaps" type="button"><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span></button>
+        <label class="chk"><input type="checkbox" id="kem-m-rnd" checked/><span lang="vi">m ngẫu nhiên</span><span lang="en">random m</span></label>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-m"><span lang="vi">Bí mật ngẫu nhiên — m</span><span lang="en">Random secret — m</span></label><span class="cnt" id="kem-m-cnt"></span></div>
+        <textarea id="kem-m" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-m-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-ct"><span lang="vi">Bản mã — ct</span><span lang="en">Ciphertext — ct</span></label><span class="cnt" id="kem-ct-cnt"></span></div>
+        <textarea id="kem-ct" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-ct-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-ss"><span lang="vi">Khoá chung của bên gửi — K</span><span lang="en">Shared secret, sender — K</span></label><span class="cnt" id="kem-ss-cnt"></span></div>
+        <textarea id="kem-ss" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-ss-tools"></div>
+      </div>
+      <p class="hint"><span lang="vi">Bản mã được gửi cho bên nhận. Khoá chung ở lại bên gửi và không bao giờ đi trên đường truyền: bên nhận tự tính lại nó.</span><span lang="en">The ciphertext goes to the receiver. The shared secret stays with the sender and never travels: the receiver recomputes it.</span></p>
+    </section>
+
+    <div class="arrow" id="kem-a4"><span class="lbl"><span aria-hidden="true">←</span><span class="no">4</span><span id="kem-a4-txt"></span></span></div>
+
+    <section class="card recv" id="kem-c5">
+      <h4><span class="no">5</span><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span>
+        <span class="who"><span lang="vi">bên nhận</span><span lang="en">receiver</span></span></h4>
+      <div class="row">
+        <button class="btn" id="kem-decaps" type="button"><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span></button>
+        <button class="btn ghost sm" id="kem-flip" type="button"><span lang="vi">Lật 1 bit của bản mã</span><span lang="en">Flip one ciphertext bit</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="kem-ss2"><span lang="vi">Khoá chung của bên nhận — K′</span><span lang="en">Shared secret, receiver — K′</span></label><span class="cnt" id="kem-ss2-cnt"></span></div>
+        <textarea id="kem-ss2" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="kem-ss2-tools"></div>
+      </div>
+    </section>
+
+    <div class="result info" id="kem-result" role="status" aria-live="polite"></div>
   </div>
-  <div id="kem-status"></div>
 </section>
 
+<!-- ================================================================ ML-DSA -->
 <section class="panel" id="panel-dsa" role="tabpanel" aria-labelledby="tab-dsa" hidden>
-  <div class="ctrl">
-    <label for="dsa-set"><span lang="vi">Bộ tham số</span><span lang="en">Parameter set</span></label>
-    <select id="dsa-set" data-i18n="neutral">
-      <option>ML-DSA-44</option><option selected>ML-DSA-65</option><option>ML-DSA-87</option>
-    </select>
-    <button class="btn" id="dsa-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate keys</span></button>
-    <button class="btn ghost" id="dsa-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear</span></button>
+  <div class="bar">
+    <div class="chips" role="radiogroup" aria-labelledby="dsa-set-l">
+      <span class="chips-l" id="dsa-set-l"><span lang="vi">Mức an toàn</span><span lang="en">Security level</span></span>
+      <label class="chip"><input type="radio" name="dsa-set" value="ML-DSA-44"/><span>ML-DSA-44</span></label>
+      <label class="chip"><input type="radio" name="dsa-set" value="ML-DSA-65" checked/><span>ML-DSA-65</span></label>
+      <label class="chip"><input type="radio" name="dsa-set" value="ML-DSA-87"/><span>ML-DSA-87</span></label>
+    </div>
+    <button class="btn ghost sm" id="dsa-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear all</span></button>
   </div>
 
-  <h4 class="grp"><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
-  <div class="fld">
-    <label for="dsa-pk"><span lang="vi">Khoá công khai — pk</span><span lang="en">Public Key — pk</span>
-      <span class="len" id="dsa-pk-len"></span></label>
-    <textarea id="dsa-pk" rows="3" spellcheck="false" placeholder="hex"></textarea>
-  </div>
-  <div class="fld">
-    <label for="dsa-sk"><span lang="vi">Khoá bí mật — sk</span><span lang="en">Private Key — sk</span>
-      <span class="len" id="dsa-sk-len"></span></label>
-    <textarea id="dsa-sk" rows="3" spellcheck="false" placeholder="hex"></textarea>
-  </div>
+  <div class="flow">
+    <section class="card full" id="dsa-c1">
+      <h4><span class="no">1</span><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
+      <div class="row">
+        <button class="btn" id="dsa-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+        <label class="chk"><input type="checkbox" id="dsa-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+        <button class="btn ghost sm" id="dsa-rfc" type="button"><span lang="vi">Nạp khoá mẫu RFC 9881</span><span lang="en">Load the RFC 9881 example</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-seed">Seed · ξ</label><span class="cnt" id="dsa-seed-cnt"></span></div>
+        <textarea id="dsa-seed" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-seed-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-pk"><span lang="vi">Khoá công khai — pk</span><span lang="en">Public key — pk</span></label><span class="cnt" id="dsa-pk-cnt"></span></div>
+        <textarea id="dsa-pk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-pk-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-sk"><span lang="vi">Khoá bí mật — sk</span><span lang="en">Private key — sk</span></label><span class="cnt" id="dsa-sk-cnt"></span></div>
+        <textarea id="dsa-sk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-sk-tools"></div>
+      </div>
+      <div class="pairline" id="dsa-pair" role="status"></div>
+      <details class="pem" id="dsa-pem" hidden><summary><span lang="vi">Xem file PEM vừa nạp</span><span lang="en">View the PEM file just loaded</span></summary><pre id="dsa-pem-text"></pre></details>
+    </section>
 
-  <h4 class="grp"><span lang="vi">Thông điệp</span><span lang="en">Message</span></h4>
-  <div class="ctrl">
-    <label for="dsa-enc"><span lang="vi">Dạng nhập</span><span lang="en">Input as</span></label>
-    <select id="dsa-enc">
-      <option value="text"><span lang="vi">văn bản</span><span lang="en">text</span></option>
-      <option value="hex" data-i18n="neutral">hex</option>
-    </select>
-    <label for="dsa-ctx"><span lang="vi">Ngữ cảnh (ctx, hex, ≤ 255 byte)</span><span lang="en">Context (ctx, hex, ≤ 255 bytes)</span></label>
-    <input type="text" id="dsa-ctx" placeholder="(trống / empty)"/>
-  </div>
-  <div class="fld">
-    <label for="dsa-msg"><span lang="vi">Nội dung</span><span lang="en">Content</span>
-      <span class="len" id="dsa-msg-len"></span></label>
-    <textarea id="dsa-msg" rows="2" spellcheck="false">Hello post-quantum world</textarea>
-  </div>
-  <div class="ctrl">
-    <label for="dsa-ph"><span lang="vi">Pre-hash</span><span lang="en">Pre-hash</span></label>
-    <select id="dsa-ph">
-      <option value="none"><span lang="vi">không — ML-DSA thuần</span><span lang="en">none — pure ML-DSA</span></option>
-      <option value="SHA2-256" data-i18n="neutral">SHA2-256</option>
-      <option value="SHA2-512" data-i18n="neutral">SHA2-512</option>
-      <option value="SHA3-256" data-i18n="neutral">SHA3-256</option>
-      <option value="SHA3-512" data-i18n="neutral">SHA3-512</option>
-      <option value="SHAKE-128" data-i18n="neutral">SHAKE-128</option>
-      <option value="SHAKE-256" data-i18n="neutral">SHAKE-256</option>
-    </select>
-  </div>
-  <div class="fld">
-    <label for="dsa-mp"><span lang="vi">M′ thực sự được ký (tính từ các ô trên)</span><span lang="en">M′ actually signed (computed from the fields above)</span>
-      <span class="len" id="dsa-mp-len"></span></label>
-    <textarea id="dsa-mp" rows="2" spellcheck="false" readonly></textarea>
-  </div>
+    <section class="card full" id="dsa-c2">
+      <h4><span class="no">2</span><span lang="vi">Thông điệp</span><span lang="en">Message</span></h4>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-msg"><span lang="vi">Thông điệp cần ký</span><span lang="en">Message to sign</span></label><span class="cnt" id="dsa-msg-cnt"></span></div>
+        <textarea id="dsa-msg" rows="2" spellcheck="false" autocomplete="off">Hello post-quantum world</textarea>
+        <div class="tools" id="dsa-msg-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-ctx"><span lang="vi">Ngữ cảnh — tuỳ chọn, tối đa 255 byte</span><span lang="en">Context — optional, up to 255 bytes</span></label><span class="cnt" id="dsa-ctx-cnt"></span></div>
+        <textarea id="dsa-ctx" rows="1" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-ctx-tools"></div>
+      </div>
+      <div class="chips" role="radiogroup" aria-labelledby="dsa-ph-l" id="dsa-ph">
+        <span class="chips-l" id="dsa-ph-l">Pre-hash</span>
+        <label class="chip"><input type="radio" name="dsa-ph" value="none" checked/><span><span lang="vi">Không — ML-DSA thuần</span><span lang="en">None — pure ML-DSA</span></span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA2-224"/><span>SHA-224</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA2-256"/><span>SHA-256</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA2-384"/><span>SHA-384</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA2-512"/><span>SHA-512</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA2-512/224"/><span>SHA-512/224</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA2-512/256"/><span>SHA-512/256</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA3-224"/><span>SHA3-224</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA3-256"/><span>SHA3-256</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA3-384"/><span>SHA3-384</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHA3-512"/><span>SHA3-512</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHAKE-128"/><span>SHAKE128</span></label>
+        <label class="chip"><input type="radio" name="dsa-ph" value="SHAKE-256"/><span>SHAKE256</span></label>
+      </div>
+      <p class="ph-note" id="dsa-ph-note" role="status"></p>
+      <p class="hint" id="dsa-ph-why"></p>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-mp"><span lang="vi">M′ — chuỗi byte thực sự được ký</span><span lang="en">M′ — the bytes actually signed</span></label><span class="cnt" id="dsa-mp-cnt"></span></div>
+        <textarea id="dsa-mp" rows="2" spellcheck="false" readonly></textarea>
+        <div class="tools" id="dsa-mp-tools"></div>
+      </div>
+    </section>
 
-  <h4 class="grp"><span lang="vi">Chữ ký</span><span lang="en">Signature</span></h4>
-  <button class="btn" id="dsa-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button>
-  <button class="btn" id="dsa-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
-  <button class="btn ghost" id="dsa-flip" type="button"><span lang="vi">Lật 1 bit của chữ ký</span><span lang="en">Flip one bit of the signature</span></button>
-  <div class="fld">
-    <label for="dsa-sig"><span lang="vi">Chữ ký</span><span lang="en">Signature</span>
-      <span class="len" id="dsa-sig-len"></span></label>
-    <textarea id="dsa-sig" rows="3" spellcheck="false" placeholder="hex"></textarea>
+    <section class="card full" id="dsa-c3">
+      <h4><span class="no">3</span><span lang="vi">Chữ ký</span><span lang="en">Signature</span></h4>
+      <div class="row">
+        <button class="btn" id="dsa-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button>
+        <button class="btn" id="dsa-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
+        <label class="chk"><input type="checkbox" id="dsa-rnd-rnd" checked/><span lang="vi">rnd ngẫu nhiên</span><span lang="en">random rnd</span></label>
+        <button class="btn ghost sm" id="dsa-rnd0" type="button"><span lang="vi">rnd = 0 (ký tất định)</span><span lang="en">rnd = 0 (deterministic)</span></button>
+        <button class="btn ghost sm" id="dsa-flip" type="button"><span lang="vi">Lật 1 bit của chữ ký</span><span lang="en">Flip one signature bit</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-rnd"><span lang="vi">Bí mật ngẫu nhiên của lần ký — rnd</span><span lang="en">Per-signature randomness — rnd</span></label><span class="cnt" id="dsa-rnd-cnt"></span></div>
+        <textarea id="dsa-rnd" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-rnd-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="dsa-sig"><span lang="vi">Chữ ký</span><span lang="en">Signature</span></label><span class="cnt" id="dsa-sig-cnt"></span></div>
+        <textarea id="dsa-sig" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="dsa-sig-tools"></div>
+      </div>
+    </section>
+
+    <div class="result info" id="dsa-result" role="status" aria-live="polite"></div>
   </div>
-  <div id="dsa-status"></div>
+</section>
+
+<!-- ================================================================ bộ chuyển đổi -->
+<section class="panel" id="panel-cvt" role="tabpanel" aria-labelledby="tab-cvt" hidden>
+  <p class="hint"><span lang="vi">Khoá và chữ ký lấy từ nơi khác thường không ở dạng hex: có khi là mảng C trong mã nguồn, mảng Java, hay Base64 trong một file cấu hình. Dán vào đây để đổi qua lại; mỗi ô của hai thẻ kia cũng có sẵn nút đổi định dạng.</span><span lang="en">Keys and signatures copied from elsewhere are often not hex: a C array in source code, a Java array, Base64 in a config file. Paste them here to convert; every field in the other two tabs has the same format buttons.</span></p>
+  <div class="chips" role="radiogroup" aria-labelledby="cvt-in-l">
+    <span class="chips-l" id="cvt-in-l"><span lang="vi">Đầu vào</span><span lang="en">Input</span></span>
+    <label class="chip"><input type="radio" name="cvt-in" value="auto" checked/><span><span lang="vi">Tự nhận (hex / mảng C / Java / thập phân)</span><span lang="en">Auto (hex / C / Java / decimal array)</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-in" value="base64"/><span>Base64</span></label>
+    <label class="chip"><input type="radio" name="cvt-in" value="text"/><span><span lang="vi">Văn bản (UTF-8)</span><span lang="en">Text (UTF-8)</span></span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="cvt-in"><span lang="vi">Dữ liệu vào</span><span lang="en">Input data</span></label><span class="cnt" id="cvt-in-cnt"></span></div>
+    <textarea id="cvt-in" rows="4" spellcheck="false" autocomplete="off">{ 0x50, 0x51, 0x43, -1, 127 }</textarea>
+    <div class="tools" id="cvt-in-tools"></div>
+  </div>
+  <div class="chips" role="radiogroup" aria-labelledby="cvt-out-l">
+    <span class="chips-l" id="cvt-out-l"><span lang="vi">Đầu ra</span><span lang="en">Output</span></span>
+    <label class="chip"><input type="radio" name="cvt-out" value="hex" checked/><span>Hex</span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="HEX"/><span><span lang="vi">Hex hoa</span><span lang="en">Hex upper</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="spaced"/><span><span lang="vi">Hex cách</span><span lang="en">Hex spaced</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="colon"/><span><span lang="vi">Hex hai chấm</span><span lang="en">Hex colon</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="c"/><span><span lang="vi">Mảng C</span><span lang="en">C array</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="java"/><span><span lang="vi">Mảng Java</span><span lang="en">Java array</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="base64"/><span>Base64</span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="text"/><span><span lang="vi">Văn bản</span><span lang="en">Text</span></span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="cvt-out"><span lang="vi">Kết quả</span><span lang="en">Result</span></label><span class="cnt" id="cvt-out-cnt"></span></div>
+    <textarea id="cvt-out" rows="4" spellcheck="false" readonly></textarea>
+    <div class="tools" id="cvt-out-tools"></div>
+  </div>
+  <div class="row"><button class="btn ghost sm" id="cvt-use" type="button"><span lang="vi">Dùng kết quả làm đầu vào</span><span lang="en">Use the result as input</span></button></div>
+  <div class="result info" id="cvt-result" role="status" aria-live="polite"></div>
 </section>
 
 <h2><span lang="vi">Các ô trên màn hình nghĩa là gì</span><span lang="en">What the fields on screen mean</span></h2>
-<p lang="vi">Mọi ô đều sửa được: bạn có thể dán khoá, bản mã hay chữ ký lấy từ nơi khác vào rồi chạy
-tiếp, chứ không bắt buộc đi theo đúng ba bước.</p>
-<p lang="en">Every field is editable: you can paste a key, a ciphertext or a signature from somewhere
-else and carry on, rather than being forced through a fixed three-step wizard.</p>
+<p lang="vi">Mọi ô đều sửa được: bạn có thể dán khoá, bản mã hay chữ ký lấy từ nơi khác (hex, Base64,
+mảng C hay mảng Java, hoặc cả một file PEM) rồi chạy tiếp từ giữa chừng. Bộ đếm cạnh mỗi ô cho biết
+số byte đang có trên số byte cần, và hiện dấu ✓ khi đủ.</p>
+<p lang="en">Every field is editable: paste a key, a ciphertext or a signature from somewhere else (hex,
+Base64, a C or Java array, or a whole PEM file) and carry on from the middle. The counter beside each
+field shows how many bytes it holds out of how many are needed, with a ✓ once it is complete.</p>
 <div class="tbl-wrap">
 <table>
 <thead><tr>
@@ -439,29 +625,109 @@ else and carry on, rather than being forced through a fixed three-step wizard.</
   <th><span lang="vi">Nghĩa</span><span lang="en">What it is</span></th>
 </tr></thead>
 <tbody>
-  <tr><td data-i18n="neutral"><strong>Public Key</strong> · ek / pk</td>
+  <tr><td data-i18n="neutral"><strong>Seed</strong> · d ‖ z, ξ</td>
+      <td><span lang="vi">Toàn bộ cặp khoá được tính ra từ chuỗi này (64 byte với ML-KEM, 32 byte với ML-DSA). Bỏ dấu "seed ngẫu nhiên" và gõ một seed cố định thì lần nào cũng ra đúng cặp khoá đó — tiện để đối chiếu với tài liệu.</span><span lang="en">The whole key pair is computed from this string (64 bytes for ML-KEM, 32 for ML-DSA). Untick "random seed" and type a fixed one, and you get exactly the same key pair every time — handy for comparing against a document.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>ek / pk</strong></td>
       <td><span lang="vi">Khoá công khai — đem gửi cho người khác. Bên gửi dùng nó để đóng gói; người xác minh dùng nó để kiểm chữ ký.</span><span lang="en">The public key — the one you hand out. A sender encapsulates to it; a verifier checks signatures against it.</span></td></tr>
-  <tr><td data-i18n="neutral"><strong>Private Key</strong> · dk / sk</td>
+  <tr><td data-i18n="neutral"><strong>dk / sk</strong></td>
       <td><span lang="vi">Khoá bí mật — không bao giờ rời máy. Dùng để giải đóng gói hoặc để ký.</span><span lang="en">The secret key — it never leaves the machine. Used to decapsulate, or to sign.</span></td></tr>
-  <tr><td data-i18n="neutral"><strong>Ciphertext</strong> · ct</td>
-      <td><span lang="vi">Thứ duy nhất đi trên đường truyền trong trao đổi khoá. Bản thân khoá chung không bao giờ được gửi.</span><span lang="en">The only thing that travels in a key exchange. The shared secret itself is never sent.</span></td></tr>
-  <tr><td data-i18n="neutral"><strong>Shared Secret</strong> · K</td>
-      <td><span lang="vi">32 byte mà hai bên cùng có được. Thường được đưa tiếp vào một hàm dẫn xuất khoá để tạo khoá phiên.</span><span lang="en">The 32 bytes both sides end up with. In practice it is fed into a key-derivation function to make session keys.</span></td></tr>
-  <tr><td data-i18n="neutral"><strong>Message</strong></td>
-      <td><span lang="vi">Nội dung cần ký. Nhập dạng văn bản hoặc dạng hex — hai dạng cho ra chuỗi byte khác nhau, nên chữ ký cũng khác.</span><span lang="en">The content being signed. Enter it as text or as hex — the two give different byte strings, hence different signatures.</span></td></tr>
-  <tr><td data-i18n="neutral"><strong>Context</strong> · ctx</td>
-      <td><span lang="vi">Chuỗi tuỳ chọn tối đa 255 byte, do chuẩn đưa vào để một chữ ký ký trong bối cảnh này không dùng lại được ở bối cảnh khác. Ký với ctx nào thì phải xác minh với đúng ctx đó.</span><span lang="en">An optional string of up to 255 bytes, added by the standard so that a signature made in one setting cannot be replayed in another. Verify with exactly the ctx you signed with.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>m</strong></td>
+      <td><span lang="vi">32 byte ngẫu nhiên do bên gửi chọn cho một lần đóng gói. Cùng ek và cùng m thì luôn ra cùng bản mã và cùng khoá chung.</span><span lang="en">32 random bytes the sender picks for one encapsulation. The same ek and the same m always give the same ciphertext and the same shared secret.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>ct</strong></td>
+      <td><span lang="vi">Bản mã — thứ duy nhất đi trên đường truyền trong trao đổi khoá. Bản thân khoá chung không bao giờ được gửi.</span><span lang="en">The ciphertext — the only thing that travels in a key exchange. The shared secret itself is never sent.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>K / K′</strong></td>
+      <td><span lang="vi">32 byte mà hai bên cùng có được, mỗi bên tự tính. Thường được đưa tiếp vào một hàm dẫn xuất khoá để tạo khoá phiên.</span><span lang="en">The 32 bytes both sides end up with, each computing its own. In practice it is fed into a key-derivation function to make session keys.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Message</strong> · <strong>Context</strong></td>
+      <td><span lang="vi">Thông điệp cần ký, và một chuỗi ngữ cảnh tuỳ chọn tối đa 255 byte. Ngữ cảnh do chuẩn đưa vào để một chữ ký ký trong bối cảnh này không dùng lại được ở bối cảnh khác: ký với ngữ cảnh nào thì phải xác minh với đúng ngữ cảnh đó.</span><span lang="en">The message to sign, and an optional context string of up to 255 bytes. The standard adds the context so that a signature made in one setting cannot be replayed in another: verify with exactly the context you signed with.</span></td></tr>
   <tr><td data-i18n="neutral"><strong>Pre-hash</strong></td>
-      <td><span lang="vi">Chọn giữa <em>ML-DSA thuần</em> (ký thẳng thông điệp) và <em>HashML-DSA</em> (băm thông điệp trước, rồi ký giá trị băm). Dạng pre-hash có ích khi thông điệp rất lớn hoặc khi nó được băm ở một nơi khác.</span><span lang="en">Chooses between <em>pure ML-DSA</em> (sign the message itself) and <em>HashML-DSA</em> (hash the message first, then sign the digest). The pre-hash form helps when the message is huge, or when it is hashed somewhere else entirely.</span></td></tr>
+      <td><span lang="vi">Chọn giữa <em>ML-DSA thuần</em> (ký thẳng thông điệp) và <em>HashML-DSA</em> (băm thông điệp trước, rồi ký giá trị băm). Dạng pre-hash có ích khi thông điệp rất lớn, hoặc khi nó được băm ở một nơi khác.</span><span lang="en">Chooses between <em>pure ML-DSA</em> (sign the message itself) and <em>HashML-DSA</em> (hash the message first, then sign the digest). The pre-hash form helps when the message is huge, or when it is hashed somewhere else entirely.</span></td></tr>
   <tr><td data-i18n="neutral"><strong>M′</strong></td>
-      <td><span lang="vi">Chuỗi byte thực sự được ký, do trang tự dựng từ ba ô trên. Đây là chỗ nhìn thấy rõ nhất khác biệt giữa hai dạng: thuần bắt đầu bằng <code>00</code>, pre-hash bắt đầu bằng <code>01</code> rồi tới mã định danh của hàm băm.</span><span lang="en">The byte string actually signed, assembled by the page from the three fields above. It is where the difference shows most plainly: the pure form starts with <code>00</code>, the pre-hash form starts with <code>01</code> followed by the hash function's identifier.</span></td></tr>
+      <td><span lang="vi">Chuỗi byte thực sự được ký, do trang tự dựng từ thông điệp, ngữ cảnh và pre-hash. Dạng thuần bắt đầu bằng <code>00</code> rồi độ dài ngữ cảnh; dạng pre-hash bắt đầu bằng <code>01</code>, rồi ngữ cảnh, rồi mã định danh của hàm băm, rồi giá trị băm.</span><span lang="en">The byte string actually signed, assembled by the page from the message, the context and the pre-hash choice. The pure form starts with <code>00</code> and the context length; the pre-hash form starts with <code>01</code>, then the context, the hash function's identifier and the digest.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>rnd</strong></td>
+      <td><span lang="vi">32 byte ngẫu nhiên trộn vào mỗi lần ký, nên ký hai lần cùng một thông điệp ra hai chữ ký khác nhau — cả hai đều hợp lệ. Đặt rnd = 0 thì chữ ký là tất định: cùng khoá, cùng thông điệp thì cùng chữ ký.</span><span lang="en">32 random bytes mixed into every signature, so signing the same message twice gives two different signatures — both valid. Set rnd = 0 and signing is deterministic: same key, same message, same signature.</span></td></tr>
 </tbody>
 </table>
 </div>
-<p lang="vi">Thử đổi một ký tự trong ngữ cảnh rồi bấm xác minh mà không ký lại — chữ ký bị từ chối
+<p lang="vi">Thử đổi một ký tự trong ngữ cảnh rồi bấm Xác minh mà không ký lại — chữ ký bị từ chối
 ngay, dù thông điệp không đổi. Đó chính là tác dụng của ngữ cảnh.</p>
-<p lang="en">Change one character of the context and press verify without re-signing — the signature
+<p lang="en">Change one character of the context and press Verify without re-signing — the signature
 is rejected at once, even though the message is untouched. That is exactly what the context is for.</p>
+
+<h2><span lang="vi">Vì sao một số hàm băm bị gạch</span><span lang="en">Why some hash functions are struck out</span></h2>
+<p lang="vi">Ký kiểu pre-hash thì độ an toàn của chữ ký không thể cao hơn độ an toàn của hàm băm. Thứ
+cần ở đây là <em>chống va chạm</em> — khó tìm hai thông điệp có cùng giá trị băm — và với một hàm băm
+cho ra n bit thì mức chống va chạm chỉ còn khoảng n/2 bit (cùng lý do với "nghịch lý ngày sinh": một
+lớp 23 người đã có quá nửa khả năng có hai người trùng ngày sinh). FIPS 204 vì vậy đòi n/2 không nhỏ
+hơn mức an toàn λ của bộ tham số: 128 bit cho ML-DSA-44, 192 cho ML-DSA-65, 256 cho ML-DSA-87.</p>
+<p lang="en">With pre-hash signing, the signature can be no stronger than the hash. What matters here is
+<em>collision resistance</em> — how hard it is to find two messages with the same digest — and for a
+hash with an n-bit output that is only about n/2 bits (the same reason as the "birthday paradox": a
+class of 23 people already has better than even odds of two sharing a birthday). FIPS 204 therefore
+requires n/2 to be at least the parameter set's security level λ: 128 bits for ML-DSA-44, 192 for
+ML-DSA-65, 256 for ML-DSA-87.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Bộ tham số</span><span lang="en">Parameter set</span></th>
+  <th>λ</th>
+  <th><span lang="vi">Hàm băm được dùng</span><span lang="en">Hash functions allowed</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">ML-DSA-44</td><td class="num">128</td><td data-i18n="neutral">SHA-256, SHA-384, SHA-512, SHA-512/256, SHA3-256, SHA3-384, SHA3-512, SHAKE128, SHAKE256</td></tr>
+  <tr><td data-i18n="neutral">ML-DSA-65</td><td class="num">192</td><td data-i18n="neutral">SHA-384, SHA-512, SHA3-384, SHA3-512, SHAKE256</td></tr>
+  <tr><td data-i18n="neutral">ML-DSA-87</td><td class="num">256</td><td data-i18n="neutral">SHA-512, SHA3-512, SHAKE256</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Đang chọn một hàm mà đổi lên mức cao hơn làm nó trở nên quá yếu thì trang tự đặt lại về
+"Không" và nói rõ vì sao, thay vì lặng lẽ ký bằng một hàm không đạt.</p>
+<p lang="en">If you raise the level while a function is selected and that makes it too weak, the page
+resets the choice to "None" and says why, rather than quietly signing with a function that falls short.</p>
+
+<h2><span lang="vi">Nạp file khoá và kiểm tra cặp khoá</span><span lang="en">Loading key files and checking a key pair</span></h2>
+<p lang="vi">Nút "Nạp file" ở các ô khoá đọc được file PEM hoặc DER: khoá công khai, khoá bí mật
+PKCS#8 ở cả ba dạng mà RFC 9935 (ML-KEM) và RFC 9881 (ML-DSA) định nghĩa — chỉ seed, chỉ khoá mở rộng,
+hoặc cả hai — chứng chỉ X.509, và khoá thô ở dạng nhị phân, hex hay Base64. Thuật toán được nhận theo
+mã định danh (OID) trong file; khoá thô thì theo độ dài. Nạp nhầm khoá ML-DSA vào thẻ ML-KEM thì trang
+bảo bạn sang thẻ kia. File chứa cả seed lẫn khoá mở rộng mà hai thứ không khớp nhau thì bị từ chối —
+hai RFC bắt buộc như vậy.</p>
+<p lang="en">The "Load file" button on the key fields reads PEM or DER files: public keys, PKCS#8 private
+keys in all three forms that RFC 9935 (ML-KEM) and RFC 9881 (ML-DSA) define — seed only, expanded key
+only, or both — X.509 certificates, and raw keys in binary, hex or Base64. The algorithm is taken from
+the identifier (OID) in the file; a raw key is recognised by its length. Load an ML-DSA key into the
+ML-KEM tab and the page tells you to use the other tab. A file holding both a seed and an expanded key
+that do not match is rejected — both RFCs require it.</p>
+<p lang="vi">Dòng kiểm tra dưới hai ô khoá trả lời một câu: khoá bí mật này có thuộc về khoá công khai
+này không? Có ba câu trả lời: <em>khớp</em>; <em>thuộc về một cặp khác</em> (khoá công khai suy ra từ
+khoá bí mật không trùng ô khoá công khai); và <em>khoá bí mật bị hỏng</em> (không qua một phép kiểm
+nhất quán). Mở "chi tiết" để xem từng phép kiểm. Có hai chỗ đáng chú ý:</p>
+<p lang="en">The check line under the two key fields answers one question: does this private key belong
+to this public key? There are three answers: <em>match</em>; <em>belongs to a different key pair</em>
+(the public key derived from the private key differs from the Public key field); and <em>the private
+key is corrupted</em> (it fails a consistency check). Open "details" to see each check. Two points are
+worth noticing:</p>
+<ul lang="vi">
+  <li>Một khoá bí mật ML-DSA chứa sẵn một phần <code>t0</code> có thể tính lại từ các phần khác. Ví dụ
+      thứ ba trong phụ lục C.4 của RFC 9881 là khoá có <code>t0</code> sai: nó vẫn ký được, chữ ký vẫn
+      xác minh đúng, nên phép thử "ký rồi xác minh" không thấy gì. Chỉ phép tính lại <code>t0</code> mới
+      bắt được nó. Bấm thử với khoá đó sẽ thấy dòng "khứ hồi" xanh mà kết luận vẫn đỏ.</li>
+  <li>Khoá bí mật ML-KEM chứa một giá trị <code>z</code> chỉ dùng khi bản mã sai. Đổi <code>z</code> thì
+      cặp khoá vẫn "khớp" và khứ hồi vẫn đúng — chỉ có seed mới cho thấy khoá đã khác. Phần
+      <code>K</code> của khoá bí mật ML-DSA cũng vậy: đổi nó thì khoá vẫn ký và xác minh bình thường. Vì
+      thế dòng kiểm tra còn so seed với cặp khoá khi ô seed có giá trị.</li>
+</ul>
+<ul lang="en">
+  <li>An ML-DSA private key carries a part, <code>t0</code>, that can be recomputed from the others.
+      The third example in Appendix C.4 of RFC 9881 is a key with a wrong <code>t0</code>: it still
+      signs, the signature still verifies, so a "sign then verify" test sees nothing. Only recomputing
+      <code>t0</code> catches it. Try that key and you will see the round-trip line green while the
+      verdict is still red.</li>
+  <li>An ML-KEM private key holds a value <code>z</code> used only when the ciphertext is wrong.
+      Change <code>z</code> and the pair still "matches" and the round trip still succeeds — only the
+      seed reveals that the key has changed. The <code>K</code> part of an ML-DSA private key behaves
+      the same way: change it and the key still signs and verifies normally. That is why the check line
+      also compares the seed with the key pair when the seed field holds a value.</li>
+</ul>
 
 <h2><span lang="vi">Các con số nói lên điều gì</span><span lang="en">What the numbers are telling you</span></h2>
 <p lang="vi">Thứ đập vào mắt người làm phần cứng không phải tốc độ mà là <strong>kích thước</strong>.
@@ -508,34 +774,49 @@ error</strong>. It still returns a perfectly ordinary-looking 32-byte key — ju
 This is deliberate in the standard and is called <em>implicit rejection</em>: a decoder that
 announced "bad ciphertext" would let an attacker send stacks of malformed ciphertexts and recover
 the secret key from the error messages alone.</p>
-<p lang="vi">ML-DSA thì ngược lại: xác minh là một phép kiểm công khai, nên trả thẳng đúng/sai. Bấm
-nút sửa thông điệp sẽ thấy chữ ký lập tức bị từ chối.</p>
+<p lang="vi">ML-DSA thì ngược lại: xác minh là một phép kiểm công khai, nên trả thẳng đúng/sai. Lật một
+bit của chữ ký, hoặc sửa một chữ của thông điệp, rồi bấm Xác minh sẽ thấy chữ ký lập tức bị từ chối.</p>
 <p lang="en">ML-DSA is the opposite: verification is a public check, so it answers true or false
-directly. Press the alter-message button and the signature is rejected at once.</p>
+directly. Flip one bit of the signature, or change one letter of the message, press Verify, and the
+signature is rejected at once.</p>
 
 <h2><span lang="vi">Mã này có đáng tin không</span><span lang="en">Can this code be trusted</span></h2>
-<p lang="vi">Phần tính toán trên trang là mã JavaScript tôi tự viết từ hai văn bản chuẩn, không dùng
-thư viện ngoài. Vì tự viết nên phải tự chứng minh. Tôi làm ba việc:</p>
-<p lang="en">The calculator is JavaScript I wrote myself from the two standards, with no external
-library. Because it is hand-written, it has to be proved. I did three things:</p>
+<p lang="vi">Phần tính toán trên trang là mã JavaScript tôi tự viết từ các văn bản chuẩn (FIPS 203,
+FIPS 204, FIPS 180-4, FIPS 202, RFC 9935, RFC 9881), không dùng thư viện ngoài. Vì tự viết nên phải tự
+chứng minh. Tôi làm bốn việc:</p>
+<p lang="en">The calculator is JavaScript I wrote myself from the standards (FIPS 203, FIPS 204,
+FIPS 180-4, FIPS 202, RFC 9935, RFC 9881), with no external library. Because it is hand-written, it has
+to be proved. I did four things:</p>
 <ul lang="vi">
-  <li>Tầng hàm băm (SHA-3, SHAKE) được so với thư viện chuẩn của Python trên nhiều độ dài — khớp hoàn toàn.</li>
-  <li>Cả sáu bộ tham số được chạy với seed cố định và so <em>từng byte</em> với một mô hình tham chiếu
-      độc lập đã đối chiếu vector chuẩn của NIST — khớp hoàn toàn. Nút "Chạy kiểm chứng" ở đầu trang
-      lặp lại đúng phép so đó ngay trong máy bạn.</li>
-  <li>Tôi cố tình làm hỏng mã mười lần (sai bảng hằng số, sai thứ tự chỉ số, bỏ một phép kiểm) và
-      đòi phép kiểm phải đỏ ở cả mười lần. Một bộ kiểm chưa từng chứng minh được nó biết báo đỏ thì
-      màu xanh của nó chẳng nói lên điều gì.</li>
+  <li>So <em>từng byte</em> với một mô hình tham chiếu độc lập đã đối chiếu vector chuẩn của NIST:
+      mười hai hàm băm ở mười bảy độ dài, cả sáu bộ tham số, HashML-DSA với mọi hàm băm ở cả ba mức,
+      các phép kiểm đầu vào của FIPS 203, phép tính lại khoá công khai từ khoá bí mật, dòng kiểm tra cặp
+      khoá, bộ chuyển đổi dữ liệu, và việc đọc cả 37 khối PEM trong phụ lục C của hai RFC — kể cả bảy
+      khoá cố tình làm hỏng. Kết quả: <span data-i18n="neutral">843/843</span> khớp.</li>
+  <li>Cho một trình duyệt giả lập bấm qua mọi luồng trên trang — <span data-i18n="neutral">101</span>
+      phép kiểm — và sau mỗi cú bấm lại soát xem có câu nào chỉ có một ngôn ngữ không.</li>
+  <li>Cố tình làm hỏng mã <span data-i18n="neutral">40</span> lần (sai bảng hằng số, sai thứ tự chỉ số,
+      bỏ một phép kiểm, đổi dấu một lần quá nhiều…) và đòi phép kiểm phải đỏ ở mọi lần. Một bộ kiểm chưa
+      từng chứng minh được nó biết báo đỏ thì màu xanh của nó chẳng nói lên điều gì.</li>
+  <li>Nút "Chạy kiểm chứng" ở đầu trang lặp lại một phần các phép so đó ngay trong máy bạn, kể cả việc
+      mở rộng khoá mẫu dạng seed của hai RFC và so với khoá công khai in trong chính RFC — một nguồn
+      không phải của tôi.</li>
 </ul>
 <ul lang="en">
-  <li>The hash layer (SHA-3, SHAKE) was compared against Python's standard library at several
-      lengths — an exact match.</li>
-  <li>All six parameter sets were run from fixed seeds and compared <em>byte for byte</em> against an
-      independent reference model that had itself been checked against NIST's own vectors — an exact
-      match. The self-test button at the top repeats that same comparison on your machine.</li>
-  <li>I deliberately broke the code ten times (wrong constant tables, swapped indices, a dropped
-      check) and required the test to go red every time. A suite that has never shown it can go red
-      tells you nothing when it is green.</li>
+  <li>Compared <em>byte for byte</em> against an independent reference model that had itself been
+      checked against NIST's own vectors: the twelve hash functions at seventeen lengths, all six
+      parameter sets, HashML-DSA with every hash at all three levels, the FIPS 203 input checks,
+      recomputing a public key from a private key, the key-pair check line, the data converter, and
+      reading all 37 PEM blocks in Appendix C of the two RFCs — including the seven deliberately broken
+      keys. Result: <span data-i18n="neutral">843/843</span> match.</li>
+  <li>Had a simulated browser click through every flow on the page — <span data-i18n="neutral">101</span>
+      checks — and, after every click, look for any sentence present in one language only.</li>
+  <li>Broke the code on purpose <span data-i18n="neutral">40</span> times (wrong constant tables,
+      swapped indices, a dropped check, one sign flip too many…) and required the tests to go red every
+      time. A suite that has never shown it can go red tells you nothing when it is green.</li>
+  <li>The self-test button at the top repeats part of those comparisons on your machine, including
+      expanding the two RFCs' seed-form example keys and comparing them with the public keys printed in
+      the RFCs themselves — a source that is not mine.</li>
 </ul>
 <div class="callout">
   <span lang="vi"><strong>Dù vậy, đừng dùng mã này để bảo vệ thứ gì thật.</strong> Nó viết cho việc
@@ -550,11 +831,19 @@ library. Because it is hand-written, it has to be proved. I did three things:</p
 <ul class="refs">
   <li>NIST FIPS 203, <em>Module-Lattice-Based Key-Encapsulation Mechanism Standard</em> (ML-KEM), 2024.</li>
   <li>NIST FIPS 204, <em>Module-Lattice-Based Digital Signature Standard</em> (ML-DSA), 2024.</li>
+  <li>NIST FIPS 180-4, <em>Secure Hash Standard</em> (SHA-2), 2015 · NIST FIPS 202, <em>SHA-3 Standard</em>, 2015.</li>
+  <li>IETF RFC 9935, <em>Internet X.509 Public Key Infrastructure – Algorithm Identifiers for the Module-Lattice-Based Key-Encapsulation Mechanism (ML-KEM)</em>, 03/2026.</li>
+  <li>IETF RFC 9881, <em>Internet X.509 Public Key Infrastructure – Algorithm Identifiers for the Module-Lattice-Based Digital Signature Algorithm (ML-DSA)</em>, 10/2025.</li>
   <li><a href="https://www.jnet-secure.com/pqc-calculator" target="_blank" rel="noopener" data-i18n="neutral">PQC Calculator — jNet Secure</a>
-      — <span lang="vi">trang đã gợi ý cho tôi ý tưởng làm một máy tính PQC chạy ngay trong trình duyệt.
-      Mã và giao diện ở đây do tôi tự viết.</span>
-      <span lang="en">the page that gave me the idea of a PQC calculator running in the browser. The
-      code and the interface here are my own.</span></li>
+      — <span lang="vi">trang mẫu của máy tính này. Cách tương tác ở đây đi theo trang đó: các ô sửa được,
+      năm bước trao đổi khoá, nạp file khoá, dòng kiểm tra cặp khoá, khoá hàm băm yếu, bộ chuyển đổi. Mã
+      và thiết kế giao diện là của tôi. Một chỗ khác có chủ ý: bộ đọc mảng ở đây đọc <code>-0x01</code>
+      thành <code>0xFF</code>, còn trang mẫu đổi dấu hai lần nên đọc thành <code>0x01</code>.</span>
+      <span lang="en">the reference for this calculator. The interaction here follows that page:
+      editable fields, the five-step key exchange, loading key files, the key-pair check line, locking weak
+      hashes, the converter. The code and the visual design are my own. One deliberate difference: the array
+      reader here reads <code>-0x01</code> as <code>0xFF</code>, whereas the reference flips the sign twice and
+      reads <code>0x01</code>.</span></li>
   <li><a href="tu-ma-luong-tu-den-ecc.html" data-i18n="neutral">ECC</a>
       — <span lang="vi">ghi chú anh em: mã sửa lỗi, nơi cũng dùng số học trên trường hữu hạn như ở đây.</span>
       <span lang="en">the sibling note on error-correcting codes, which lean on the same finite-field arithmetic.</span></li>
@@ -570,222 +859,9 @@ library. Because it is hand-written, it has to be proved. I did three things:</p
 <script src="assets/pqc-mlkem.js"></script>
 <script src="assets/pqc-sha2.js"></script>
 <script src="assets/pqc-mldsa.js"></script>
+<script src="assets/pqc-tools.js"></script>
 <script src="assets/pqc-vectors.js"></script>
-<script>
-(function () {
-  'use strict';
-  var $ = function (id) { return document.getElementById(id); };
-  function bi(vi, en) { return '<span lang="vi">' + vi + '</span><span lang="en">' + en + '</span>'; }
-  function hex(a) { var s = '', i; for (i = 0; i < a.length; i++) s += ('0' + a[i].toString(16)).slice(-2); return s; }
-  function unhex(s) {
-    s = (s || '').replace(/[\s:]/g, '');
-    if (s.length % 2) throw new Error('odd');
-    if (s.length && !/^[0-9a-fA-F]+$/.test(s)) throw new Error('bad');
-    var a = new Uint8Array(s.length / 2), i;
-    for (i = 0; i < a.length; i++) a[i] = parseInt(s.substr(2 * i, 2), 16);
-    return a;
-  }
-  function num(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
-  function setLen(id, bytes) {
-    $(id).innerHTML = bytes == null ? '' :
-      '<span data-i18n="neutral">' + num(bytes) + ' B</span>';
-  }
-  function note(id, cls, html) { $(id).innerHTML = '<span class="pill ' + cls + '">' + html + '</span>'; }
-  function timed(fn) { var t0 = performance.now(); var r = fn(); return { r: r, t: performance.now() - t0 }; }
-  function ms(t) { return ' <span data-i18n="neutral">· ' + t.toFixed(1) + ' ms</span>'; }
-  function err(id, e) {
-    note(id, 'bad', bi('Lỗi: ', 'Error: ') + '<span data-i18n="neutral">' + (e && e.message ? e.message : e) + '</span>');
-  }
-  function badHex(id, what) {
-    note(id, 'bad', bi('Ô ' + what + ' không phải hex hợp lệ.', 'The ' + what + ' field is not valid hex.'));
-  }
-
-  /* ---------- tự kiểm chứng ---------- */
-  async function sha256hex(b) { return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', b.slice().buffer))); }
-  $('bt-selftest').addEventListener('click', async function () {
-    var st = $('st-status'), det = $('st-detail'), lines = [], pass = 0, total = 0, V = window.PQC_VECTORS, name;
-    st.className = 'pill wait'; st.innerHTML = bi('đang chạy…', 'running…');
-    det.hidden = false; det.textContent = '';
-    await new Promise(function (r) { setTimeout(r, 30); });
-    if (!window.crypto || !crypto.subtle) {
-      st.className = 'pill bad'; st.innerHTML = bi('trình duyệt không có crypto.subtle', 'this browser has no crypto.subtle'); return;
-    }
-    function chk(l, g, w) { total++; if (g === w) pass++; else lines.push('FAIL ' + l + '\n  got  ' + g + '\n  want ' + w); }
-    for (name in V.mlkem) {
-      var v = V.mlkem[name], p = MLKEM.PARAMS[name];
-      var kg = MLKEM.keygenInternal(p, unhex(v.d), unhex(v.z));
-      var en = MLKEM.encapsInternal(p, kg.ek, unhex(v.m));
-      var de = MLKEM.decapsInternal(p, kg.dk, en.ct);
-      chk(name + ' ek', await sha256hex(kg.ek), v.ek_sha256);
-      chk(name + ' dk', await sha256hex(kg.dk), v.dk_sha256);
-      chk(name + ' ct', await sha256hex(en.ct), v.ct_sha256);
-      chk(name + ' K', hex(en.K), v.K);
-      chk(name + " K'", hex(de.K), v.K);
-      var bad = Uint8Array.from(en.ct); bad[0] ^= 1;
-      chk(name + ' implicit-reject', hex(MLKEM.decapsInternal(p, kg.dk, bad).K), v.K_implicit_reject);
-      lines.push(name + ': ek=' + kg.ek.length + ' dk=' + kg.dk.length + ' ct=' + en.ct.length + ' OK');
-      det.textContent = lines.join('\n');
-      await new Promise(function (r) { setTimeout(r, 0); });
-    }
-    for (name in V.mldsa) {
-      var w = V.mldsa[name], q = MLDSA.PARAMS[name];
-      var k2 = MLDSA.keygenInternal(q, unhex(w.xi));
-      var Mp = MLDSA.prepare(unhex(w.msg));
-      var sg = MLDSA.signInternal(q, k2.sk, Mp, unhex(w.rnd));
-      chk(name + ' pk', await sha256hex(k2.pk), w.pk_sha256);
-      chk(name + ' sk', await sha256hex(k2.sk), w.sk_sha256);
-      chk(name + ' sig', await sha256hex(sg.sig), w.sig_sha256);
-      chk(name + ' verify', String(MLDSA.verifyInternal(q, k2.pk, Mp, sg.sig)), 'true');
-      var bs = Uint8Array.from(sg.sig); bs[0] ^= 1;
-      chk(name + ' tampered', String(MLDSA.verifyInternal(q, k2.pk, Mp, bs)), 'false');
-      lines.push(name + ': pk=' + k2.pk.length + ' sk=' + k2.sk.length + ' sig=' + sg.sig.length + ' OK');
-      det.textContent = lines.join('\n');
-      await new Promise(function (r) { setTimeout(r, 0); });
-    }
-    st.className = 'pill ' + (pass === total ? 'ok' : 'bad');
-    st.innerHTML = '<span data-i18n="neutral">' + pass + '/' + total + '</span> ' +
-      (pass === total ? bi('phép kiểm khớp', 'checks match') : bi('phép kiểm — CÓ LỖI', 'checks — FAILED'));
-    det.textContent = lines.join('\n');
-  });
-
-  /* ---------- tabs ---------- */
-  function selectTab(kem) {
-    $('tab-kem').setAttribute('aria-selected', String(kem));
-    $('tab-dsa').setAttribute('aria-selected', String(!kem));
-    $('panel-kem').hidden = !kem; $('panel-dsa').hidden = kem;
-  }
-  $('tab-kem').addEventListener('click', function () { selectTab(true); });
-  $('tab-dsa').addEventListener('click', function () { selectTab(false); });
-
-  /* ---------- ML-KEM ---------- */
-  function kemLens() {
-    [['kem-ek', 'kem-ek-len'], ['kem-dk', 'kem-dk-len'], ['kem-ct', 'kem-ct-len'],
-     ['kem-ss', 'kem-ss-len'], ['kem-ss2', 'kem-ss2-len']].forEach(function (p) {
-      try { setLen(p[1], unhex($(p[0]).value).length); } catch (e) { setLen(p[1], null); }
-    });
-  }
-  ['kem-ek', 'kem-dk', 'kem-ct', 'kem-ss', 'kem-ss2'].forEach(function (i) {
-    $(i).addEventListener('input', kemLens);
-  });
-  $('kem-clear').addEventListener('click', function () {
-    ['kem-ek', 'kem-dk', 'kem-ct', 'kem-ss', 'kem-ss2'].forEach(function (i) { $(i).value = ''; });
-    $('kem-status').innerHTML = ''; kemLens();
-  });
-  $('kem-keygen').addEventListener('click', function () {
-    try {
-      var o = timed(function () { return MLKEM.keygen($('kem-set').value); });
-      $('kem-ek').value = hex(o.r.ek); $('kem-dk').value = hex(o.r.dk);
-      $('kem-ct').value = ''; $('kem-ss').value = ''; $('kem-ss2').value = '';
-      kemLens();
-      note('kem-status', 'ok', bi('Đã sinh cặp khoá', 'Key pair generated') + ms(o.t));
-    } catch (e) { err('kem-status', e); }
-  });
-  $('kem-encaps').addEventListener('click', function () {
-    var ek;
-    try { ek = unhex($('kem-ek').value); } catch (e) { return badHex('kem-status', bi('khoá công khai', 'Public Key')); }
-    try {
-      var o = timed(function () { return MLKEM.encaps($('kem-set').value, ek); });
-      $('kem-ct').value = hex(o.r.ct); $('kem-ss').value = hex(o.r.K); $('kem-ss2').value = '';
-      kemLens();
-      note('kem-status', 'ok', bi('Đã đóng gói', 'Encapsulated') + ms(o.t));
-    } catch (e) { err('kem-status', e); }
-  });
-  $('kem-decaps').addEventListener('click', function () {
-    var dk, ct;
-    try { dk = unhex($('kem-dk').value); } catch (e) { return badHex('kem-status', bi('khoá bí mật', 'Private Key')); }
-    try { ct = unhex($('kem-ct').value); } catch (e) { return badHex('kem-status', bi('bản mã', 'Ciphertext')); }
-    try {
-      var o = timed(function () { return MLKEM.decaps($('kem-set').value, dk, ct); });
-      $('kem-ss2').value = hex(o.r.K); kemLens();
-      var same = $('kem-ss').value.trim().toLowerCase() === hex(o.r.K);
-      if (!$('kem-ss').value.trim())
-        note('kem-status', 'wait', bi('Đã tính K′ (chưa có K để so)', 'K′ computed (no K to compare)') + ms(o.t));
-      else if (same)
-        note('kem-status', 'ok', bi('K′ TRÙNG K — hai bên có chung bí mật', 'K′ MATCHES K — both sides share the secret') + ms(o.t));
-      else
-        note('kem-status', 'bad', bi('K′ KHÁC K — bản mã đã bị sửa. Chú ý: không có lỗi nào được báo, đó là <em>từ chối ngầm</em> của FIPS 203.',
-          'K′ DIFFERS from K — the ciphertext was altered. Note that no error was raised: this is FIPS 203 <em>implicit rejection</em>.') + ms(o.t));
-    } catch (e) { err('kem-status', e); }
-  });
-  $('kem-flip').addEventListener('click', function () {
-    var ct;
-    try { ct = unhex($('kem-ct').value); } catch (e) { return badHex('kem-status', bi('bản mã', 'Ciphertext')); }
-    if (!ct.length) return;
-    ct[0] ^= 1; $('kem-ct').value = hex(ct); kemLens();
-    note('kem-status', 'wait', bi('Đã lật bit đầu của bản mã — bấm Giải đóng gói', 'First bit of the ciphertext flipped — press Decapsulate'));
-  });
-
-  /* ---------- ML-DSA ---------- */
-  function msgBytes() {
-    var v = $('dsa-msg').value;
-    return $('dsa-enc').value === 'hex' ? unhex(v) : new TextEncoder().encode(v);
-  }
-  function ctxBytes() { return unhex($('dsa-ctx').value); }
-  function phValue() { var v = $('dsa-ph').value; return v === 'none' ? null : v; }
-  function refreshMp() {
-    try {
-      var Mp = MLDSA.prepare(msgBytes(), ctxBytes(), phValue());
-      $('dsa-mp').value = hex(Mp); setLen('dsa-mp-len', Mp.length);
-      setLen('dsa-msg-len', msgBytes().length);
-      return Mp;
-    } catch (e) { $('dsa-mp').value = ''; setLen('dsa-mp-len', null); return null; }
-  }
-  ['dsa-msg', 'dsa-ctx'].forEach(function (i) { $(i).addEventListener('input', refreshMp); });
-  ['dsa-enc', 'dsa-ph'].forEach(function (i) { $(i).addEventListener('change', refreshMp); });
-  function dsaLens() {
-    [['dsa-pk', 'dsa-pk-len'], ['dsa-sk', 'dsa-sk-len'], ['dsa-sig', 'dsa-sig-len']].forEach(function (p) {
-      try { setLen(p[1], unhex($(p[0]).value).length); } catch (e) { setLen(p[1], null); }
-    });
-  }
-  ['dsa-pk', 'dsa-sk', 'dsa-sig'].forEach(function (i) { $(i).addEventListener('input', dsaLens); });
-  $('dsa-clear').addEventListener('click', function () {
-    ['dsa-pk', 'dsa-sk', 'dsa-sig'].forEach(function (i) { $(i).value = ''; });
-    $('dsa-status').innerHTML = ''; dsaLens(); refreshMp();
-  });
-  $('dsa-keygen').addEventListener('click', function () {
-    try {
-      var o = timed(function () { return MLDSA.keygen($('dsa-set').value); });
-      $('dsa-pk').value = hex(o.r.pk); $('dsa-sk').value = hex(o.r.sk); $('dsa-sig').value = '';
-      dsaLens();
-      note('dsa-status', 'ok', bi('Đã sinh cặp khoá', 'Key pair generated') + ms(o.t));
-    } catch (e) { err('dsa-status', e); }
-  });
-  $('dsa-sign').addEventListener('click', function () {
-    var sk, msg, ctx;
-    try { sk = unhex($('dsa-sk').value); } catch (e) { return badHex('dsa-status', bi('khoá bí mật', 'Private Key')); }
-    try { msg = msgBytes(); } catch (e) { return badHex('dsa-status', bi('thông điệp', 'Message')); }
-    try { ctx = ctxBytes(); } catch (e) { return badHex('dsa-status', bi('ngữ cảnh', 'Context')); }
-    try {
-      var o = timed(function () { return MLDSA.sign($('dsa-set').value, sk, msg, ctx, phValue()); });
-      $('dsa-sig').value = hex(o.r.sig); dsaLens(); refreshMp();
-      note('dsa-status', 'ok', bi('Đã ký sau ', 'Signed after ') +
-        '<span data-i18n="neutral">' + o.r.iterations + '</span>' + bi(' lần thử', ' attempts') + ms(o.t));
-    } catch (e) { err('dsa-status', e); }
-  });
-  $('dsa-verify').addEventListener('click', function () {
-    var pk, sig, msg, ctx;
-    try { pk = unhex($('dsa-pk').value); } catch (e) { return badHex('dsa-status', bi('khoá công khai', 'Public Key')); }
-    try { sig = unhex($('dsa-sig').value); } catch (e) { return badHex('dsa-status', bi('chữ ký', 'Signature')); }
-    try { msg = msgBytes(); } catch (e) { return badHex('dsa-status', bi('thông điệp', 'Message')); }
-    try { ctx = ctxBytes(); } catch (e) { return badHex('dsa-status', bi('ngữ cảnh', 'Context')); }
-    try {
-      var o = timed(function () { return MLDSA.verify($('dsa-set').value, pk, msg, sig, ctx, phValue()); });
-      if (o.r) note('dsa-status', 'ok', bi('Chữ ký HỢP LỆ', 'Signature VALID') + ms(o.t));
-      else note('dsa-status', 'bad', bi('Chữ ký BỊ TỪ CHỐI — khoá, thông điệp, ngữ cảnh hoặc pre-hash không khớp lúc ký.',
-        'Signature REJECTED — the key, message, context or pre-hash does not match what was signed.') + ms(o.t));
-    } catch (e) { err('dsa-status', e); }
-  });
-  $('dsa-flip').addEventListener('click', function () {
-    var sig;
-    try { sig = unhex($('dsa-sig').value); } catch (e) { return badHex('dsa-status', bi('chữ ký', 'Signature')); }
-    if (!sig.length) return;
-    sig[0] ^= 1; $('dsa-sig').value = hex(sig); dsaLens();
-    note('dsa-status', 'wait', bi('Đã lật bit đầu của chữ ký — bấm Xác minh', 'First bit of the signature flipped — press Verify'));
-  });
-
-  kemLens(); dsaLens(); refreshMp();
-})();
-</script>
+<script src="assets/pqc-calc-ui.js"></script>
 
 
 <footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
