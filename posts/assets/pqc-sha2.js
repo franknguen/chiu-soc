@@ -184,7 +184,74 @@
   }
   var IV224t = ivFor512t(224), IV256t = ivFor512t(256);
 
+  /* ---------- nén MỘT khối, không cấp phát (cho SLH-DSA: trạng thái giữa sau khối PK.seed || 0… tính một lần) ----------
+     compress256(st, w): st = Int32Array(8) cập nhật tại chỗ; w = Int32Array(64), w[0..15] = khối big-endian
+     (w[16..63] bị ghi đè). compress512(st, w): st = Int32Array(16), w = Int32Array(160), mọi từ 64 bit là cặp
+     (cao, thấp) xen kẽ; w[0..31] = khối. Cộng 64 bit: phần thấp cộng không dấu, số nhớ = thương cho 2^32. */
+  var K256s = new Int32Array(K256), K512s = new Int32Array(160);
+  (function () { for (var i = 0; i < 80; i++) { K512s[2 * i] = K512h[i]; K512s[2 * i + 1] = K512l[i]; } })();
+  function compress256(st, w) {
+    var i, x, y, t1, t2;
+    for (i = 16; i < 64; i++) {
+      x = w[i - 15]; y = w[i - 2];
+      w[i] = (w[i - 16] + w[i - 7] + (((x >>> 7) | (x << 25)) ^ ((x >>> 18) | (x << 14)) ^ (x >>> 3)) +
+              (((y >>> 17) | (y << 15)) ^ ((y >>> 19) | (y << 13)) ^ (y >>> 10))) | 0;
+    }
+    var a = st[0], b = st[1], c = st[2], d = st[3], e = st[4], f = st[5], g = st[6], h = st[7];
+    for (i = 0; i < 64; i++) {
+      t1 = (h + (((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7))) +
+            ((e & f) ^ (~e & g)) + K256s[i] + w[i]) | 0;
+      t2 = ((((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10))) +
+            ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    st[0] = (st[0] + a) | 0; st[1] = (st[1] + b) | 0; st[2] = (st[2] + c) | 0; st[3] = (st[3] + d) | 0;
+    st[4] = (st[4] + e) | 0; st[5] = (st[5] + f) | 0; st[6] = (st[6] + g) | 0; st[7] = (st[7] + h) | 0;
+  }
+  var TWO32 = 4294967296;
+  function compress512(st, w) {
+    var i, xh, xl, yh, yl, lo, s0h, s0l, s1h, s1l;
+    for (i = 32; i < 160; i += 2) {
+      xh = w[i - 30]; xl = w[i - 29]; yh = w[i - 4]; yl = w[i - 3];
+      s0h = ((xh >>> 1) | (xl << 31)) ^ ((xh >>> 8) | (xl << 24)) ^ (xh >>> 7);
+      s0l = ((xl >>> 1) | (xh << 31)) ^ ((xl >>> 8) | (xh << 24)) ^ ((xl >>> 7) | (xh << 25));
+      s1h = ((yh >>> 19) | (yl << 13)) ^ ((yl >>> 29) | (yh << 3)) ^ (yh >>> 6);
+      s1l = ((yl >>> 19) | (yh << 13)) ^ ((yh >>> 29) | (yl << 3)) ^ ((yl >>> 6) | (yh << 26));
+      lo = (s0l >>> 0) + (s1l >>> 0) + (w[i - 31] >>> 0) + (w[i - 13] >>> 0);
+      w[i] = (s0h + s1h + w[i - 32] + w[i - 14] + ((lo / TWO32) | 0)) | 0; w[i + 1] = lo | 0;
+    }
+    var ah = st[0], al = st[1], bh = st[2], bl = st[3], ch = st[4], cl = st[5], dh = st[6], dl = st[7];
+    var eh = st[8], el = st[9], fh = st[10], fl = st[11], gh = st[12], gl = st[13], hh = st[14], hl = st[15];
+    var t1h, t1l, t2h, t2l;
+    for (i = 0; i < 160; i += 2) {
+      t1l = (hl >>> 0) + ((((el >>> 14) | (eh << 18)) ^ ((el >>> 18) | (eh << 14)) ^ ((eh >>> 9) | (el << 23))) >>> 0) +
+            ((((el & fl) ^ (~el & gl))) >>> 0) + (K512s[i + 1] >>> 0) + (w[i + 1] >>> 0);
+      t1h = (hh + (((eh >>> 14) | (el << 18)) ^ ((eh >>> 18) | (el << 14)) ^ ((el >>> 9) | (eh << 23))) +
+            ((eh & fh) ^ (~eh & gh)) + K512s[i] + w[i] + ((t1l / TWO32) | 0)) | 0;
+      t2l = ((((al >>> 28) | (ah << 4)) ^ ((ah >>> 2) | (al << 30)) ^ ((ah >>> 7) | (al << 25))) >>> 0) +
+            (((al & bl) ^ (al & cl) ^ (bl & cl)) >>> 0);
+      t2h = (((ah >>> 28) | (al << 4)) ^ ((al >>> 2) | (ah << 30)) ^ ((al >>> 7) | (ah << 25))) +
+            ((ah & bh) ^ (ah & ch) ^ (bh & ch)) + ((t2l / TWO32) | 0);
+      t1l = t1l | 0; t2l = t2l | 0;
+      hh = gh; hl = gl; gh = fh; gl = fl; fh = eh; fl = el;
+      lo = (dl >>> 0) + (t1l >>> 0); eh = (dh + t1h + ((lo / TWO32) | 0)) | 0; el = lo | 0;
+      dh = ch; dl = cl; ch = bh; cl = bl; bh = ah; bl = al;
+      lo = (t1l >>> 0) + (t2l >>> 0); ah = (t1h + t2h + ((lo / TWO32) | 0)) | 0; al = lo | 0;
+    }
+    lo = (st[1] >>> 0) + (al >>> 0);  st[0] = (st[0] + ah + ((lo / TWO32) | 0)) | 0;   st[1] = lo | 0;
+    lo = (st[3] >>> 0) + (bl >>> 0);  st[2] = (st[2] + bh + ((lo / TWO32) | 0)) | 0;   st[3] = lo | 0;
+    lo = (st[5] >>> 0) + (cl >>> 0);  st[4] = (st[4] + ch + ((lo / TWO32) | 0)) | 0;   st[5] = lo | 0;
+    lo = (st[7] >>> 0) + (dl >>> 0);  st[6] = (st[6] + dh + ((lo / TWO32) | 0)) | 0;   st[7] = lo | 0;
+    lo = (st[9] >>> 0) + (el >>> 0);  st[8] = (st[8] + eh + ((lo / TWO32) | 0)) | 0;   st[9] = lo | 0;
+    lo = (st[11] >>> 0) + (fl >>> 0); st[10] = (st[10] + fh + ((lo / TWO32) | 0)) | 0; st[11] = lo | 0;
+    lo = (st[13] >>> 0) + (gl >>> 0); st[12] = (st[12] + gh + ((lo / TWO32) | 0)) | 0; st[13] = lo | 0;
+    lo = (st[15] >>> 0) + (hl >>> 0); st[14] = (st[14] + hh + ((lo / TWO32) | 0)) | 0; st[15] = lo | 0;
+  }
+  function iv512() { var o = new Int32Array(16); for (var i = 0; i < 8; i++) { o[2 * i] = H512h[i]; o[2 * i + 1] = H512l[i]; } return o; }
+
   root.PQCSHA2 = {
+    compress256: compress256, compress512: compress512,
+    iv256: function () { return new Int32Array(H256); }, iv512: iv512,
     sha224: function (m) { return sha256core(m, H224, 28); },
     sha256: function (m) { return sha256core(m, H256, 32); },
     sha384: function (m) { return sha512core(m, H384h, H384l, 48); },

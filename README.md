@@ -9,8 +9,8 @@ Không framework, không bước build: mở `index.html` là chạy.
 ```
 index.html          trang chủ: giới thiệu + mục lục + 4 chuyên mục (#s1..#s4) + #about
 posts/              mỗi bài là một file HTML độc lập, cũng song ngữ
-posts/assets/       ảnh, hình SVG tự vẽ, PDF bài giảng, và mã JavaScript của hai máy tính PQC
-                    (ML-KEM / ML-DSA và SMAUG-T / HAETAE)
+posts/assets/       ảnh, hình SVG tự vẽ, PDF bài giảng, và mã JavaScript của ba máy tính PQC
+                    (ML-KEM / ML-DSA, SMAUG-T / HAETAE, SLH-DSA / FN-DSA / HQC-KEM)
 ```
 
 Chuyên mục:
@@ -178,6 +178,52 @@ thấp nhất của bảng Gaussian 83 bit (sai ở đó chỉ đổi khoảng m
 
 Khi sửa trang này, giữ cùng quy tắc như máy tính PQC ở trên (chuỗi `bi()`, bộ ba `id`, bấm kiểm chứng phải ra
 toàn xanh).
+
+## Máy tính SLH-DSA / FN-DSA / HQC-KEM — `posts/nist-205-206-207-calculator.html`
+
+Trang thứ ba của loạt máy tính, cho ba thuật toán hậu lượng tử còn lại của NIST, cùng cách tương tác:
+
+| thẻ | chuẩn | trạng thái (kiểm 31/10/2026) | trang hiện thực |
+|---|---|---|---|
+| Ký · SLH-DSA | FIPS 205 | đã ban hành 13/08/2024 | đúng FIPS 205, cả 12 bộ tham số (SHA2 / SHAKE × 128 / 192 / 256 × s / f) |
+| Ký · FN-DSA | FIPS 206 | chưa công bố dự thảo | Falcon v1.2 + hành vi của mã tham chiếu vòng 3 (Falcon-512 / 1024), chữ ký dạng có đệm của đặc tả |
+| Trao đổi khoá · HQC-KEM | FIPS 207 | chưa công bố dự thảo (HQC được chọn 03/2025, NIST IR 8545) | đặc tả HQC 12/10/2026 + mã tham chiếu 5.1.0 (dk = seed 32 byte) |
+
+Khác với hai trang trước:
+
+- **Web Worker.** Ký SLH-DSA bộ "s" mất từ khoảng 1 giây (SHA2-128s) tới khoảng 11 giây (SHAKE-192s), đo bằng Node; sinh khoá Falcon-1024 và kiểm tra cặp khoá cũng lâu.
+  Các phép này chạy trong `assets/nist-worker.js` để trang không đứng; dòng kết quả đếm giây trong lúc chờ. Trình duyệt chặn
+  Worker khi mở file trực tiếp từ đĩa (`file://`) — khi đó trang tự chạy ở luồng chính, sau khi kịp vẽ dòng "đang tính".
+  Xem thử bằng `python3 -m http.server` để có Worker.
+- **SLH-DSA:** ba nhóm nút chọn bộ tham số (hàm băm, mức, biến thể); pre-hash với 12 hàm, hàm có giá trị băm ngắn hơn 2n byte
+  bị gạch (FIPS 205 mục 10.2.2); addrnd để trống = ký tất định. Nút "Nạp ví dụ ACVP của NIST" dùng vector keyGen chính thức.
+- **FN-DSA:** không có ngữ cảnh / pre-hash vì FIPS 206 chưa định nghĩa; hai ô ngẫu nhiên của lần ký (muối r 40 byte, seed bộ lấy
+  mẫu 48 byte). Sinh khoá giải phương trình NTRU **chính xác**: với một số ít seed (ví dụ mục 1 của KAT Falcon-1024) mã C tham
+  chiếu — giải với độ chính xác cố định — chọn một ứng viên khác, nên khoá khác KAT; chữ ký ký từ khoá của KAT thì luôn trùng.
+- **HQC-KEM:** năm bước như ML-KEM; khoá giải đóng gói chính là seed 32 byte; `HQC.pkeDecrypt` là cửa chỉ dành cho kiểm thử bộ
+  giải mã nối Reed–Solomon × Reed–Muller (bộ KAT không bao giờ cần Reed–Solomon sửa lỗi).
+- Khoá thô cho cả ba (chưa có định dạng file chuẩn dùng chung); SLH-DSA có nhiều bộ cùng độ dài khoá, trang ưu tiên bộ đang mở và
+  nút đã bấm, rồi nói rõ khi phải đoán.
+
+Các file mới (nạp sau `pqc-mlkem.js`, `pqc-sha2.js`, `pqc-mldsa.js`, `pqc-tools.js`):
+
+| file | nội dung | biến toàn cục |
+|---|---|---|
+| `assets/pqc-slhdsa.js` | SLH-DSA (FIPS 205): 12 bộ, Alg. 18–25, giao diện trong / ngoài, HashSLH-DSA | `SLHDSA` |
+| `assets/pqc-fndsa.js` | Falcon-512 / 1024: keygen (NTRUSolve bằng `BigInt`), ký (FFT số thực IEEE-754, ffSampling), xác minh có lý do | `FNDSA` |
+| `assets/pqc-hqc.js` | HQC-1 / 3 / 5: keygen, encaps, decaps, mã nối RS × RM | `HQC` |
+| `assets/nist-tools.js` | kích thước, quy tắc pre-hash 2n, nhận dạng khoá thô, kiểm tra cặp khoá — chạy được cả trong Worker | `NIST3Tools` |
+| `assets/nist-worker.js` | Web Worker: chạy một phép của `SLHDSA` / `FNDSA` / `HQC` / `NIST3Tools` mỗi thông điệp | — |
+| `assets/nist-vectors.js` | vector ACVP (SLH-DSA), mục KAT count = 0 (Falcon, HQC), vector seed cố định | `NIST3_VECTORS` |
+| `assets/nist-calc-ui.js` | giao diện bốn thẻ, gọi Worker, nút ví dụ ACVP / KAT, nút tự kiểm chứng | `NIST3Calc` (cửa cho kiểm thử) |
+
+Kiểm chứng: nút "Chạy kiểm chứng" chạy 59 phép kiểm trong trình duyệt. Ngoài repo: 463 phép so từng byte với vector ACVP
+của NIST (SLH-DSA, kể cả bộ "s" khi chạy đầy đủ), KAT vòng 3 của Falcon, KAT 5.1.0 của HQC, một mô hình tham chiếu, các ca bộ
+giải mã HQC hỏng đúng tới giới hạn sửa lỗi t1 rồi quá một khối, và chữ ký Falcon mã hoá "+0" / "−0"; 67 phép kiểm giao diện
+bằng trình duyệt giả lập, soát hai ngôn ngữ sau mỗi cú bấm; 28 đột biến cố ý — cả 28 bị bắt. Lượt đột biến đầu còn ba đột biến
+sống, chỉ ra ba chỗ phép kiểm hở; vá chỗ thứ hai lộ ra một lỗi thật ở `pqc-tools.js` dùng chung: file khoá nhị phân mà byte
+nào cũng in được (ví dụ dk 32 byte toàn 0x09) bị từ chối — nay `readKeyFile` coi chính các byte là khoá thô khi văn bản không
+phải PEM / hex / Base64. Hai trang ML và KpqC đã chạy lại xanh sau thay đổi này.
 
 ## Thêm một bài mới
 

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Thử SLH-DSA, FN-DSA và HQC-KEM ngay trên trình duyệt — ChiU·SoC"
+      data-title-en="Try SLH-DSA, FN-DSA and HQC-KEM in your browser — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thử SLH-DSA, FN-DSA và HQC-KEM ngay trên trình duyệt — ChiU·SoC</title>
+<meta name="description" content="Máy tính chạy hoàn toàn trong trình duyệt cho ba thuật toán hậu lượng tử còn lại của NIST: SLH-DSA (FIPS 205) ký bằng hàm băm, FN-DSA (Falcon) ký trên lattice NTRU, HQC-KEM trao đổi khoá bằng mã sửa lỗi; khoá thô, kiểm tra cặp khoá, ví dụ ACVP / KAT chính thức và nút tự kiểm chứng."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:22px 0 7px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+/* thư viện ảnh */
+.gallery{ display:grid; gap:16px; margin:22px 0 26px; }
+.gallery.two{ grid-template-columns:repeat(2,1fr); }
+@media(max-width:620px){ .gallery.two{ grid-template-columns:1fr; } }
+.gallery figure{ margin:0; }
+.gallery img{
+  display:block; width:100%; height:auto; border-radius:13px;
+  box-shadow:0 8px 24px rgba(15,27,45,.18); background:#e9eef5;
+}
+.gallery figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; line-height:1.55; }
+.diagram{ margin:22px 0 10px; }
+.diagram img{ display:block; width:100%; height:auto; border-radius:14px;
+  border:1px solid rgba(20,83,143,.14); background:#f7f9fc; }
+.diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; }
+
+/* ===== máy tính PQC ===== */
+.selftest{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  margin:20px 0 10px; padding:16px 18px; border-radius:14px;
+  background:rgba(42,157,143,.07); border:1px solid rgba(42,157,143,.28);
+}
+.st-note{ flex:1 1 260px; font-size:.84em; color:var(--muted); line-height:1.6; }
+.btn{
+  font:inherit; font-size:.88em; font-weight:700; cursor:pointer;
+  color:#fff; border:0; padding:9px 18px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.btn:disabled{ opacity:.5; cursor:default; }
+.btn.ghost{ background:none; color:var(--accent); border:1px solid rgba(20,83,143,.3); }
+.btn.sm{ font-size:.8em; padding:6px 13px; }
+.hexbox{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.78em; line-height:1.6; white-space:pre-wrap; word-break:break-all;
+  background:#0f1b2d; color:#9fd0c8; border-radius:10px;
+  padding:10px 12px; margin:8px 0 0; max-height:200px; overflow:auto;
+}
+.pill{ display:inline-block; font-size:.78em; font-weight:700; padding:3px 11px; border-radius:999px; }
+.pill.ok{ background:rgba(42,157,143,.16); color:#15695f; }
+.pill.bad{ background:rgba(190,30,45,.12); color:#9b1d28; }
+.pill.wait{ background:rgba(234,179,8,.16); color:#8a6100; }
+.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35);
+  padding:12px 16px; border-radius:12px; font-size:.9em; }
+
+.tabs{ display:flex; gap:8px; margin:26px 0 0; flex-wrap:wrap; }
+.tab{
+  font:inherit; font-size:.9em; font-weight:700; cursor:pointer;
+  background:#fff; color:var(--muted); border:1px solid rgba(20,83,143,.2);
+  padding:10px 18px; border-radius:12px 12px 0 0; border-bottom:0;
+}
+.tab[aria-selected="true"]{ color:var(--accent); box-shadow:inset 0 3px 0 var(--accent2); }
+.panel{
+  border:1px solid rgba(20,83,143,.2); border-radius:0 14px 14px 14px;
+  padding:18px 18px 14px; background:#fbfcfe; margin-bottom:26px;
+}
+.panel[hidden]{ display:none; }
+.bar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin:0 0 14px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.chips-l{ font-size:.74rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:6px; }
+.chip{ position:relative; display:inline-flex; }
+.chip input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+.chip > span{
+  font-size:.8em; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid rgba(20,83,143,.25); color:var(--accent); background:#fff; white-space:nowrap;
+}
+.chip input:checked + span{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input:focus-visible + span{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.chip input:disabled{ cursor:not-allowed; }
+.chip input:disabled + span{ color:#9aa4b1; background:#f3f5f8; border-style:dashed; text-decoration:line-through; }
+
+/* năm bước của trao đổi khoá: bên nhận lệch trái, bên gửi lệch phải */
+.flow{ display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:12px 0; }
+.actor{ font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.actor.recv{ grid-column:1/6; color:var(--accent); }
+.actor.send{ grid-column:6/11; color:#1f7f74; text-align:right; }
+.card{
+  min-width:0; background:#fff; border:1px solid rgba(20,83,143,.15); border-radius:14px;
+  padding:14px 16px 4px; transition:box-shadow .2s;
+}
+.card.recv{ grid-column:1/9; border-left:4px solid var(--accent); }
+.card.send{ grid-column:3/11; border-left:4px solid var(--accent2); }
+.card.full{ grid-column:1/-1; border-left:4px solid var(--accent); }
+.card.next{ box-shadow:0 0 0 3px rgba(42,157,143,.28); }
+.card h4{ display:flex; align-items:center; gap:10px; margin:0 0 10px; font-size:.98rem; }
+.no{
+  display:inline-grid; place-items:center; flex:none; width:26px; height:26px; border-radius:50%;
+  background:rgba(20,83,143,.1); color:var(--accent); font-size:.8rem; font-weight:800;
+}
+.card.done > h4 .no{ background:var(--accent2); color:#fff; }
+.who{ margin-left:auto; font-size:.7rem; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.arrow{ grid-column:1/-1; display:flex; align-items:center; gap:10px; font-size:.82em; color:var(--muted); }
+.arrow::before, .arrow::after{ content:""; flex:1 1 20px; border-top:2px dashed rgba(20,83,143,.22); }
+.arrow .lbl{
+  display:inline-flex; gap:8px; align-items:center; text-align:center;
+  padding:4px 12px; border-radius:999px; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.arrow.lit .lbl{ background:rgba(42,157,143,.12); color:#15695f; border-color:rgba(42,157,143,.35); }
+.arrow .no{ width:22px; height:22px; font-size:.72rem; }
+@media(max-width:640px){
+  .card.recv, .card.send{ grid-column:1/-1; }
+  .actor{ display:none; }
+}
+.row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 12px; }
+.chk{ display:inline-flex; gap:7px; align-items:center; font-size:.84em; font-weight:600; color:var(--muted); cursor:pointer; }
+.chk input{ accent-color:var(--accent2); width:16px; height:16px; }
+.hint{ font-size:.82em; color:var(--muted); margin:0 0 10px; line-height:1.6; }
+
+.fld{ margin:0 0 12px; }
+.fld-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:4px; }
+.fld-head label{ font-size:.82em; font-weight:700; color:var(--muted); }
+.cnt{ font-size:.74em; font-weight:700; font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap; }
+.cnt.ok{ color:#15695f; }
+.cnt.warn{ color:#8a6100; }
+.cnt.bad{ color:#9b1d28; }
+.fld textarea{
+  display:block; width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.74em; line-height:1.6; color:#27323f; background:#fbfcfe;
+  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:8px 10px;
+  resize:vertical; word-break:break-all; max-height:9.6em;
+}
+.fld.big textarea{ max-height:none; min-height:18em; }
+.fld textarea[readonly]{ background:#f1f4f8; color:#55606d; }
+.fld textarea:focus{ outline:2px solid rgba(42,157,143,.45); outline-offset:1px; }
+.tools{ display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; margin-top:5px; }
+.tools:empty{ display:none; }
+.tools button{
+  font:inherit; font-size:.7em; font-weight:700; cursor:pointer; padding:2px 9px;
+  border-radius:7px; border:1px solid rgba(20,83,143,.18); background:#fff; color:var(--accent);
+}
+.tools button:hover{ background:rgba(20,83,143,.07); }
+.tools button[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.tools .gap{ flex:1 1 8px; }
+.tools .flash{ font-size:.72em; font-weight:700; color:#15695f; }
+
+.result{
+  grid-column:1/-1; margin:8px 0 4px; padding:11px 14px; border-radius:12px;
+  font-size:.9em; line-height:1.6; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.result.ok{ background:rgba(42,157,143,.1); border-color:rgba(42,157,143,.38); color:#11574f; }
+.result.bad{ background:rgba(190,30,45,.06); border-color:rgba(190,30,45,.3); color:#8c1a24; }
+.result.info{ color:#2d3748; }
+.result .sub{ display:block; font-size:.9em; color:var(--muted); margin-top:2px; }
+.result .ic{ font-weight:800; margin-right:6px; }
+.pairline{ font-size:.84em; margin:2px 0 12px; padding:9px 12px; border-radius:10px; background:#f6f8fb; }
+.pairline:empty{ display:none; }
+.pairline.ok{ background:rgba(42,157,143,.09); color:#11574f; }
+.pairline.bad{ background:rgba(190,30,45,.06); color:#8c1a24; }
+.pairline summary{ cursor:pointer; font-size:.92em; color:var(--muted); margin-top:3px; }
+.pairline ul{ list-style:none; padding:0; margin:6px 0 2px; }
+.pairline li{ margin:0 0 3px; color:#2d3748; }
+.pairline li b{ display:inline-block; width:1.4em; }
+.ph-note{ font-size:.82em; color:#8a6100; margin:6px 0 0; }
+.ph-note:empty{ display:none; }
+details.pem{ margin:0 0 12px; font-size:.84em; }
+details.pem summary{ cursor:pointer; color:var(--accent); font-weight:700; }
+details.pem pre{ max-height:190px; font-size:.78em; margin:6px 0 0; }
+#file-in{ display:none; }
+
+/* PDF đọc ngay trên trang (ẩn thanh công cụ của trình xem) */
+.pdfview{ margin:20px 0 10px; }
+.pdfview iframe{
+  display:block; width:100%; height:clamp(380px, 74vh, 700px);
+  border:1px solid rgba(20,83,143,.18); border-radius:14px; background:#f7f9fc;
+}
+.pdfview-note{
+  display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
+  margin:10px 0 26px; font-size:.83em; color:var(--muted); line-height:1.6;
+}
+.pdfview-note a{
+  font-weight:700; color:var(--accent); text-decoration:none;
+  padding:5px 14px; border-radius:999px; background:rgba(20,83,143,.08);
+}
+.pdfview-note a:hover{ background:rgba(20,83,143,.15); }
+.pdfview-note .meta-note{ flex:1 1 240px; margin:0; }
+
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.7;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:8px 12px; text-align:left; vertical-align:top; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px;
+}
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">Thử SLH-DSA, FN-DSA và HQC-KEM ngay trên trình duyệt</span><span lang="en">Try SLH-DSA, FN-DSA and HQC-KEM in your browser</span></h1>
+<div class="meta"><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi · 31/10/2026 · Frank Nguyen</span><span lang="en">PQC, AI &amp; ECC · 31 Oct 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">ML-KEM và ML-DSA không phải là tất cả những gì NIST chọn. Ba thuật toán còn lại đi theo những
+con đường khác hẳn: <strong>SLH-DSA</strong> (FIPS 205) chỉ dựa vào hàm băm, <strong>FN-DSA</strong> (Falcon, FIPS
+206) cho chữ ký nhỏ nhất nhờ lấy mẫu Gauss bằng số thực, và <strong>HQC-KEM</strong> (FIPS 207) dựa trên mã sửa lỗi
+chứ không phải lattice. Trang này cho bạn chạy thử cả ba, với đúng cách tương tác của
+<a href="pqc-calculator.html">máy tính ML-KEM / ML-DSA</a> và <a href="kpqc-calculator.html">máy tính KpqC</a>,
+<em>hoàn toàn trong máy bạn</em>.</p>
+<p class="lede" lang="en">ML-KEM and ML-DSA are not all that NIST selected. The other three algorithms take quite
+different roads: <strong>SLH-DSA</strong> (FIPS 205) relies on hash functions alone, <strong>FN-DSA</strong> (Falcon,
+FIPS 206) has the smallest signatures thanks to Gaussian sampling with floating-point numbers, and
+<strong>HQC-KEM</strong> (FIPS 207) rests on error-correcting codes rather than lattices. This page lets you run all
+three, with the same interaction as the <a href="pqc-calculator.html">ML-KEM / ML-DSA calculator</a> and the
+<a href="kpqc-calculator.html">KpqC calculator</a>, <em>entirely on your own machine</em>.</p>
+
+<noscript>
+  <p class="nojs"><span lang="vi">Phần tính toán cần JavaScript. Phần giải thích bên dưới vẫn đọc được bình thường.</span><span lang="en">The calculator needs JavaScript. The explanations below read fine without it.</span></p>
+</noscript>
+
+<div class="selftest">
+  <button class="btn" id="bt-selftest" type="button"><span lang="vi">Chạy kiểm chứng</span><span lang="en">Run the self-test</span></button>
+  <span id="st-status" class="pill wait"><span lang="vi">chưa chạy</span><span lang="en">not run yet</span></span>
+  <span class="st-note">
+    <span lang="vi">Chạy lại vector ACVP của NIST cho SLH-DSA và mục KAT chính thức của Falcon và HQC, cùng các vector seed
+      cố định từ một mô hình tham chiếu đã khớp những nguồn đó. Bạn tự thấy bằng chứng, không phải tin lời tôi.</span>
+    <span lang="en">Replays NIST's ACVP vectors for SLH-DSA and the official KAT entries of Falcon and HQC, plus fixed-seed
+      vectors from a reference model that matches those sources. You see the evidence rather than take my word.</span>
+  </span>
+</div>
+<div id="st-detail" class="hexbox" hidden></div>
+
+<input type="file" id="file-in" aria-hidden="true" tabindex="-1"/>
+
+<div class="tabs" role="tablist">
+  <button class="tab" id="tab-slh" type="button" role="tab" aria-selected="true" aria-controls="panel-slh">
+    <span lang="vi">Ký · SLH-DSA</span><span lang="en">Sign · SLH-DSA</span></button>
+  <button class="tab" id="tab-fn" type="button" role="tab" aria-selected="false" aria-controls="panel-fn">
+    <span lang="vi">Ký · FN-DSA</span><span lang="en">Sign · FN-DSA</span></button>
+  <button class="tab" id="tab-hqc" type="button" role="tab" aria-selected="false" aria-controls="panel-hqc">
+    <span lang="vi">Trao đổi khoá · HQC-KEM</span><span lang="en">Key exchange · HQC-KEM</span></button>
+  <button class="tab" id="tab-cvt" type="button" role="tab" aria-selected="false" aria-controls="panel-cvt">
+    <span lang="vi">Chuyển đổi dữ liệu</span><span lang="en">Data converter</span></button>
+</div>
+
+<!-- ================================================================ SLH-DSA -->
+<section class="panel" id="panel-slh" role="tabpanel" aria-labelledby="tab-slh">
+  <div class="bar">
+    <div class="chips" role="radiogroup" aria-labelledby="slh-hash-l">
+      <span class="chips-l" id="slh-hash-l"><span lang="vi">Hàm băm</span><span lang="en">Hash</span></span>
+      <label class="chip"><input type="radio" name="slh-hash" value="SHA2"/><span>SHA2</span></label>
+      <label class="chip"><input type="radio" name="slh-hash" value="SHAKE" checked/><span>SHAKE</span></label>
+    </div>
+    <div class="chips" role="radiogroup" aria-labelledby="slh-lvl-l">
+      <span class="chips-l" id="slh-lvl-l"><span lang="vi">Mức</span><span lang="en">Level</span></span>
+      <label class="chip"><input type="radio" name="slh-lvl" value="128" checked/><span>128</span></label>
+      <label class="chip"><input type="radio" name="slh-lvl" value="192"/><span>192</span></label>
+      <label class="chip"><input type="radio" name="slh-lvl" value="256"/><span>256</span></label>
+    </div>
+    <div class="chips" role="radiogroup" aria-labelledby="slh-var-l">
+      <span class="chips-l" id="slh-var-l"><span lang="vi">Biến thể</span><span lang="en">Variant</span></span>
+      <label class="chip"><input type="radio" name="slh-var" value="f" checked/><span><span lang="vi">f — ký nhanh</span><span lang="en">f — fast signing</span></span></label>
+      <label class="chip"><input type="radio" name="slh-var" value="s"/><span><span lang="vi">s — chữ ký nhỏ</span><span lang="en">s — small signature</span></span></label>
+    </div>
+    <button class="btn ghost sm" id="slh-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear all</span></button>
+  </div>
+  <p class="hint" id="slh-name"></p>
+
+  <div class="flow">
+    <section class="card full" id="slh-c1">
+      <h4><span class="no">1</span><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
+      <div class="row">
+        <button class="btn" id="slh-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+        <label class="chk"><input type="checkbox" id="slh-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+        <button class="btn ghost sm" id="slh-acvp" type="button"><span lang="vi">Nạp ví dụ ACVP của NIST</span><span lang="en">Load NIST's ACVP example</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-seed">Seed · SK.seed ‖ SK.prf ‖ PK.seed</label><span class="cnt" id="slh-seed-cnt"></span></div>
+        <textarea id="slh-seed" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="slh-seed-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-pk"><span lang="vi">Khoá công khai — PK.seed ‖ PK.root</span><span lang="en">Public key — PK.seed ‖ PK.root</span></label><span class="cnt" id="slh-pk-cnt"></span></div>
+        <textarea id="slh-pk" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="slh-pk-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-sk"><span lang="vi">Khoá bí mật — SK.seed ‖ SK.prf ‖ PK.seed ‖ PK.root</span><span lang="en">Private key — SK.seed ‖ SK.prf ‖ PK.seed ‖ PK.root</span></label><span class="cnt" id="slh-sk-cnt"></span></div>
+        <textarea id="slh-sk" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="slh-sk-tools"></div>
+      </div>
+      <div class="pairline" id="slh-pair" role="status"></div>
+    </section>
+
+    <section class="card full" id="slh-c2">
+      <h4><span class="no">2</span><span lang="vi">Thông điệp</span><span lang="en">Message</span></h4>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-msg"><span lang="vi">Thông điệp cần ký</span><span lang="en">Message to sign</span></label><span class="cnt" id="slh-msg-cnt"></span></div>
+        <textarea id="slh-msg" rows="2" spellcheck="false" autocomplete="off">Hello post-quantum world</textarea>
+        <div class="tools" id="slh-msg-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-ctx"><span lang="vi">Ngữ cảnh — tuỳ chọn, tối đa 255 byte</span><span lang="en">Context — optional, up to 255 bytes</span></label><span class="cnt" id="slh-ctx-cnt"></span></div>
+        <textarea id="slh-ctx" rows="1" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="slh-ctx-tools"></div>
+      </div>
+      <div class="chips" role="radiogroup" aria-labelledby="slh-ph-l" id="slh-ph">
+        <span class="chips-l" id="slh-ph-l">Pre-hash</span>
+        <label class="chip"><input type="radio" name="slh-ph" value="none" checked/><span><span lang="vi">Không — SLH-DSA thuần</span><span lang="en">None — pure SLH-DSA</span></span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA2-224"/><span>SHA-224</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA2-256"/><span>SHA-256</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA2-384"/><span>SHA-384</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA2-512"/><span>SHA-512</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA2-512/224"/><span>SHA-512/224</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA2-512/256"/><span>SHA-512/256</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA3-224"/><span>SHA3-224</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA3-256"/><span>SHA3-256</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA3-384"/><span>SHA3-384</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHA3-512"/><span>SHA3-512</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHAKE-128"/><span>SHAKE128</span></label>
+        <label class="chip"><input type="radio" name="slh-ph" value="SHAKE-256"/><span>SHAKE256</span></label>
+      </div>
+      <p class="ph-note" id="slh-ph-note" role="status"></p>
+      <p class="hint" id="slh-ph-why"></p>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-mp"><span lang="vi">M′ — chuỗi byte thực sự được ký</span><span lang="en">M′ — the bytes actually signed</span></label><span class="cnt" id="slh-mp-cnt"></span></div>
+        <textarea id="slh-mp" rows="2" spellcheck="false" readonly></textarea>
+        <div class="tools" id="slh-mp-tools"></div>
+      </div>
+    </section>
+
+    <section class="card full" id="slh-c3">
+      <h4><span class="no">3</span><span lang="vi">Chữ ký</span><span lang="en">Signature</span></h4>
+      <div class="row">
+        <button class="btn" id="slh-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button>
+        <button class="btn" id="slh-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
+        <label class="chk"><input type="checkbox" id="slh-rnd-rnd" checked/><span lang="vi">addrnd ngẫu nhiên</span><span lang="en">random addrnd</span></label>
+        <button class="btn ghost sm" id="slh-det" type="button"><span lang="vi">Ký tất định</span><span lang="en">Deterministic signing</span></button>
+        <button class="btn ghost sm" id="slh-flip" type="button"><span lang="vi">Lật 1 bit của chữ ký</span><span lang="en">Flip one signature bit</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-rnd"><span lang="vi">Bí mật ngẫu nhiên của lần ký — addrnd (trống = tất định)</span><span lang="en">Per-signature randomness — addrnd (empty = deterministic)</span></label><span class="cnt" id="slh-rnd-cnt"></span></div>
+        <textarea id="slh-rnd" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="slh-rnd-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="slh-sig"><span lang="vi">Chữ ký</span><span lang="en">Signature</span></label><span class="cnt" id="slh-sig-cnt"></span></div>
+        <textarea id="slh-sig" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="slh-sig-tools"></div>
+      </div>
+    </section>
+
+    <div class="result info" id="slh-result" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ================================================================ FN-DSA -->
+<section class="panel" id="panel-fn" role="tabpanel" aria-labelledby="tab-fn" hidden>
+  <div class="bar">
+    <div class="chips" role="radiogroup" aria-labelledby="fn-set-l">
+      <span class="chips-l" id="fn-set-l"><span lang="vi">Mức an toàn</span><span lang="en">Security level</span></span>
+      <label class="chip"><input type="radio" name="fn-set" value="Falcon-512" checked/><span>Falcon-512</span></label>
+      <label class="chip"><input type="radio" name="fn-set" value="Falcon-1024"/><span>Falcon-1024</span></label>
+    </div>
+    <button class="btn ghost sm" id="fn-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear all</span></button>
+  </div>
+
+  <div class="flow">
+    <section class="card full" id="fn-c1">
+      <h4><span class="no">1</span><span lang="vi">Khoá</span><span lang="en">Keys</span></h4>
+      <div class="row">
+        <button class="btn" id="fn-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+        <label class="chk"><input type="checkbox" id="fn-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+        <button class="btn ghost sm" id="fn-kat" type="button"><span lang="vi">Nạp ví dụ KAT chính thức</span><span lang="en">Load the official KAT example</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-seed">Seed</label><span class="cnt" id="fn-seed-cnt"></span></div>
+        <textarea id="fn-seed" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="fn-seed-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-pk"><span lang="vi">Khoá công khai — h = g / f mod q</span><span lang="en">Public key — h = g / f mod q</span></label><span class="cnt" id="fn-pk-cnt"></span></div>
+        <textarea id="fn-pk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="fn-pk-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-sk"><span lang="vi">Khoá bí mật — f, g, F</span><span lang="en">Private key — f, g, F</span></label><span class="cnt" id="fn-sk-cnt"></span></div>
+        <textarea id="fn-sk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="fn-sk-tools"></div>
+      </div>
+      <div class="pairline" id="fn-pair" role="status"></div>
+    </section>
+
+    <section class="card full" id="fn-c2">
+      <h4><span class="no">2</span><span lang="vi">Thông điệp</span><span lang="en">Message</span></h4>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-msg"><span lang="vi">Thông điệp cần ký</span><span lang="en">Message to sign</span></label><span class="cnt" id="fn-msg-cnt"></span></div>
+        <textarea id="fn-msg" rows="2" spellcheck="false" autocomplete="off">Hello post-quantum world</textarea>
+        <div class="tools" id="fn-msg-tools"></div>
+      </div>
+      <p class="hint"><span lang="vi">Không có ô ngữ cảnh hay pre-hash: FIPS 206 chưa được công bố nên chưa biết FN-DSA sẽ định nghĩa chúng thế nào. Trang này ký đúng như Falcon v1.2 — băm muối r cùng thông điệp.</span><span lang="en">There is no context or pre-hash field: FIPS 206 has not been published, so how FN-DSA will define them is not yet known. This page signs exactly as Falcon v1.2 does — it hashes the salt r together with the message.</span></p>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-mp"><span lang="vi">r ‖ M — chuỗi được băm thành điểm c</span><span lang="en">r ‖ M — the string hashed to the point c</span></label><span class="cnt" id="fn-mp-cnt"></span></div>
+        <textarea id="fn-mp" rows="2" spellcheck="false" readonly></textarea>
+        <div class="tools" id="fn-mp-tools"></div>
+      </div>
+    </section>
+
+    <section class="card full" id="fn-c3">
+      <h4><span class="no">3</span><span lang="vi">Chữ ký</span><span lang="en">Signature</span></h4>
+      <div class="row">
+        <button class="btn" id="fn-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button>
+        <button class="btn" id="fn-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
+        <label class="chk"><input type="checkbox" id="fn-salt-rnd" checked/><span lang="vi">muối r ngẫu nhiên</span><span lang="en">random salt r</span></label>
+        <label class="chk"><input type="checkbox" id="fn-sseed-rnd" checked/><span lang="vi">seed lấy mẫu ngẫu nhiên</span><span lang="en">random sampler seed</span></label>
+        <button class="btn ghost sm" id="fn-flip" type="button"><span lang="vi">Lật 1 bit của chữ ký</span><span lang="en">Flip one signature bit</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-salt"><span lang="vi">Muối — r</span><span lang="en">Salt — r</span></label><span class="cnt" id="fn-salt-cnt"></span></div>
+        <textarea id="fn-salt" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="fn-salt-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-sseed"><span lang="vi">Seed của bộ lấy mẫu Gauss</span><span lang="en">Seed of the Gaussian sampler</span></label><span class="cnt" id="fn-sseed-cnt"></span></div>
+        <textarea id="fn-sseed" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="fn-sseed-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="fn-sig"><span lang="vi">Chữ ký</span><span lang="en">Signature</span></label><span class="cnt" id="fn-sig-cnt"></span></div>
+        <textarea id="fn-sig" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="fn-sig-tools"></div>
+      </div>
+    </section>
+
+    <div class="result info" id="fn-result" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ================================================================ HQC-KEM -->
+<section class="panel" id="panel-hqc" role="tabpanel" aria-labelledby="tab-hqc" hidden>
+  <div class="bar">
+    <div class="chips" role="radiogroup" aria-labelledby="hqc-set-l">
+      <span class="chips-l" id="hqc-set-l"><span lang="vi">Mức an toàn</span><span lang="en">Security level</span></span>
+      <label class="chip"><input type="radio" name="hqc-set" value="HQC-1" checked/><span>HQC-1</span></label>
+      <label class="chip"><input type="radio" name="hqc-set" value="HQC-3"/><span>HQC-3</span></label>
+      <label class="chip"><input type="radio" name="hqc-set" value="HQC-5"/><span>HQC-5</span></label>
+    </div>
+    <button class="btn ghost sm" id="hqc-clear" type="button"><span lang="vi">Xoá hết</span><span lang="en">Clear all</span></button>
+  </div>
+
+  <div class="flow">
+    <div class="actor recv"><span lang="vi">Bên nhận — giữ cặp khoá</span><span lang="en">Receiver — owns the key pair</span></div>
+    <div class="actor send"><span lang="vi">Bên gửi — chỉ biết khoá công khai</span><span lang="en">Sender — knows only the public key</span></div>
+
+    <section class="card recv" id="hqc-c1">
+      <h4><span class="no">1</span><span lang="vi">Sinh cặp khoá</span><span lang="en">Key pair</span>
+        <span class="who"><span lang="vi">bên nhận</span><span lang="en">receiver</span></span></h4>
+      <div class="row">
+        <button class="btn" id="hqc-keygen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+        <label class="chk"><input type="checkbox" id="hqc-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+        <button class="btn ghost sm" id="hqc-kat" type="button"><span lang="vi">Nạp ví dụ KAT chính thức</span><span lang="en">Load the official KAT example</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="hqc-sk"><span lang="vi">Khoá giải đóng gói (bí mật) — dk, chính là seed</span><span lang="en">Decapsulation key (private) — dk, which is the seed</span></label><span class="cnt" id="hqc-sk-cnt"></span></div>
+        <textarea id="hqc-sk" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="hqc-sk-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="hqc-pk"><span lang="vi">Khoá đóng gói (công khai) — ek</span><span lang="en">Encapsulation key (public) — ek</span></label><span class="cnt" id="hqc-pk-cnt"></span></div>
+        <textarea id="hqc-pk" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="hqc-pk-tools"></div>
+      </div>
+      <div class="pairline" id="hqc-pair" role="status"></div>
+    </section>
+
+    <div class="arrow" id="hqc-a2"><span class="lbl"><span class="no">2</span><span id="hqc-a2-txt"></span><span aria-hidden="true">→</span></span></div>
+
+    <section class="card send" id="hqc-c3">
+      <h4><span class="no">3</span><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span>
+        <span class="who"><span lang="vi">bên gửi</span><span lang="en">sender</span></span></h4>
+      <div class="row">
+        <button class="btn" id="hqc-encaps" type="button"><span lang="vi">Đóng gói</span><span lang="en">Encapsulate</span></button>
+        <label class="chk"><input type="checkbox" id="hqc-m-rnd" checked/><span lang="vi">m và muối ngẫu nhiên</span><span lang="en">random m and salt</span></label>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="hqc-m"><span lang="vi">Thông điệp ngẫu nhiên — m</span><span lang="en">Random message — m</span></label><span class="cnt" id="hqc-m-cnt"></span></div>
+        <textarea id="hqc-m" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="hqc-m-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="hqc-salt"><span lang="vi">Muối — salt</span><span lang="en">Salt</span></label><span class="cnt" id="hqc-salt-cnt"></span></div>
+        <textarea id="hqc-salt" rows="1" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="hqc-salt-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="hqc-ct"><span lang="vi">Bản mã — c = (u, v, salt)</span><span lang="en">Ciphertext — c = (u, v, salt)</span></label><span class="cnt" id="hqc-ct-cnt"></span></div>
+        <textarea id="hqc-ct" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="hqc-ct-tools"></div>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="hqc-ss"><span lang="vi">Khoá chung của bên gửi — K</span><span lang="en">Shared secret, sender — K</span></label><span class="cnt" id="hqc-ss-cnt"></span></div>
+        <textarea id="hqc-ss" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="hqc-ss-tools"></div>
+      </div>
+    </section>
+
+    <div class="arrow" id="hqc-a4"><span class="lbl"><span aria-hidden="true">←</span><span class="no">4</span><span id="hqc-a4-txt"></span></span></div>
+
+    <section class="card recv" id="hqc-c5">
+      <h4><span class="no">5</span><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span>
+        <span class="who"><span lang="vi">bên nhận</span><span lang="en">receiver</span></span></h4>
+      <div class="row">
+        <button class="btn" id="hqc-decaps" type="button"><span lang="vi">Giải đóng gói</span><span lang="en">Decapsulate</span></button>
+        <button class="btn ghost sm" id="hqc-flip" type="button"><span lang="vi">Lật 1 bit của bản mã</span><span lang="en">Flip one ciphertext bit</span></button>
+      </div>
+      <div class="fld">
+        <div class="fld-head"><label for="hqc-ss2"><span lang="vi">Khoá chung của bên nhận — K′</span><span lang="en">Shared secret, receiver — K′</span></label><span class="cnt" id="hqc-ss2-cnt"></span></div>
+        <textarea id="hqc-ss2" rows="2" spellcheck="false" autocomplete="off"></textarea>
+        <div class="tools" id="hqc-ss2-tools"></div>
+      </div>
+    </section>
+
+    <div class="result info" id="hqc-result" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ================================================================ bộ chuyển đổi -->
+<section class="panel" id="panel-cvt" role="tabpanel" aria-labelledby="tab-cvt" hidden>
+  <p class="hint"><span lang="vi">Khoá và chữ ký lấy từ nơi khác thường không ở dạng hex: có khi là mảng C trong mã nguồn tham chiếu, mảng Java, hay Base64 trong một file cấu hình. Dán vào đây để đổi qua lại; mỗi ô của các thẻ kia cũng có sẵn nút đổi định dạng.</span><span lang="en">Keys and signatures copied from elsewhere are often not hex: a C array in reference source code, a Java array, Base64 in a config file. Paste them here to convert; every field in the other tabs has the same format buttons.</span></p>
+  <div class="chips" role="radiogroup" aria-labelledby="cvt-in-l">
+    <span class="chips-l" id="cvt-in-l"><span lang="vi">Đầu vào</span><span lang="en">Input</span></span>
+    <label class="chip"><input type="radio" name="cvt-in" value="auto" checked/><span><span lang="vi">Tự nhận (hex / mảng C / Java / thập phân)</span><span lang="en">Auto (hex / C / Java / decimal array)</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-in" value="base64"/><span>Base64</span></label>
+    <label class="chip"><input type="radio" name="cvt-in" value="text"/><span><span lang="vi">Văn bản (UTF-8)</span><span lang="en">Text (UTF-8)</span></span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="cvt-in"><span lang="vi">Dữ liệu vào</span><span lang="en">Input data</span></label><span class="cnt" id="cvt-in-cnt"></span></div>
+    <textarea id="cvt-in" rows="4" spellcheck="false" autocomplete="off">{ 0x46, 0x49, 0x50, 0x53, -1, 127 }</textarea>
+    <div class="tools" id="cvt-in-tools"></div>
+  </div>
+  <div class="chips" role="radiogroup" aria-labelledby="cvt-out-l">
+    <span class="chips-l" id="cvt-out-l"><span lang="vi">Đầu ra</span><span lang="en">Output</span></span>
+    <label class="chip"><input type="radio" name="cvt-out" value="hex" checked/><span>Hex</span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="HEX"/><span><span lang="vi">Hex hoa</span><span lang="en">Hex upper</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="spaced"/><span><span lang="vi">Hex cách</span><span lang="en">Hex spaced</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="colon"/><span><span lang="vi">Hex hai chấm</span><span lang="en">Hex colon</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="c"/><span><span lang="vi">Mảng C</span><span lang="en">C array</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="java"/><span><span lang="vi">Mảng Java</span><span lang="en">Java array</span></span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="base64"/><span>Base64</span></label>
+    <label class="chip"><input type="radio" name="cvt-out" value="text"/><span><span lang="vi">Văn bản</span><span lang="en">Text</span></span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="cvt-out"><span lang="vi">Kết quả</span><span lang="en">Result</span></label><span class="cnt" id="cvt-out-cnt"></span></div>
+    <textarea id="cvt-out" rows="4" spellcheck="false" readonly></textarea>
+    <div class="tools" id="cvt-out-tools"></div>
+  </div>
+  <div class="row"><button class="btn ghost sm" id="cvt-use" type="button"><span lang="vi">Dùng kết quả làm đầu vào</span><span lang="en">Use the result as input</span></button></div>
+  <div class="result info" id="cvt-result" role="status" aria-live="polite"></div>
+</section>
+
+<h2><span lang="vi">Chuẩn hoá đến đâu</span><span lang="en">How far standardisation has got</span></h2>
+<p lang="vi">Ba thuật toán ở ba chặng khác nhau, và trang này ghi rõ nó hiện thực văn bản nào:</p>
+<p lang="en">The three algorithms are at three different stages, and this page states exactly which text it implements:</p>
+<ul lang="vi">
+  <li><strong>SLH-DSA — FIPS 205, đã ban hành ngày 13/08/2024.</strong> Trang hiện thực đúng văn bản đó, cả 12 bộ tham số,
+      và được đối chiếu với vector ACVP của NIST.</li>
+  <li><strong>FN-DSA — FIPS 206, đang được soạn.</strong> Bản dự thảo chưa được công bố (trang dự thảo trên csrc.nist.gov
+      chưa tồn tại khi tôi kiểm ngày 31/10/2026). Trang hiện thực <em>Falcon v1.2</em> — thuật toán mà FN-DSA được xây trên đó —
+      khớp với mã tham chiếu vòng 3 và bộ KAT chính thức của nó. Những gì FIPS 206 sẽ đổi (ngữ cảnh, pre-hash, cách mã hoá)
+      thì chưa ai biết chắc, nên trang không đoán.</li>
+  <li><strong>HQC-KEM — FIPS 207, đang được soạn.</strong> NIST chọn HQC tháng 3/2025 (báo cáo NIST IR 8545) làm cơ chế đóng
+      gói khoá dự phòng cho ML-KEM. Trang hiện thực đặc tả HQC ngày 12/10/2026 và mã tham chiếu 5.1.0 đi kèm (khoá giải đóng
+      gói chỉ còn là một seed 32 byte), khớp với bộ KAT của phiên bản đó.</li>
+</ul>
+<ul lang="en">
+  <li><strong>SLH-DSA — FIPS 205, published on 13 August 2024.</strong> The page implements exactly that text, all 12
+      parameter sets, checked against NIST's ACVP vectors.</li>
+  <li><strong>FN-DSA — FIPS 206, being written.</strong> The draft has not been published (its draft page on csrc.nist.gov
+      did not exist when I checked on 31 October 2026). The page implements <em>Falcon v1.2</em> — the algorithm FN-DSA is
+      built on — matching the round-3 reference code and its official KAT. What FIPS 206 will change (context, pre-hash,
+      encodings) nobody knows for certain yet, so the page does not guess.</li>
+  <li><strong>HQC-KEM — FIPS 207, being written.</strong> NIST selected HQC in March 2025 (report NIST IR 8545) as a backup
+      key-encapsulation mechanism to ML-KEM. The page implements the HQC specification of 12 October 2026 and its reference
+      code 5.1.0 (the decapsulation key is now just a 32-byte seed), matching that version's KAT.</li>
+</ul>
+
+<h2><span lang="vi">Các ô trên màn hình nghĩa là gì</span><span lang="en">What the fields on screen mean</span></h2>
+<p lang="vi">Mọi ô đều sửa được, và mọi giá trị ngẫu nhiên đều nằm trong một ô: bỏ dấu "ngẫu nhiên" và nhập giá trị cố
+định thì kết quả lặp lại được từng byte.</p>
+<p lang="en">Every field is editable, and every random value sits in a field: untick "random" and enter a fixed value, and
+the result repeats byte for byte.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Ô</span><span lang="en">Field</span></th>
+  <th><span lang="vi">Nghĩa</span><span lang="en">What it is</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral"><strong>Seed</strong> · SLH-DSA</td>
+      <td><span lang="vi">Ba chuỗi n byte: SK.seed sinh mọi khoá một lần bên trong, SK.prf trộn vào mỗi chữ ký, PK.seed là phần công khai. Khoá công khai còn có PK.root — gốc của cây Merkle trên cùng, tính từ hai seed.</span><span lang="en">Three n-byte strings: SK.seed generates every inner one-time key, SK.prf is mixed into each signature, PK.seed is the public part. The public key also has PK.root — the root of the top Merkle tree, computed from the two seeds.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>addrnd</strong></td>
+      <td><span lang="vi">n byte ngẫu nhiên trộn vào mỗi lần ký SLH-DSA. Để trống thì ký tất định: chuẩn dùng PK.seed thay chỗ của nó.</span><span lang="en">n random bytes mixed into each SLH-DSA signature. Leave it empty for deterministic signing: the standard then uses PK.seed in its place.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>Seed</strong> · FN-DSA</td>
+      <td><span lang="vi">48 byte nuôi một luồng SHAKE256, từ đó rút ra f và g, rồi giải phương trình NTRU fG − gF = q để có F và G.</span><span lang="en">48 bytes feeding a SHAKE256 stream, from which f and g are drawn, before the NTRU equation fG − gF = q is solved for F and G.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>r</strong> · <strong>sampler seed</strong></td>
+      <td><span lang="vi">Muối 40 byte được băm cùng thông điệp, và 48 byte nuôi bộ lấy mẫu Gauss của lần ký. Cùng khoá, cùng thông điệp, cùng hai giá trị này thì cùng chữ ký.</span><span lang="en">A 40-byte salt hashed with the message, and 48 bytes feeding the signature's Gaussian sampler. Same key, same message, same two values: same signature.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>dk</strong> · HQC</td>
+      <td><span lang="vi">32 byte, và chỉ có thế: từ đặc tả 12/10/2026, khoá giải đóng gói chính là seed sinh khoá. Muốn giải đóng gói, bên nhận sinh lại mọi thứ từ nó.</span><span lang="en">32 bytes, and nothing more: since the 12 October 2026 specification, the decapsulation key is the key-generation seed itself. To decapsulate, the receiver regenerates everything from it.</span></td></tr>
+  <tr><td data-i18n="neutral"><strong>m</strong> · <strong>salt</strong> · HQC</td>
+      <td><span lang="vi">Thông điệp ngẫu nhiên (16 / 24 / 32 byte) và muối 16 byte của một lần đóng gói. Muối đi kèm bản mã.</span><span lang="en">The random message (16 / 24 / 32 bytes) and the 16-byte salt of one encapsulation. The salt travels with the ciphertext.</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2><span lang="vi">SLH-DSA: chữ ký chỉ từ hàm băm</span><span lang="en">SLH-DSA: signatures from hash functions alone</span></h2>
+<p lang="vi">SLH-DSA không dựa vào bài toán lattice nào: nếu SHA-2 hay SHAKE còn an toàn thì chữ ký còn an toàn. Nó ghép ba
+lớp: chữ ký một lần WOTS+ (mỗi khoá chỉ ký được một lần), cây Merkle XMSS gom hàng trăm khoá một lần dưới một gốc, và một
+"siêu cây" d tầng; lớp dưới cùng là FORS, chữ ký vài lần ký lên giá trị băm của thông điệp. Cái giá là kích thước và thời
+gian: chữ ký dài 7 856 đến 49 856 byte, và mỗi lần ký là hàng trăm nghìn tới hàng triệu lần gọi hàm băm.</p>
+<p lang="en">SLH-DSA rests on no lattice problem: if SHA-2 or SHAKE remain secure, the signatures remain secure. It stacks
+three layers: the WOTS+ one-time signature (each key signs once), XMSS Merkle trees gathering hundreds of one-time keys
+under one root, and a d-layer "hypertree"; at the bottom sits FORS, a few-time signature over the message digest. The
+price is size and time: signatures of 7,856 to 49,856 bytes, and each signature costs hundreds of thousands to millions
+of hash calls.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Bộ tham số</span><span lang="en">Parameter set</span></th>
+  <th>n</th>
+  <th><span lang="vi">Khoá công khai</span><span lang="en">Public key</span></th>
+  <th><span lang="vi">Khoá bí mật</span><span lang="en">Secret key</span></th>
+  <th><span lang="vi">Chữ ký</span><span lang="en">Signature</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">SLH-DSA-*-128s / 128f</td><td class="num">16</td><td class="num">32</td><td class="num">64</td><td class="num">7 856 / 17 088</td></tr>
+  <tr><td data-i18n="neutral">SLH-DSA-*-192s / 192f</td><td class="num">24</td><td class="num">48</td><td class="num">96</td><td class="num">16 224 / 35 664</td></tr>
+  <tr><td data-i18n="neutral">SLH-DSA-*-256s / 256f</td><td class="num">32</td><td class="num">64</td><td class="num">128</td><td class="num">29 792 / 49 856</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Biến thể <strong>s</strong> cho chữ ký nhỏ hơn hơn hai lần nhưng ký chậm hơn nhiều; <strong>f</strong> thì ngược
+lại. Trên máy tôi (đo bằng Node), ký một bộ "s" mất từ khoảng một giây (SHA2-128s) tới hơn mười giây (SHAKE-192s) — phép
+tính chạy ở một luồng riêng (Web Worker) nên trang vẫn dùng được trong lúc chờ. Ký hiệu * là SHA2 hoặc SHAKE: hai họ cho cùng kích thước.</p>
+<p lang="en">The <strong>s</strong> variants give signatures more than twice as small but sign far more slowly; the
+<strong>f</strong> variants the other way round. On my machine (measured in Node) an "s" signature takes from about one
+second (SHA2-128s) to over ten (SHAKE-192s) — the work runs in a separate thread (a Web Worker), so the page stays usable
+while you wait. The * stands for SHA2 or SHAKE: both
+families give the same sizes.</p>
+<p lang="vi">Ở chế độ pre-hash, FIPS 205 (mục 10.2.2) đòi giá trị băm đem ký phải cho ít nhất 8n bit an ninh chống va chạm,
+tức dài ít nhất 2n byte. Vì thế SHA-224 bị gạch ở mọi mức, SHA-256 chỉ dùng được ở mức 128, và mức 256 chỉ còn SHA-512,
+SHA3-512, SHAKE256 — đúng như quy tắc của ML-DSA.</p>
+<p lang="en">In pre-hash mode, FIPS 205 (section 10.2.2) requires the signed digest to give at least 8n bits of
+collision resistance, that is, to be at least 2n bytes long. So SHA-224 is struck out at every level, SHA-256 works only
+at level 128, and level 256 is left with SHA-512, SHA3-512 and SHAKE256 — exactly the rule of ML-DSA.</p>
+
+<h2><span lang="vi">FN-DSA (Falcon): chữ ký nhỏ nhất, cái giá là số thực</span><span lang="en">FN-DSA (Falcon): the smallest signatures, at the price of floating point</span></h2>
+<p lang="vi">Falcon dùng lattice NTRU: khoá bí mật là bốn đa thức ngắn f, g, F, G thoả fG − gF = q, khoá công khai là
+h = g / f mod q với q = 12 289. Ký là tìm một vector ngắn (s1, s2) sao cho s1 + s2·h bằng giá trị băm của muối và thông
+điệp — tìm bằng cách lấy mẫu Gauss trên một cây (ffSampling) tính trong miền FFT bằng số thực IEEE-754. Nhờ thế chữ ký
+chỉ 666 byte (Falcon-512) so với 2 420 byte của ML-DSA-44.</p>
+<p lang="en">Falcon uses NTRU lattices: the private key is four short polynomials f, g, F, G with fG − gF = q, the public
+key is h = g / f mod q with q = 12,289. Signing means finding a short vector (s1, s2) with s1 + s2·h equal to the hash
+of the salt and the message — found by Gaussian sampling over a tree (ffSampling) computed in the FFT domain with
+IEEE-754 floating-point numbers. That is why a signature is only 666 bytes (Falcon-512) against ML-DSA-44's 2,420.</p>
+<p lang="vi">Một chi tiết tôi chỉ thấy khi so từng byte: mã tham chiếu C giải phương trình NTRU với độ chính xác cố định,
+nên thỉnh thoảng loại một cặp (f, g) mà bộ giải chính xác vẫn giải được, rồi dùng cặp sau đó. Trang này giải chính xác.
+Kết quả: với phần lớn seed, khoá sinh ra trùng file KAT; với một số ít (như mục số 1 của Falcon-1024), trang cho một khoá
+khác — vẫn hợp lệ. Chữ ký ký từ khoá của KAT thì trùng từng byte trong mọi trường hợp.</p>
+<p lang="en">A detail I only saw by comparing byte for byte: the reference C code solves the NTRU equation with fixed
+precision, so it occasionally rejects an (f, g) pair that an exact solver handles, and moves on to the next one. This
+page solves exactly. As a result, for most seeds the key generated matches the KAT file; for a few (such as Falcon-1024
+entry 1) the page produces a different — still valid — key. Signatures made from the KAT's key match byte for byte in
+every case.</p>
+
+<h2><span lang="vi">HQC-KEM: trao đổi khoá bằng mã sửa lỗi</span><span lang="en">HQC-KEM: key exchange from error-correcting codes</span></h2>
+<p lang="vi">HQC không dùng lattice: khoá công khai là một mẫu của bài toán giải mã hội chứng trên mã quasi-cyclic nhị phân, và
+thông điệp được bảo vệ bằng một mã nối — Reed–Solomon rút gọn bên ngoài, Reed–Muller RM(1,7) nhân đôi bên trong. Bên nhận
+giải đóng gói chính là chạy một bộ giải mã sửa lỗi: giải Reed–Muller bằng biến đổi Hadamard, rồi giải Reed–Solomon. Vì
+dựa trên một bài toán khác hẳn ML-KEM, NIST giữ HQC làm phương án dự phòng: nếu lattice có ngày bị phá, vẫn còn một KEM
+đứng được.</p>
+<p lang="en">HQC uses no lattice: the public key is an instance of syndrome decoding on binary quasi-cyclic codes, and the
+message is protected by a concatenated code — a shortened Reed–Solomon code outside, a duplicated Reed–Muller RM(1,7)
+inside. Decapsulating literally runs an error-correcting decoder: Reed–Muller by a Hadamard transform, then
+Reed–Solomon. Because it rests on a problem entirely different from ML-KEM's, NIST keeps HQC as a backup: if lattices
+ever fall, a KEM would still stand.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Bộ tham số</span><span lang="en">Parameter set</span></th>
+  <th><span lang="vi">Khoá đóng gói</span><span lang="en">Encapsulation key</span></th>
+  <th><span lang="vi">Khoá giải đóng gói</span><span lang="en">Decapsulation key</span></th>
+  <th><span lang="vi">Bản mã</span><span lang="en">Ciphertext</span></th>
+  <th><span lang="vi">So với ML-KEM cùng mức</span><span lang="en">Against ML-KEM, same level</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">HQC-1</td><td class="num">2 241</td><td class="num">32</td><td class="num">4 433</td><td data-i18n="neutral">ML-KEM-512: 800 · 1 632 · 768</td></tr>
+  <tr><td data-i18n="neutral">HQC-3</td><td class="num">4 514</td><td class="num">32</td><td class="num">8 978</td><td data-i18n="neutral">ML-KEM-768: 1 184 · 2 400 · 1 088</td></tr>
+  <tr><td data-i18n="neutral">HQC-5</td><td class="num">7 237</td><td class="num">32</td><td class="num">14 421</td><td data-i18n="neutral">ML-KEM-1024: 1 568 · 3 168 · 1 568</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Kích thước tính bằng byte. Bản mã HQC lớn hơn ML-KEM khoảng sáu đến chín lần — cái giá của sự đa dạng.</p>
+<p lang="vi">Một điều tôi chỉ thấy khi kiểm thử: bộ KAT chính thức không bao giờ bắt Reed–Solomon sửa lỗi nào — với bản mã
+thật, lớp Reed–Muller đã sửa hết. Nên tôi cố tình làm hỏng hẳn từng khối Reed–Muller: hỏng t<sub>1</sub> khối (15, 16 hay 29
+tuỳ mức) thì Reed–Solomon vẫn khôi phục đúng thông điệp; hỏng thêm một khối là sai. Mã này cũng phải sai đúng như mã tham
+chiếu ở chỗ đó.</p>
+<p lang="en">Sizes in bytes. HQC ciphertexts are roughly six to nine times larger than ML-KEM's — the price of diversity.</p>
+<p lang="en">Something I only saw while testing: the official KAT never makes Reed–Solomon correct anything — on real
+ciphertexts the Reed–Muller layer has already fixed every error. So I corrupted whole Reed–Muller blocks on purpose: with
+t<sub>1</sub> bad blocks (15, 16 or 29 depending on the level) Reed–Solomon still recovers the message; one more block and
+it fails. This code has to fail exactly where the reference code fails, too.</p>
+
+<h2><span lang="vi">Khoá thô và kiểm tra cặp khoá</span><span lang="en">Raw keys and the key-pair check</span></h2>
+<p lang="vi">Nút "Nạp file" nhận khoá thô (nhị phân, hex hay Base64) và nhận ra bộ tham số theo độ dài. Ở SLH-DSA, độ dài
+không đủ để phân biệt: SHA2 và SHAKE, s và f cùng mức có khoá dài như nhau, và 64 byte có thể là khoá bí mật mức 128 hoặc
+khoá công khai mức 256. Trang ưu tiên bộ đang mở và nút bạn đã bấm, rồi nói rõ khi phải đoán. File khoá ML-KEM / ML-DSA thì
+được chỉ sang <a href="pqc-calculator.html">máy tính kia</a>.</p>
+<p lang="en">The "Load file" button accepts raw keys (binary, hex or Base64) and recognises the parameter set by length.
+For SLH-DSA length is not enough: SHA2 and SHAKE, s and f at the same level have keys of the same length, and 64 bytes may
+be a level-128 private key or a level-256 public key. The page prefers the set that is open and the button you pressed,
+and says so when it has to guess. ML-KEM / ML-DSA key files are pointed to <a href="pqc-calculator.html">the other
+calculator</a>.</p>
+<p lang="vi">Dòng kiểm tra cặp khoá trả lời cùng câu hỏi như hai trang anh em, nhưng mỗi thuật toán kiểm theo cách của nó:
+SLH-DSA tính lại gốc cây trên cùng từ SK.seed và PK.seed; FN-DSA tính lại h = g / f và kiểm phương trình NTRU, rồi ký thử;
+HQC sinh lại khoá đóng gói từ dk. Bài học "phần ẩn" lặp lại ở SLH-DSA: đổi SK.prf thì mọi phép kiểm vẫn xanh, chỉ seed mới
+cho thấy khoá đã khác.</p>
+<p lang="en">The key-pair check line answers the same question as on the sibling pages, but each algorithm checks in its
+own way: SLH-DSA recomputes the top tree's root from SK.seed and PK.seed; FN-DSA recomputes h = g / f, checks the NTRU
+equation and signs once; HQC regenerates the encapsulation key from dk. The "hidden part" lesson repeats for SLH-DSA:
+change SK.prf and every check stays green — only the seed reveals that the key has changed.</p>
+
+<h2><span lang="vi">Vì sao có nút "lật 1 bit"</span><span lang="en">Why there is a "flip one bit" button</span></h2>
+<p lang="vi">Như ML-KEM, HQC không báo lỗi khi bản mã bị sửa: bên nhận trả ra một khoá 32 byte trông bình thường nhưng khác
+khoá của bên gửi — <em>từ chối ngầm</em>. Với HQC điều này còn quan trọng hơn: bộ giải mã sửa lỗi bên trong có xác suất
+giải sai rất nhỏ nhưng khác 0, và kẻ tấn công không được phép học gì từ việc nó thành công hay thất bại. Hai thuật toán
+chữ ký thì trả lời thẳng đúng / sai; FN-DSA còn nói vì sao sai.</p>
+<p lang="en">Like ML-KEM, HQC raises no error when the ciphertext is altered: the receiver returns an ordinary-looking
+32-byte key that differs from the sender's — <em>implicit rejection</em>. For HQC this matters even more: the inner
+error-correcting decoder has a tiny but non-zero chance of failing, and an attacker must learn nothing from whether it
+succeeded. The two signature schemes answer true or false directly; FN-DSA even says why.</p>
+
+<h2><span lang="vi">Mã này có đáng tin không</span><span lang="en">Can this code be trusted</span></h2>
+<p lang="vi">Phần tính toán là mã JavaScript tôi tự viết theo các văn bản chuẩn và mã tham chiếu, không dùng thư viện ngoài.
+Tôi làm bốn việc để chứng minh nó:</p>
+<p lang="en">The calculator is JavaScript I wrote myself following the standards and the reference code, with no external
+library. I did four things to prove it:</p>
+<ul lang="vi">
+  <li>So <em>từng byte</em> với nguồn chính thức: vector ACVP của NIST cho SLH-DSA (sinh khoá, ký thuần, ký pre-hash, ký
+      giao diện trong, xác minh cả chữ ký hỏng), KAT vòng 3 của Falcon, KAT 5.1.0 của HQC — cộng một mô hình tham chiếu ở
+      các seed cố định và các quy tắc kiểm tra cặp khoá: <span data-i18n="neutral">463</span> phép so, tất cả khớp.</li>
+  <li>Cho một trình duyệt giả lập bấm qua mọi luồng trên trang — <span data-i18n="neutral">67</span> phép kiểm — và sau
+      mỗi cú bấm lại soát xem có câu nào chỉ có một ngôn ngữ không.</li>
+  <li>Cố tình làm hỏng mã <span data-i18n="neutral">28</span> lần và đòi phép kiểm phải đỏ: cả 28 lần đều đỏ. Lượt đầu
+      còn ba lần xanh, chỉ ra ba chỗ phép kiểm còn hở — chữ ký Falcon mã hoá một hệ số thành "−0", khoá HQC nạp chỉ có dk,
+      chữ ký SLH-DSA có ngữ cảnh — và khi vá chỗ thứ hai thì lộ ra một lỗi thật: file khoá nhị phân mà byte nào cũng tình cờ
+      in được bị từ chối. Cả phép kiểm lẫn lỗi đều đã sửa.</li>
+  <li>Nút "Chạy kiểm chứng" ở đầu trang lặp lại một phần các phép so đó ngay trong máy bạn.</li>
+</ul>
+<ul lang="en">
+  <li>Compared <em>byte for byte</em> with official sources: NIST's ACVP vectors for SLH-DSA (key generation, pure,
+      pre-hash and internal-interface signing, verification including broken signatures), Falcon's round-3 KAT, HQC's 5.1.0
+      KAT — plus a reference model at fixed seeds and the key-pair check rules: <span data-i18n="neutral">463</span>
+      comparisons, all matching.</li>
+  <li>Had a simulated browser click through every flow on the page — <span data-i18n="neutral">67</span> checks — and,
+      after every click, look for any sentence present in one language only.</li>
+  <li>Broke the code on purpose <span data-i18n="neutral">28</span> times and required the tests to go red: all 28
+      went red. The first run left three green, pointing at three gaps in the tests — a Falcon signature encoding a
+      coefficient as "−0", an HQC key loaded as dk alone, an SLH-DSA signature with a context — and closing the second
+      exposed a real bug: a binary key file whose every byte happens to be printable was refused. Both the tests and
+      the bug are fixed.</li>
+  <li>The self-test button at the top repeats part of those comparisons on your machine.</li>
+</ul>
+<div class="callout">
+  <span lang="vi"><strong>Đừng dùng mã này để bảo vệ thứ gì thật.</strong> Nó viết cho việc học: thời gian chạy phụ thuộc
+  dữ liệu, khoá nằm trong bộ nhớ JavaScript, và bộ lấy mẫu Gauss của Falcon là nơi các tấn công kênh bên đã nhắm vào nhiều
+  lần.</span>
+  <span lang="en"><strong>Do not protect anything real with this code.</strong> It is written for learning: data-dependent
+  timing, keys living in JavaScript memory, and Falcon's Gaussian sampler is a place side-channel attacks have aimed at
+  more than once.</span>
+</div>
+
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://csrc.nist.gov/pubs/fips/205/final" target="_blank" rel="noopener" data-i18n="neutral">NIST FIPS 205, Stateless Hash-Based Digital Signature Standard (SLH-DSA)</a> — 13/08/2024.</li>
+  <li><a href="https://falcon-sign.info/" target="_blank" rel="noopener" data-i18n="neutral">Falcon — specification v1.2 &amp; reference implementation</a>
+      — <span lang="vi">cơ sở của FN-DSA (FIPS 206, chưa công bố).</span><span lang="en">the basis of FN-DSA (FIPS 206, not yet published).</span></li>
+  <li><a href="https://pqc-hqc.org/resources.html" target="_blank" rel="noopener" data-i18n="neutral">HQC — specification 2026-10-12 &amp; reference code</a>
+      — <span lang="vi">cơ sở của HQC-KEM (FIPS 207, chưa công bố).</span><span lang="en">the basis of HQC-KEM (FIPS 207, not yet published).</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/ir/8545/final" target="_blank" rel="noopener" data-i18n="neutral">NIST IR 8545 — Status Report on the Fourth Round of the NIST PQC Standardization Process</a> — 03/2025.</li>
+  <li><a href="pqc-calculator.html" data-i18n="neutral">ML-KEM &amp; ML-DSA</a> · <a href="kpqc-calculator.html" data-i18n="neutral">SMAUG-T &amp; HAETAE</a>
+      — <span lang="vi">hai máy tính anh em, cùng cách tương tác.</span><span lang="en">the two sibling calculators, same interaction.</span></li>
+  <li><a href="https://www.jnet-secure.com/pqc-calculator" target="_blank" rel="noopener" data-i18n="neutral">PQC Calculator — jNet Secure</a>
+      — <span lang="vi">trang mẫu cho cách tương tác của cả ba máy tính. Mã và thiết kế giao diện là của tôi.</span>
+      <span lang="en">the reference for the interaction of all three calculators. The code and the visual design are my own.</span></li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">← PQC, AI &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<script src="assets/pqc-mlkem.js"></script>
+<script src="assets/pqc-sha2.js"></script>
+<script src="assets/pqc-mldsa.js"></script>
+<script src="assets/pqc-tools.js"></script>
+<script src="assets/pqc-slhdsa.js"></script>
+<script src="assets/pqc-fndsa.js"></script>
+<script src="assets/pqc-hqc.js"></script>
+<script src="assets/nist-tools.js"></script>
+<script src="assets/nist-vectors.js"></script>
+<script src="assets/nist-calc-ui.js"></script>
+
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

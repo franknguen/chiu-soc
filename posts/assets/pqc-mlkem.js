@@ -107,6 +107,54 @@
   function shake256(d, l) { return hashOf(136, 0x1F, d, l); }
   function shake128xof(d) { return new Sponge(168, 0x1F).absorb(d); }
 
+  /* Keccak-p[1600, 24] không cấp phát, cho SLH-DSA (hàng triệu lần gọi): s = Int32Array(50),
+     s[2i] / s[2i+1] = nửa thấp / cao của làn i, tức từ 32 bit little-endian thứ j của luồng byte là s[j].
+     rho + pi gộp làm một vòng đi theo hoán vị pi; bảng tính từ cùng phép bước (x, y) như RHO. */
+  var PI_LN = new Int32Array(24), PI_RS = new Int32Array(24), PI_SW = new Int32Array(24);
+  (function () {
+    var x = 1, y = 0, t, r, nx;
+    for (t = 0; t < 24; t++) {
+      r = ((t + 1) * (t + 2) / 2) % 64;          // độ dịch của làn (x, y) hiện tại
+      nx = y; y = (2 * x + 3 * y) % 5; x = nx;   // làn đó chuyển tới (y, 2x + 3y)
+      PI_LN[t] = 2 * (x + 5 * y); PI_RS[t] = r & 31; PI_SW[t] = r >= 32 ? 1 : 0;
+    }
+  })();
+  function keccakP(s) {
+    var r, t, y, j, k, l, h, tl, th;
+    var c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, d0, d1, d2, d3, d4, d5, d6, d7, d8, d9;
+    for (r = 0; r < 24; r++) {
+      c0 = s[0] ^ s[10] ^ s[20] ^ s[30] ^ s[40]; c1 = s[1] ^ s[11] ^ s[21] ^ s[31] ^ s[41];
+      c2 = s[2] ^ s[12] ^ s[22] ^ s[32] ^ s[42]; c3 = s[3] ^ s[13] ^ s[23] ^ s[33] ^ s[43];
+      c4 = s[4] ^ s[14] ^ s[24] ^ s[34] ^ s[44]; c5 = s[5] ^ s[15] ^ s[25] ^ s[35] ^ s[45];
+      c6 = s[6] ^ s[16] ^ s[26] ^ s[36] ^ s[46]; c7 = s[7] ^ s[17] ^ s[27] ^ s[37] ^ s[47];
+      c8 = s[8] ^ s[18] ^ s[28] ^ s[38] ^ s[48]; c9 = s[9] ^ s[19] ^ s[29] ^ s[39] ^ s[49];
+      d0 = c8 ^ ((c2 << 1) | (c3 >>> 31)); d1 = c9 ^ ((c3 << 1) | (c2 >>> 31));   // theta: D[x] = C[x-1] ^ rot1(C[x+1])
+      d2 = c0 ^ ((c4 << 1) | (c5 >>> 31)); d3 = c1 ^ ((c5 << 1) | (c4 >>> 31));
+      d4 = c2 ^ ((c6 << 1) | (c7 >>> 31)); d5 = c3 ^ ((c7 << 1) | (c6 >>> 31));
+      d6 = c4 ^ ((c8 << 1) | (c9 >>> 31)); d7 = c5 ^ ((c9 << 1) | (c8 >>> 31));
+      d8 = c6 ^ ((c0 << 1) | (c1 >>> 31)); d9 = c7 ^ ((c1 << 1) | (c0 >>> 31));
+      for (y = 0; y < 50; y += 10) {
+        s[y] ^= d0; s[y + 1] ^= d1; s[y + 2] ^= d2; s[y + 3] ^= d3; s[y + 4] ^= d4;
+        s[y + 5] ^= d5; s[y + 6] ^= d6; s[y + 7] ^= d7; s[y + 8] ^= d8; s[y + 9] ^= d9;
+      }
+      l = s[2]; h = s[3];
+      for (t = 0; t < 24; t++) {
+        j = PI_LN[t]; k = PI_RS[t];
+        if (PI_SW[t]) { tl = l; l = h; h = tl; }
+        tl = (l << k) | (h >>> (32 - k)); th = (h << k) | (l >>> (32 - k));
+        l = s[j]; h = s[j + 1]; s[j] = tl; s[j + 1] = th;
+      }
+      for (y = 0; y < 50; y += 10) {                // chi theo từng hàng
+        c0 = s[y]; c1 = s[y + 1]; c2 = s[y + 2]; c3 = s[y + 3]; c4 = s[y + 4];
+        c5 = s[y + 5]; c6 = s[y + 6]; c7 = s[y + 7]; c8 = s[y + 8]; c9 = s[y + 9];
+        s[y] = c0 ^ (~c2 & c4); s[y + 1] = c1 ^ (~c3 & c5); s[y + 2] = c2 ^ (~c4 & c6); s[y + 3] = c3 ^ (~c5 & c7);
+        s[y + 4] = c4 ^ (~c6 & c8); s[y + 5] = c5 ^ (~c7 & c9); s[y + 6] = c6 ^ (~c8 & c0); s[y + 7] = c7 ^ (~c9 & c1);
+        s[y + 8] = c8 ^ (~c0 & c2); s[y + 9] = c9 ^ (~c1 & c3);
+      }
+      s[0] ^= RC_LO[r]; s[1] ^= RC_HI[r];
+    }
+  }
+
   /* ---------- tham số và bảng NTT ---------- */
   var Q = 3329, N = 256;
   var PARAMS = {
@@ -365,6 +413,7 @@
     sha3_224: sha3_224, sha3_256: sha3_256, sha3_384: sha3_384, sha3_512: sha3_512, shake256: shake256,
     shake128xof: shake128xof,
     shake256xof: function (d) { return new Sponge(136, 0x1F).absorb(d); },
+    keccakP: keccakP,
     randomBytes: randomBytes
   };
 })(typeof window !== 'undefined' ? window : globalThis);

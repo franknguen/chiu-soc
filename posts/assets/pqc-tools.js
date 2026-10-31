@@ -259,6 +259,7 @@
     var s = text.replace(/\s+/g, ''), b;
     try { b = parseHex(s); if (b.length) return fromBytes(b, 'hex'); } catch (e) { if (!e.code || e.code === 'DER') throw e; }
     try { b = parseB64(s); if (b.length) return fromBytes(b, 'base64'); } catch (e) { if (!e.code || e.code === 'DER') throw e; }
+    if (buf.length) return fromBytes(buf, 'DER');   // không phải PEM / hex / Base64: chính các byte là khoá nhị phân (byte nào cũng in được)
     throw Err('UNRECOGNIZED');
   }
   /* gắn thuật toán (OID hoặc độ dài), mở rộng seed, kiểm seed <-> expandedKey. tab: 'kem' | 'sig' */
