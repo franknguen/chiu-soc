@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ChiU-SoC — Ghi chú từ nghiên cứu Ph.D. và nghề thiết kế vi mạch số / SoC</title>
-<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú những gì học được khi làm nghiên cứu sinh Ph.D. và trong công việc kỹ sư thiết kế vi mạch số / SoC: mật mã hậu lượng tử, mã sửa lỗi, RTL, verification, EDA mã nguồn mở. Personal notes from Ph.D. research and digital IC / SoC design work."/>
+<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú những gì học được khi làm nghiên cứu sinh Ph.D. và trong công việc kỹ sư thiết kế vi mạch số / SoC: thuật toán mật mã (cổ điển và hậu lượng tử), mã sửa lỗi, thiết kế và verification SoC / ASIC, EDA mã nguồn mở. Personal notes from Ph.D. research and digital IC / SoC design work: cryptographic algorithms (classical and post-quantum), error correction, SoC / ASIC design and verification, open-source EDA."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
@@ -229,6 +229,14 @@ footer{
 }
 footer a{ color:#8fd3cb; text-decoration:none; font-weight:600; }
 footer a:hover{ text-decoration:underline; }
+/* ==== house-format v1 — bilingual-personal-site skill, scripts/house-format.css. Prose is justified on every page.
+     Do not edit this block in a page: edit the skill's copy, re-run apply_format.py; check_site.py fails a page whose
+     block differs. ==== */
+main p, main li, main blockquote, main dd, main .art-desc, main .art-quote{ text-align:justify; text-justify:inter-word; hyphens:auto; }
+main .refs li, main .art-links li, main .songlist li, main .toc-wrap li, main .listen p, main .pair li, main .result li, main table p, main table li{ text-align:left; hyphens:manual; }
+main .poem-credit, main .video-cap, main figcaption p, main figcaption li{ text-align:center; hyphens:manual; }
+main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
+/* ==== /house-format ==== */
 </style>
 </head>
 <body>
@@ -275,11 +283,9 @@ footer a:hover{ text-decoration:underline; }
        Beyond the technical work there is also <em>Thoughts on our country</em> and
        <em>Poetry &amp; Melody</em> — room for the things outside the chip.</p>
     <div class="hero-chips">
-      <span class="chip"><span lang="vi">Mật mã hậu lượng tử (PQC)</span><span lang="en">Post-quantum cryptography (PQC)</span></span>
-      <span class="chip"><span lang="vi">Thuật toán mật mã</span><span lang="en">Cryptographic algorithms</span></span>
-      <span class="chip">SoC / ASIC</span>
-      <span class="chip">RTL Design / Verification</span>
-      <span class="chip"><span lang="vi">Mã sửa lỗi</span><span lang="en">Error correction code</span></span>
+      <span class="chip"><span lang="vi">Thuật toán mật mã (cổ điển &amp; hậu lượng tử)</span><span lang="en">Cryptographic algorithms (classical &amp; post-quantum)</span></span>
+      <span class="chip"><span lang="vi">Mã sửa lỗi (Error correction)</span><span lang="en">Error correction</span></span>
+      <span class="chip">SoC / ASIC Design &amp; Verification</span>
       <span class="chip"><span lang="vi">EDA mã nguồn mở</span><span lang="en">Open-source EDA</span></span>
     </div>
   </div>
@@ -636,26 +642,26 @@ footer a:hover{ text-decoration:underline; }
   <div>
     <h3><span lang="vi">Chủ đề quan tâm</span><span lang="en">Interests</span></h3>
     <ul lang="vi">
-      <li><strong>Mật mã hậu lượng tử (PQC) — ưu tiên số một</strong>: NIST-PQC, KPQC, và chuyện
-          sinh, lưu, huỷ khoá cho thiết bị biên</li>
-      <li>Thuật toán mật mã trên phần cứng: khối tăng tốc, kiểm chứng bằng vector chuẩn của NIST</li>
-      <li>Thiết kế RTL và kiến trúc SoC: bus AMBA (APB/AHB/AXI), tích hợp IP, điều khiển bộ nhớ</li>
-      <li>Verification và ASIC flow mã nguồn mở (Yosys, OpenLane 2, Sky130)</li>
-      <li>Chạy mô hình AI trên thiết bị biên: lượng tử hoá, khối tăng tốc, ngân sách bộ nhớ và điện năng</li>
-      <li>Máy tính lượng tử và mã sửa lỗi lượng tử — nền nghiên cứu cũ, nay soi lại vào ECC phần cứng</li>
-      <li>Mã sửa lỗi trên phần cứng — từ mã khối cổ điển (Hamming, BCH, Reed–Solomon) tới mã hiện đại
-          (LDPC, Polar) và bộ giải mã kênh dựa trên AI</li>
+      <li><strong>Thuật toán mật mã, cổ điển và hậu lượng tử</strong> — hậu lượng tử là ưu tiên số một:
+          NIST-PQC, KPQC, sinh – lưu – huỷ khoá cho thiết bị biên; mã cổ điển (AES, SHA, RSA/ECC) trên phần cứng,
+          kiểm chứng bằng vector chuẩn của NIST</li>
+      <li><strong>Mã sửa lỗi</strong> — từ mã khối cổ điển (Hamming, BCH, Reed–Solomon) tới LDPC, Polar và bộ
+          giải mã dựa trên AI; mã sửa lỗi lượng tử là nền nghiên cứu Ph.D., nay soi lại vào ECC phần cứng</li>
+      <li><strong>Thiết kế &amp; verification SoC / ASIC</strong> — RTL, bus AMBA (APB/AHB/AXI), tích hợp IP,
+          testbench và mô phỏng, FPGA bring-up</li>
+      <li><strong>EDA mã nguồn mở</strong> — Verilator, Icarus, cocotb, Yosys, OpenLane 2, Sky130: từ RTL đến GDSII
+          không cần license</li>
     </ul>
     <ul lang="en">
-      <li><strong>Post-quantum cryptography (PQC) — first priority</strong>: NIST-PQC, KPQC, and
-          generating, storing and destroying keys on edge devices</li>
-      <li>Cryptographic algorithms in hardware: accelerator blocks, verification against NIST's own vectors</li>
-      <li>RTL design and SoC architecture: AMBA buses (APB/AHB/AXI), IP integration, memory controllers</li>
-      <li>Verification and the open-source ASIC flow (Yosys, OpenLane 2, Sky130)</li>
-      <li>Running AI models on edge devices: quantisation, accelerator blocks, memory and power budgets</li>
-      <li>Quantum computing and quantum error correction — my research background, now read back into hardware ECC</li>
-      <li>Error-correcting codes in hardware — from the classical block codes (Hamming, BCH,
-          Reed–Solomon) to the modern ones (LDPC, polar) and AI-based channel decoders</li>
+      <li><strong>Cryptographic algorithms, classical and post-quantum</strong> — post-quantum first:
+          NIST-PQC, KPQC, generating, storing and destroying keys on edge devices; classical ciphers (AES, SHA,
+          RSA/ECC) in hardware, verified against NIST's own vectors</li>
+      <li><strong>Error correction</strong> — from the classical block codes (Hamming, BCH, Reed–Solomon) to LDPC,
+          polar and AI-based decoders; quantum error correction was my Ph.D. research, now read back into hardware ECC</li>
+      <li><strong>SoC / ASIC design &amp; verification</strong> — RTL, AMBA buses (APB/AHB/AXI), IP integration,
+          testbenches and simulation, FPGA bring-up</li>
+      <li><strong>Open-source EDA</strong> — Verilator, Icarus, cocotb, Yosys, OpenLane 2, Sky130: RTL to GDSII
+          without a licence</li>
     </ul>
   </div>
   <div>

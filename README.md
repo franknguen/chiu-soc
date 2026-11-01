@@ -1,8 +1,9 @@
 # frank.github.io
 
 Trang cá nhân **ChiU·SoC** — ghi chú những gì học được khi làm nghiên cứu sinh Ph.D. và trong công việc
-kỹ sư thiết kế vi mạch số / SoC (mật mã hậu lượng tử, mã sửa lỗi, RTL, verification, EDA mã nguồn mở),
-cùng những điều ngoài nghề. Song ngữ Việt / English, chuyển bằng nút **VI | EN** trên thanh tiêu đề.
+kỹ sư thiết kế vi mạch số / SoC — thuật toán mật mã (cổ điển và hậu lượng tử), mã sửa lỗi, thiết kế và
+verification SoC / ASIC, EDA mã nguồn mở — cùng những điều ngoài nghề. Song ngữ Việt / English, chuyển
+bằng nút **VI | EN** trên thanh tiêu đề.
 Không framework, không bước build: mở `index.html` là chạy.
 
 ## Cấu trúc
@@ -238,6 +239,25 @@ phải PEM / hex / Base64. Hai trang ML và KpqC đã chạy lại xanh sau thay
 
 Số thứ tự bài được đánh tự động, liên tục qua các chuyên mục (CSS counter) — không đánh tay.
 
+## Định dạng chung của mọi trang
+
+Mỗi trang mang `<style>` riêng (không có stylesheet dùng chung, không bước build), nên quy tắc trình bày
+chung chỉ tồn tại khi **mọi trang lặp lại đúng một khối CSS**. Khối đó nằm cuối `<style>` của từng trang,
+kẹp giữa hai dòng chú thích `/* ==== house-format v1 … */` và `/* ==== /house-format ==== */`:
+
+- Văn xuôi **canh đều hai bên** (`text-align:justify`, có `hyphens:auto`): mọi `p`, `li`, `blockquote`,
+  `dd`, `.art-desc`, `.art-quote` trong `<main>`.
+- Trả về **canh trái** cho các danh sách thực chất là hàng link (`.refs`, `.art-links`, `.songlist`, mục lục,
+  dòng kiểm tra cặp khoá / kết quả của máy tính PQC, mọi thứ trong bảng) — canh đều sẽ kéo giãn dòng đầu
+  của một mục hai dòng thành khoảng trắng lớn.
+- Giữ **canh giữa** cho dòng ghi tác giả dưới bài thơ, chú thích video và chú thích hình.
+- Không ngắt từ bằng gạch nối trong `code`, `pre`, `kbd`, `samp` và link — một tên file bị ngắt thành
+  `calcu-lator` đọc như gạch nối thật.
+
+Header, nav và footer không bị khối này chạm tới. Muốn đổi định dạng thì đổi khối này **ở cả mười trang** cho
+giống hệt nhau (ngoài repo có script chèn / thay khối này cho mọi trang trong một lần); một trang thiếu khối
+hay có khối bị sửa tay sẽ bị bước kiểm tra trước khi đăng từ chối.
+
 ## Kiểm tra trước khi đăng
 
 ```bash
@@ -245,5 +265,6 @@ python3 -m http.server -d .      # xem thử tại http://localhost:8000
 ```
 
 Nên kiểm: thẻ HTML cân; mọi `#anchor` và file đích tồn tại; số khối `lang="vi"` bằng số khối
-`lang="en"` trong từng phần tử cha; không còn chữ tiếng Việt nằm ngoài mọi khối `lang`; và không có
-tên công ty, đường dẫn máy nội bộ hay email công việc nào trong trang.
+`lang="en"` trong từng phần tử cha; không còn chữ tiếng Việt nằm ngoài mọi khối `lang`; không có
+tên công ty, đường dẫn máy nội bộ hay email công việc nào trong trang; và khối CSS `house-format` có mặt
+nguyên vẹn trên mọi trang.
