@@ -227,6 +227,34 @@ sống, chỉ ra ba chỗ phép kiểm hở; vá chỗ thứ hai lộ ra một l
 nào cũng in được (ví dụ dk 32 byte toàn 0x09) bị từ chối — nay `readKeyFile` coi chính các byte là khoá thô khi văn bản không
 phải PEM / hex / Base64. Hai trang ML và KpqC đã chạy lại xanh sau thay đổi này.
 
+## Trình mô phỏng SECDED & khoá PUF — trong `posts/tu-ma-luong-tu-den-ecc.html`
+
+Hai trình mô phỏng nằm ngay trong bài viết về ECC, cùng cách dùng như các máy tính PQC (bấm là thấy,
+không nhập liệu phức tạp, mọi chuỗi hiện ra đều song ngữ):
+
+- **SECDED (13, 8)** — đúng cách xếp của ví dụ trong bài: bit kiểm C1 C2 C4 C8 ở vị trí 1 2 4 8, dữ liệu
+  D0..D7 ở các vị trí còn lại, bit P ở vị trí 0. Bốn bước: bấm ô để đổi dữ liệu → từ mã 13 bit kèm các
+  dòng `C1 = D0 ⊕ D1 ⊕ …` tính sống → bấm ô của từ nhận để lật bit (hoặc nút 1 / 2 / 3 bit ngẫu nhiên) →
+  bộ giải mã nêu S, P′, kết luận, **và nói thật kết luận ấy có đúng không** (trang còn nhớ dữ liệu gốc):
+  3 lỗi thường bị "sửa" sang dữ liệu sai mà bộ giải mã vẫn tin mình đúng — bài học vách đá ở mục 9.
+  Nút "Kiểm tra toàn bộ 23 552 trường hợp" chạy mọi dữ liệu × mọi mẫu lỗi ≤ 2 bit ngay trong trình duyệt.
+- **Khoá PUF với dữ liệu trợ giúp** — dấu vân tay R = 4 khối × 13 bit, dùng lại đúng mã SECDED trên.
+  Ba bước: đọc R lần đầu → W = (S, P) từng khối (20 bit, được phép công khai), K = SHA-256(R) → chọn số ô
+  dao động (0 / 1 / 2 / 4 / 6, hoặc bấm vào ô) và đọc lại R′ → sửa bằng W, băm lại, so K′ với K. Ba kết
+  cục đều hiện rõ: dựng lại đúng; vượt sức sửa (hai ô lệch trong một khối) → phải báo lỗi; và sửa sai mà
+  không biết (ba ô lệch trong một khối) → lý do chip thật lưu thêm một giá trị kiểm khoá.
+
+| File | Nội dung | Đối tượng |
+|---|---|---|
+| `assets/ecc-sim.js` | mã hoá / hội chứng / giải mã SECDED (13, 8), sketch hội chứng 4 khối, đóng gói 52 bit → 7 byte → SHA-256, tự kiểm 23 552 trường hợp | `ECCSim` |
+| `assets/ecc-sim-ui.js` | ô bit bấm được, bốn bước SECDED, ba bước PUF, mọi chuỗi qua `bi(vi, en)` | `ECCSimPage` (cửa cho kiểm thử) |
+| `assets/pqc-sha2.js` | SHA-256 dùng chung với các máy tính PQC | `PQCSHA2` |
+
+Kiểm chứng (ngoài repo): một mô hình Python viết riêng theo định nghĩa (ma trận kiểm H) — 332 phép so,
+gồm ví dụ trong bài, toàn bộ 23 552 trường hợp qua một giá trị băm, 120 từ 3 lỗi (88 bị sửa sai) và 16 lần
+dựng khoá PUF với SHA-256 của `hashlib`; 44 phép kiểm giao diện bằng trình duyệt giả lập, soát hai ngôn ngữ
+sau mỗi cú bấm; 16 đột biến cố ý — cả 16 bị bắt (8 bởi bộ so mô hình, 8 bởi bộ kiểm giao diện). Nút tự kiểm trên trang được chứng minh đỏ được bằng một bộ giải mã cài sai.
+
 ## Thêm một bài mới
 
 1. Copy một bài cùng loại trong `posts/` thành `posts/<ten-bai>.html`, sửa tiêu đề (`<title>`,

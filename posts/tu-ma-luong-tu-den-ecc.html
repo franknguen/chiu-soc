@@ -183,6 +183,50 @@ footer{
   background:#14213d; color:rgba(255,255,255,.75);
   text-align:center; padding:20px 16px; font-size:.9em;
 }
+/* ===== Hai trình mô phỏng: SECDED và khoá PUF ===== */
+.btn{ font:inherit; font-size:.88em; font-weight:700; cursor:pointer; color:#fff; border:0; padding:9px 18px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+.btn:disabled{ opacity:.5; cursor:default; }
+.btn.ghost{ background:none; color:var(--accent); border:1px solid rgba(20,83,143,.3); }
+.btn.sm{ font-size:.8em; padding:6px 13px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.chip{ position:relative; display:inline-flex; }
+.chip input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+.chip > span{ font-size:.8em; font-weight:700; padding:5px 12px; border-radius:999px; border:1px solid rgba(20,83,143,.25); color:var(--accent); background:#fff; white-space:nowrap; }
+.chip input:checked + span{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input:focus-visible + span{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.hint{ font-size:.84em; color:var(--muted); margin:0 0 10px; line-height:1.6; }
+.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35); padding:10px 14px; border-radius:12px; font-size:.9em; }
+.sim{ background:#fff; border:1px solid rgba(31,41,55,.12); border-radius:16px; padding:16px 18px; margin:18px 0 24px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+.sim h3{ margin:0 0 8px; font-size:1.04em; color:var(--accent); }
+.sim-step{ border-top:1px dashed rgba(31,41,55,.18); padding-top:12px; margin-top:12px; }
+.sim-step h4{ display:flex; align-items:center; gap:10px; margin:0 0 8px; font-size:.95em; }
+.sim .no{ display:inline-flex; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-size:.78em; font-weight:800; align-items:center; justify-content:center; flex:none; }
+.sim-row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 10px; }
+.sim-l{ font-size:.74rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-right:4px; }
+.sim .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.88em; word-break:break-all; }
+.bits{ display:flex; gap:4px; flex-wrap:wrap; margin:4px 0 8px; }
+.bits.grid{ display:grid; grid-template-columns:repeat(13,34px); gap:4px; }
+.bitc{ display:flex; flex-direction:column; align-items:center; gap:1px; font-size:.66em; line-height:1.3; color:var(--muted); font-weight:700; }
+.bit{ font:inherit; font-size:1rem; font-weight:800; width:34px; height:34px; border-radius:8px; border:1px solid rgba(31,41,55,.18); background:#f7f8fa; color:var(--text); cursor:default; padding:0; }
+.bit.on{ background:#e3e9f3; }
+.bit.role-c{ border-color:rgba(20,83,143,.55); color:var(--accent); }
+.bit.role-p{ border-color:rgba(42,157,143,.65); color:#1f7f74; }
+.bit.flip{ background:#fde9c8; border-color:#e59f1a; color:#9a5b00; }
+.bit.fixed{ background:#dcf3e6; border-color:#2a9d6f; color:#1b6b4a; }
+.bit.click{ cursor:pointer; } .bit.click:hover{ box-shadow:0 0 0 2px rgba(42,157,143,.35); }
+.bit:focus-visible{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.legend{ display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.78em; color:var(--muted); margin:0 0 4px; }
+.legend i{ display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:5px; border:1px solid rgba(31,41,55,.2); background:#f7f8fa; }
+.legend i.c{ border-color:rgba(20,83,143,.55); } .legend i.p{ border-color:rgba(42,157,143,.65); }
+.legend i.flip{ background:#fde9c8; border-color:#e59f1a; } .legend i.fixed{ background:#dcf3e6; border-color:#2a9d6f; }
+.cover{ font-size:.86em; color:var(--muted); margin:0 0 6px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+.verdict{ border-radius:10px; padding:9px 13px; font-size:.9em; line-height:1.6; margin:6px 0 6px; background:#f3f5f8; border:1px solid rgba(31,41,55,.12); }
+.verdict.ok{ background:#e6f6ee; border-color:rgba(42,157,111,.4); }
+.verdict.bad{ background:#fdeaea; border-color:rgba(200,60,60,.35); }
+.verdict.warn{ background:#fff4df; border-color:rgba(229,159,26,.45); }
+#sd-st.ok{ color:#1b6b4a; font-weight:700; } #sd-st.bad{ color:#b23b3b; font-weight:700; }
+@media(max-width:560px){ .bit{ width:22px; height:24px; font-size:.8rem; border-radius:6px; } .bits{ gap:3px; } .bits.grid{ grid-template-columns:repeat(13,22px); gap:3px; } .bitc{ font-size:.58em; } }
 /* ==== house-format v1 — bilingual-personal-site skill, scripts/house-format.css. Prose is justified on every page.
      Do not edit this block in a page: edit the skill's copy, re-run apply_format.py; check_site.py fails a page whose
      block differs. ==== */
@@ -419,6 +463,54 @@ là lý do các thanh RAM máy chủ có ECC thường là 64 bit dữ liệu + 
 <strong>SECDED</strong>: correct one error, detect two without mis-correcting. This is why ECC
 server memory usually comes as 64 data bits + 8 check bits = 72.</p>
 
+<div class="sim" id="sim-secded">
+<h3><span lang="vi">Thử ngay: mã SECDED (13, 8) trong trình duyệt</span><span lang="en">Try it: the (13, 8) SECDED code in your browser</span></h3>
+<p class="hint"><span lang="vi">Cùng cách xếp như ví dụ trên: bit kiểm C1, C2, C4, C8 ở vị trí 1, 2, 4, 8; tám bit dữ liệu
+D0..D7 ở các vị trí còn lại; thêm bit P ở vị trí 0 là chẵn lẻ của cả 12 bit. Bấm vào ô dữ liệu để đổi bit, rồi bấm vào
+các ô của từ nhận được để gây lỗi và xem bộ giải mã nói gì — và nói có đúng không.</span><span lang="en">Same layout as the
+example above: check bits C1, C2, C4, C8 at positions 1, 2, 4, 8; the eight data bits D0..D7 in the remaining positions; plus a
+bit P at position 0, the parity of all 12. Click a data cell to change a bit, then click cells of the received word to inject
+errors and watch what the decoder says — and whether it is right.</span></p>
+<p class="nojs" lang="vi">Trình mô phỏng cần JavaScript.</p>
+<p class="nojs" lang="en">The simulator needs JavaScript.</p>
+<div class="sim-step"><h4><span class="no">1</span><span lang="vi">Dữ liệu 8 bit — bấm để đổi</span><span lang="en">8 data bits — click to change</span></h4>
+  <div class="sim-row"><div class="bits" id="sd-data"></div><span class="mono" id="sd-hex"></span></div>
+  <div class="sim-row">
+    <button type="button" class="btn ghost sm" id="sd-example"><span lang="vi">Ví dụ trong bài</span><span lang="en">The example above</span></button>
+    <button type="button" class="btn ghost sm" id="sd-rand"><span lang="vi">Ngẫu nhiên</span><span lang="en">Random</span></button>
+  </div>
+</div>
+<div class="sim-step"><h4><span class="no">2</span><span lang="vi">Mã hoá: từ mã 13 bit</span><span lang="en">Encode: the 13-bit codeword</span></h4>
+  <div class="legend" data-i18n="neutral"><span><i></i>D0…D7</span><span><i class="c"></i>C1 · C2 · C4 · C8</span><span><i class="p"></i>P</span></div>
+  <div class="bits" id="sd-code"></div>
+  <div class="cover" id="sd-cover"></div>
+</div>
+<div class="sim-step"><h4><span class="no">3</span><span lang="vi">Kênh nhiễu: bấm vào một ô để lật bit</span><span lang="en">Noisy channel: click a cell to flip it</span></h4>
+  <div class="bits" id="sd-recv"></div>
+  <div class="sim-row">
+    <button type="button" class="btn ghost sm" id="sd-flip1"><span lang="vi">Lật thêm 1 bit ngẫu nhiên</span><span lang="en">Flip 1 more random bit</span></button>
+    <button type="button" class="btn ghost sm" id="sd-flip2"><span lang="vi">Đúng 2 bit</span><span lang="en">Exactly 2 bits</span></button>
+    <button type="button" class="btn ghost sm" id="sd-flip3"><span lang="vi">Đúng 3 bit</span><span lang="en">Exactly 3 bits</span></button>
+    <button type="button" class="btn ghost sm" id="sd-clear"><span lang="vi">Xoá lỗi</span><span lang="en">Clear errors</span></button>
+    <span class="hint" id="sd-nerr" style="margin:0"></span>
+  </div>
+</div>
+<div class="sim-step"><h4><span class="no">4</span><span lang="vi">Giải mã</span><span lang="en">Decode</span></h4>
+  <div class="mono" id="sd-syn"></div>
+  <div class="verdict" id="sd-verdict"></div>
+  <div id="sd-out"></div>
+</div>
+<div class="sim-step">
+  <div class="sim-row">
+    <button type="button" class="btn sm" id="sd-selftest"><span lang="vi">Kiểm tra toàn bộ 23 552 trường hợp</span><span lang="en">Check all 23 552 cases</span></button>
+    <span id="sd-st"></span>
+  </div>
+  <p class="hint"><span lang="vi">Mọi giá trị dữ liệu (256) nhân mọi mẫu lỗi tới 2 bit (1 + 13 + 78): từ có ≤ 1 lỗi phải
+  trở về đúng dữ liệu, từ có 2 lỗi phải bị phát hiện mà không sửa. Chạy ngay trong máy bạn, mất chưa tới một giây.</span><span lang="en">Every data value (256) times every error pattern of up to 2 bits (1 + 13 + 78): a word with ≤ 1 error must
+  come back as the right data, a 2-error word must be flagged and left alone. Runs on your machine in under a second.</span></p>
+</div>
+</div>
+
 <h2><span lang="vi">7. Khi cần sửa nhiều bit: BCH và Reed–Solomon</span><span lang="en">7. When more bits must be fixed: BCH and Reed–Solomon</span></h2>
 <p lang="vi">Muốn sửa nhiều hơn một bit, ta phải rời khỏi số học nhị phân thông thường và bước vào
 <strong>trường hữu hạn</strong> — một tập hữu hạn phần tử mà vẫn cộng, trừ, nhân, chia được bình
@@ -493,6 +585,47 @@ cells known to be flaky — and only then is the code left to handle the remaind
 repairing a transmission channel; it is turning something approximately right into something exactly
 right.</p>
 
+<div class="sim" id="sim-puf">
+<h3><span lang="vi">Thử ngay: dựng lại khoá PUF bằng dữ liệu trợ giúp</span><span lang="en">Try it: rebuilding a PUF key with helper data</span></h3>
+<p class="hint"><span lang="vi">Dấu vân tay ở đây là 52 ô, chia làm 4 khối 13 bit; mỗi khối dùng đúng mã SECDED ở trên.
+Lúc xuất xưởng, chip lưu hội chứng (S, P) của từng khối làm dữ liệu trợ giúp W. Khi đọc lại, hội chứng mới trừ W chính là
+hội chứng của riêng phần lệch — và bộ giải mã tìm ra ô lệch y như tìm bit lỗi của một từ mã. Khoá là SHA-256 của R, hiện
+16 byte đầu.</span><span lang="en">The fingerprint here is 52 cells in 4 blocks of 13 bits; each block uses the SECDED code above.
+At the factory the chip stores each block's syndrome (S, P) as helper data W. On a later read, the new syndrome minus W is the
+syndrome of the drift alone — and the decoder locates the drifted cell exactly as it locates a flipped bit in a codeword. The key is
+SHA-256 of R, first 16 bytes shown.</span></p>
+<p class="nojs" lang="vi">Trình mô phỏng cần JavaScript.</p>
+<p class="nojs" lang="en">The simulator needs JavaScript.</p>
+<div class="sim-step"><h4><span class="no">1</span><span lang="vi">Xuất xưởng: đọc dấu vân tay R lần đầu</span><span lang="en">At the factory: the first read of the fingerprint R</span></h4>
+  <div class="sim-row"><button type="button" class="btn sm" id="pf-enroll"><span lang="vi">Đọc dấu vân tay R</span><span lang="en">Read the fingerprint R</span></button></div>
+  <div class="bits grid" id="pf-R"></div>
+  <div class="sim-row"><span class="sim-l"><span lang="vi">Dữ liệu trợ giúp W</span><span lang="en">Helper data W</span></span><span class="mono" id="pf-W"></span></div>
+  <div class="sim-row"><span class="sim-l">K = SHA-256(R)</span><span class="mono" id="pf-key"></span></div>
+  <p class="hint" id="pf-s1-note"></p>
+</div>
+<div class="sim-step"><h4><span class="no">2</span><span lang="vi">Khởi động lại: đọc lại, vài ô dao động</span><span lang="en">Power-up: read again, a few cells drift</span></h4>
+  <div class="sim-row chips">
+    <span class="sim-l"><span lang="vi">Số ô dao động</span><span lang="en">Drifting cells</span></span>
+    <label class="chip"><input type="radio" name="pf-noise" value="0"><span>0</span></label>
+    <label class="chip"><input type="radio" name="pf-noise" value="1"><span>1</span></label>
+    <label class="chip"><input type="radio" name="pf-noise" value="2" checked><span>2</span></label>
+    <label class="chip"><input type="radio" name="pf-noise" value="4"><span>4</span></label>
+    <label class="chip"><input type="radio" name="pf-noise" value="6"><span>6</span></label>
+    <button type="button" class="btn sm" id="pf-read"><span lang="vi">Đọc lại → R′</span><span lang="en">Read again → R′</span></button>
+  </div>
+  <div class="legend" data-i18n="neutral"><span><i class="flip"></i>≠ R</span></div>
+  <div class="bits grid" id="pf-Rp"></div>
+  <p class="hint" id="pf-s2-note"></p>
+</div>
+<div class="sim-step"><h4><span class="no">3</span><span lang="vi">Sửa bằng W rồi băm lại</span><span lang="en">Correct with W, then hash again</span></h4>
+  <div class="mono" id="pf-blocks"></div>
+  <div class="legend" data-i18n="neutral"><span><i class="fixed"></i>✓</span><span><i class="flip"></i>≠ R</span></div>
+  <div class="bits grid" id="pf-Rpp"></div>
+  <div class="sim-row"><span class="sim-l">K′ = SHA-256(R″)</span><span class="mono" id="pf-key2"></span></div>
+  <div class="verdict" id="pf-verdict"></div>
+</div>
+</div>
+
 <h2><span lang="vi">9. Vách đá và dốc thoải</span><span lang="en">9. A cliff and a slope</span></h2>
 <p lang="vi">Một điểm tôi hay nhắc khi giảng, vì nó đổi cách ta thiết kế hệ thống. BCH có một
 <strong>vách đá</strong>: dưới <em>t</em> lỗi thì sửa đúng gần như tuyệt đối; vượt <em>t</em> một bit
@@ -545,6 +678,34 @@ trong đầu rồi.</p>
 phone in your pocket has DRAM, flash memory, a 5G modem and a USB-C port — which code protects each
 one, and why that code? Answer that, and most of the lecture is already in your head.</p>
 
+<h2><span lang="vi">Về hai trình mô phỏng</span><span lang="en">About the two simulators</span></h2>
+<p lang="vi">Phần mô phỏng là mã JavaScript tôi tự viết, không dùng thư viện ngoài (SHA-256 lấy từ máy tính PQC
+cùng trang này). Để chắc nó nói đúng, tôi so với một mô hình viết riêng bằng Python theo định nghĩa (ma trận kiểm
+H có cột <em>p</em> là số <em>p</em> viết nhị phân): ví dụ trong bài, toàn bộ 23 552 trường hợp "mọi dữ liệu × mọi
+mẫu lỗi tới 2 bit" (so bằng một giá trị băm của cả bảng), 120 từ có 3 lỗi — trong đó 88 từ bị "sửa" sang dữ liệu
+sai mà bộ giải mã vẫn tin mình đúng — và 16 lần dựng lại khoá PUF với khoá tính bằng <code>hashlib</code>:
+<span data-i18n="neutral">332</span> phép so, tất cả khớp. Một trình duyệt giả lập bấm qua mọi bước của cả hai trình mô phỏng
+(<span data-i18n="neutral">44</span> phép kiểm, soát hai ngôn ngữ sau mỗi cú bấm), và tôi cố tình làm hỏng mã
+<span data-i18n="neutral">16</span> lần để chắc bộ kiểm đỏ được: cả 16 lần đều đỏ. Nút "Kiểm tra toàn bộ" ở trên lặp lại phần lớn việc đó
+ngay trong máy bạn.</p>
+<p lang="en">The simulators are JavaScript I wrote myself, with no external library (SHA-256 comes from the PQC calculator
+on this site). To be sure they tell the truth I compared them with a separate Python model written from the definition
+(parity-check matrix H whose column <em>p</em> is the number <em>p</em> in binary): the example in the article, all 23 552
+cases of "every data value × every error pattern of up to 2 bits" (compared through one hash over the whole table), 120
+three-error words — 88 of which are "corrected" to wrong data while the decoder believes it succeeded — and 16 PUF key
+rebuilds with keys computed by <code>hashlib</code>: <span data-i18n="neutral">332</span> comparisons, all matching. A simulated
+browser clicked through every step of both simulators (<span data-i18n="neutral">44</span> checks, both languages audited
+after each click), and I broke the code on purpose <span data-i18n="neutral">16</span> times to be sure the tests can go
+red: all 16 went red. The "Check all cases" button above repeats most of that on your machine.</p>
+<div class="callout">
+  <span lang="vi"><strong>Chỉ để học.</strong> Một PUF thật dùng mã mạnh hơn nhiều (BCH sửa hàng chục bit trên vài trăm
+  bit), bỏ phiếu nhiều lần trước khi sửa, và một hàm dẫn xuất khoá đúng chuẩn thay cho một lần băm; 52 ô ở đây là để
+  nhìn thấy cơ chế, không phải một khoá 128 bit.</span>
+  <span lang="en"><strong>For learning only.</strong> A real PUF uses a far stronger code (BCH fixing tens of bits over a
+  few hundred), repeated voting before correction, and a proper key-derivation function instead of one hash; the 52 cells
+  here are for seeing the mechanism, not a 128-bit key.</span>
+</div>
+
 <h2><span lang="vi">Bản trình bày gốc</span><span lang="en">The original slides</span></h2>
 <p lang="vi">Bài viết này là bản viết lại của một bài giảng tôi soạn cho sinh viên. Nếu bạn muốn
 xem bản gốc — có đầy đủ hình minh hoạ, bảng GF(2³), ví dụ Reed–Solomon chạy tay, và phần cuối về
@@ -589,6 +750,9 @@ closing part on working habits — here it is:</p>
 </div>
 </article>
 </main>
+<script src="assets/pqc-sha2.js"></script>
+<script src="assets/ecc-sim.js"></script>
+<script src="assets/ecc-sim-ui.js"></script>
 
 <footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
 
