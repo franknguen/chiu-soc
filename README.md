@@ -1,7 +1,8 @@
 # frank.github.io
 
-Trang cá nhân **ChiU·SoC** — ghi chú & chia sẻ kinh nghiệm thiết kế vi mạch, mật mã hậu lượng tử
-và những điều ngoài nghề. Song ngữ Việt / English, chuyển bằng nút **VI | EN** trên thanh tiêu đề.
+Trang cá nhân **ChiU·SoC** — ghi chú những gì học được khi làm nghiên cứu sinh Ph.D. và trong công việc
+kỹ sư thiết kế vi mạch số / SoC (mật mã hậu lượng tử, mã sửa lỗi, RTL, verification, EDA mã nguồn mở),
+cùng những điều ngoài nghề. Song ngữ Việt / English, chuyển bằng nút **VI | EN** trên thanh tiêu đề.
 Không framework, không bước build: mở `index.html` là chạy.
 
 ## Cấu trúc
