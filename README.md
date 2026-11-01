@@ -2,8 +2,8 @@
 
 Trang cá nhân **ChiU·SoC** — ghi chú những gì học được khi làm nghiên cứu sinh Ph.D. và trong công việc
 kỹ sư thiết kế vi mạch số / SoC — thuật toán mật mã (cổ điển và hậu lượng tử), mã sửa lỗi, thiết kế và
-verification SoC / ASIC, EDA mã nguồn mở — cùng những điều ngoài nghề. Song ngữ Việt / English, chuyển
-bằng nút **VI | EN** trên thanh tiêu đề.
+verification SoC / ASIC, EDA mã nguồn mở, AI (NPU và tự động hoá) — cùng những điều ngoài nghề. Song ngữ
+Việt / English, chuyển bằng nút **VI | EN** trên thanh tiêu đề.
 Không framework, không bước build: mở `index.html` là chạy.
 
 ## Cấu trúc

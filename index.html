@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ChiU-SoC — Ghi chú từ nghiên cứu Ph.D. và nghề thiết kế vi mạch số / SoC</title>
-<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú những gì học được khi làm nghiên cứu sinh Ph.D. và trong công việc kỹ sư thiết kế vi mạch số / SoC: thuật toán mật mã (cổ điển và hậu lượng tử), mã sửa lỗi, thiết kế và verification SoC / ASIC, EDA mã nguồn mở. Personal notes from Ph.D. research and digital IC / SoC design work: cryptographic algorithms (classical and post-quantum), error correction, SoC / ASIC design and verification, open-source EDA."/>
+<meta name="description" content="Trang cá nhân của Frank Nguyen — ghi chú những gì học được khi làm nghiên cứu sinh Ph.D. và trong công việc kỹ sư thiết kế vi mạch số / SoC: thuật toán mật mã (cổ điển và hậu lượng tử), mã sửa lỗi, thiết kế và verification SoC / ASIC, EDA mã nguồn mở, AI (NPU và tự động hoá). Personal notes from Ph.D. research and digital IC / SoC design work: cryptographic algorithms (classical and post-quantum), error correction, SoC / ASIC design and verification, open-source EDA, AI (NPU and automation)."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
@@ -284,9 +284,10 @@ main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
        <em>Poetry &amp; Melody</em> — room for the things outside the chip.</p>
     <div class="hero-chips">
       <span class="chip"><span lang="vi">Thuật toán mật mã (cổ điển &amp; hậu lượng tử)</span><span lang="en">Cryptographic algorithms (classical &amp; post-quantum)</span></span>
-      <span class="chip"><span lang="vi">Mã sửa lỗi (Error correction)</span><span lang="en">Error correction</span></span>
+      <span class="chip"><span lang="vi">Mã sửa lỗi (Error correction code)</span><span lang="en">Error correction code</span></span>
       <span class="chip">SoC / ASIC Design &amp; Verification</span>
       <span class="chip"><span lang="vi">EDA mã nguồn mở</span><span lang="en">Open-source EDA</span></span>
+      <span class="chip"><span lang="vi">AI: NPU &amp; tự động hoá</span><span lang="en">AI: NPU &amp; automation</span></span>
     </div>
   </div>
 </section>
@@ -655,6 +656,9 @@ main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
           testbench và mô phỏng, FPGA bring-up</li>
       <li><strong>EDA mã nguồn mở</strong> — Verilator, Icarus, cocotb, Yosys, OpenLane 2, Sky130: từ RTL đến GDSII
           không cần license</li>
+      <li><strong>AI: NPU &amp; tự động hoá</strong> — hai chiều: AI <em>trên</em> chip (SoC NPU cho ô tô: lượng tử
+          hoá, khối tăng tốc, ngân sách bộ nhớ và điện năng) và AI <em>cho</em> việc làm chip (agent viết RTL,
+          testbench, chạy flow và tự kiểm — xem bài <a href="posts/ai-agent-lam-rtl.html">Dùng AI agent để làm RTL</a>)</li>
     </ul>
     <ul lang="en">
       <li><strong>Cryptographic algorithms, classical and post-quantum</strong> — post-quantum first:
@@ -666,6 +670,9 @@ main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
           testbenches and simulation, FPGA bring-up</li>
       <li><strong>Open-source EDA</strong> — Verilator, Icarus, cocotb, Yosys, OpenLane 2, Sky130: RTL to GDSII
           without a licence</li>
+      <li><strong>AI: NPU &amp; automation</strong> — both directions: AI <em>on</em> the chip (automotive NPU SoCs:
+          quantisation, accelerator blocks, memory and power budgets) and AI <em>for</em> making chips (agents that
+          write RTL and testbenches, run flows and check themselves — see <a href="posts/ai-agent-lam-rtl.html">Using AI agents for RTL</a>)</li>
     </ul>
   </div>
   <div>
