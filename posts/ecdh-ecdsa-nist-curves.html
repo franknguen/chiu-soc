@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Đường cong elliptic: ECDH và ECDSA trên năm đường cong NIST — ChiU·SoC"
+      data-title-en="Elliptic curves: ECDH and ECDSA on the five NIST curves — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Đường cong elliptic: ECDH và ECDSA trên năm đường cong NIST — ChiU·SoC</title>
+<meta name="description" content="Bài viết kèm phòng thí nghiệm chạy trong trình duyệt về mật mã đường cong elliptic: luật cộng điểm trên số thực và trên trường hữu hạn (hình tương tác), nhân vô hướng từng bit, năm đường cong NIST P-192 … P-521, sinh cặp khoá FIPS 186-5, kiểm tra khoá công khai và ECDH theo SP 800-56A, ECDSA ký / xác minh với RFC 6979, tấn công lặp nonce, và góc nhìn phần cứng; đối chiếu vector CAVP / ACVP của NIST."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:22px 0 7px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+/* thư viện ảnh */
+.gallery{ display:grid; gap:16px; margin:22px 0 26px; }
+.gallery.two{ grid-template-columns:repeat(2,1fr); }
+@media(max-width:620px){ .gallery.two{ grid-template-columns:1fr; } }
+.gallery figure{ margin:0; }
+.gallery img{
+  display:block; width:100%; height:auto; border-radius:13px;
+  box-shadow:0 8px 24px rgba(15,27,45,.18); background:#e9eef5;
+}
+.gallery figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; line-height:1.55; }
+.diagram{ margin:22px 0 10px; }
+.diagram img{ display:block; width:100%; height:auto; border-radius:14px;
+  border:1px solid rgba(20,83,143,.14); background:#f7f9fc; }
+.diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; }
+
+/* ===== máy tính PQC ===== */
+.selftest{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  margin:20px 0 10px; padding:16px 18px; border-radius:14px;
+  background:rgba(42,157,143,.07); border:1px solid rgba(42,157,143,.28);
+}
+.st-note{ flex:1 1 260px; font-size:.84em; color:var(--muted); line-height:1.6; }
+.btn{
+  font:inherit; font-size:.88em; font-weight:700; cursor:pointer;
+  color:#fff; border:0; padding:9px 18px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.btn:disabled{ opacity:.5; cursor:default; }
+.btn.ghost{ background:none; color:var(--accent); border:1px solid rgba(20,83,143,.3); }
+.btn.sm{ font-size:.8em; padding:6px 13px; }
+.hexbox{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.78em; line-height:1.6; white-space:pre-wrap; word-break:break-all;
+  background:#0f1b2d; color:#9fd0c8; border-radius:10px;
+  padding:10px 12px; margin:8px 0 0; max-height:200px; overflow:auto;
+}
+.pill{ display:inline-block; font-size:.78em; font-weight:700; padding:3px 11px; border-radius:999px; }
+.pill.ok{ background:rgba(42,157,143,.16); color:#15695f; }
+.pill.bad{ background:rgba(190,30,45,.12); color:#9b1d28; }
+.pill.wait{ background:rgba(234,179,8,.16); color:#8a6100; }
+.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35);
+  padding:12px 16px; border-radius:12px; font-size:.9em; }
+
+.tabs{ display:flex; gap:8px; margin:26px 0 0; flex-wrap:wrap; }
+.tab{
+  font:inherit; font-size:.9em; font-weight:700; cursor:pointer;
+  background:#fff; color:var(--muted); border:1px solid rgba(20,83,143,.2);
+  padding:10px 18px; border-radius:12px 12px 0 0; border-bottom:0;
+}
+.tab[aria-selected="true"]{ color:var(--accent); box-shadow:inset 0 3px 0 var(--accent2); }
+.panel{
+  border:1px solid rgba(20,83,143,.2); border-radius:0 14px 14px 14px;
+  padding:18px 18px 14px; background:#fbfcfe; margin-bottom:26px;
+}
+.panel[hidden]{ display:none; }
+.bar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin:0 0 14px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.chips-l{ font-size:.74rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:6px; }
+.chip{ position:relative; display:inline-flex; }
+.chip input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+.chip > span{
+  font-size:.8em; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid rgba(20,83,143,.25); color:var(--accent); background:#fff; white-space:nowrap;
+}
+.chip input:checked + span{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input:focus-visible + span{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.chip input:disabled{ cursor:not-allowed; }
+.chip input:disabled + span{ color:#9aa4b1; background:#f3f5f8; border-style:dashed; text-decoration:line-through; }
+
+/* năm bước của trao đổi khoá: bên nhận lệch trái, bên gửi lệch phải */
+.flow{ display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:12px 0; }
+.actor{ font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.actor.recv{ grid-column:1/6; color:var(--accent); }
+.actor.send{ grid-column:6/11; color:#1f7f74; text-align:right; }
+.card{
+  min-width:0; background:#fff; border:1px solid rgba(20,83,143,.15); border-radius:14px;
+  padding:14px 16px 4px; transition:box-shadow .2s;
+}
+.card.recv{ grid-column:1/9; border-left:4px solid var(--accent); }
+.card.send{ grid-column:3/11; border-left:4px solid var(--accent2); }
+.card.full{ grid-column:1/-1; border-left:4px solid var(--accent); }
+.card.next{ box-shadow:0 0 0 3px rgba(42,157,143,.28); }
+.card h4{ display:flex; align-items:center; gap:10px; margin:0 0 10px; font-size:.98rem; }
+.no{
+  display:inline-grid; place-items:center; flex:none; width:26px; height:26px; border-radius:50%;
+  background:rgba(20,83,143,.1); color:var(--accent); font-size:.8rem; font-weight:800;
+}
+.card.done > h4 .no{ background:var(--accent2); color:#fff; }
+.who{ margin-left:auto; font-size:.7rem; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.arrow{ grid-column:1/-1; display:flex; align-items:center; gap:10px; font-size:.82em; color:var(--muted); }
+.arrow::before, .arrow::after{ content:""; flex:1 1 20px; border-top:2px dashed rgba(20,83,143,.22); }
+.arrow .lbl{
+  display:inline-flex; gap:8px; align-items:center; text-align:center;
+  padding:4px 12px; border-radius:999px; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.arrow.lit .lbl{ background:rgba(42,157,143,.12); color:#15695f; border-color:rgba(42,157,143,.35); }
+.arrow .no{ width:22px; height:22px; font-size:.72rem; }
+@media(max-width:640px){
+  .card.recv, .card.send{ grid-column:1/-1; }
+  .actor{ display:none; }
+}
+.row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 12px; }
+.chk{ display:inline-flex; gap:7px; align-items:center; font-size:.84em; font-weight:600; color:var(--muted); cursor:pointer; }
+.chk input{ accent-color:var(--accent2); width:16px; height:16px; }
+.hint{ font-size:.82em; color:var(--muted); margin:0 0 10px; line-height:1.6; }
+
+.fld{ margin:0 0 12px; }
+.fld-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:4px; }
+.fld-head label{ font-size:.82em; font-weight:700; color:var(--muted); }
+.cnt{ font-size:.74em; font-weight:700; font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap; }
+.cnt.ok{ color:#15695f; }
+.cnt.warn{ color:#8a6100; }
+.cnt.bad{ color:#9b1d28; }
+.fld textarea{
+  display:block; width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.74em; line-height:1.6; color:#27323f; background:#fbfcfe;
+  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:8px 10px;
+  resize:vertical; word-break:break-all; max-height:9.6em;
+}
+.fld.big textarea{ max-height:none; min-height:18em; }
+.fld textarea[readonly]{ background:#f1f4f8; color:#55606d; }
+.fld textarea:focus{ outline:2px solid rgba(42,157,143,.45); outline-offset:1px; }
+.tools{ display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; margin-top:5px; }
+.tools:empty{ display:none; }
+.tools button{
+  font:inherit; font-size:.7em; font-weight:700; cursor:pointer; padding:2px 9px;
+  border-radius:7px; border:1px solid rgba(20,83,143,.18); background:#fff; color:var(--accent);
+}
+.tools button:hover{ background:rgba(20,83,143,.07); }
+.tools button[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.tools .gap{ flex:1 1 8px; }
+.tools .flash{ font-size:.72em; font-weight:700; color:#15695f; }
+
+.result{
+  grid-column:1/-1; margin:8px 0 4px; padding:11px 14px; border-radius:12px;
+  font-size:.9em; line-height:1.6; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.result.ok{ background:rgba(42,157,143,.1); border-color:rgba(42,157,143,.38); color:#11574f; }
+.result.bad{ background:rgba(190,30,45,.06); border-color:rgba(190,30,45,.3); color:#8c1a24; }
+.result.info{ color:#2d3748; }
+.result .sub{ display:block; font-size:.9em; color:var(--muted); margin-top:2px; }
+.result .ic{ font-weight:800; margin-right:6px; }
+.pairline{ font-size:.84em; margin:2px 0 12px; padding:9px 12px; border-radius:10px; background:#f6f8fb; }
+.pairline:empty{ display:none; }
+.pairline.ok{ background:rgba(42,157,143,.09); color:#11574f; }
+.pairline.bad{ background:rgba(190,30,45,.06); color:#8c1a24; }
+.pairline summary{ cursor:pointer; font-size:.92em; color:var(--muted); margin-top:3px; }
+.pairline ul{ list-style:none; padding:0; margin:6px 0 2px; }
+.pairline li{ margin:0 0 3px; color:#2d3748; }
+.pairline li b{ display:inline-block; width:1.4em; }
+.ph-note{ font-size:.82em; color:#8a6100; margin:6px 0 0; }
+.ph-note:empty{ display:none; }
+details.pem{ margin:0 0 12px; font-size:.84em; }
+details.pem summary{ cursor:pointer; color:var(--accent); font-weight:700; }
+details.pem pre{ max-height:190px; font-size:.78em; margin:6px 0 0; }
+#file-in{ display:none; }
+
+/* PDF đọc ngay trên trang (ẩn thanh công cụ của trình xem) */
+.pdfview{ margin:20px 0 10px; }
+.pdfview iframe{
+  display:block; width:100%; height:clamp(380px, 74vh, 700px);
+  border:1px solid rgba(20,83,143,.18); border-radius:14px; background:#f7f9fc;
+}
+.pdfview-note{
+  display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
+  margin:10px 0 26px; font-size:.83em; color:var(--muted); line-height:1.6;
+}
+.pdfview-note a{
+  font-weight:700; color:var(--accent); text-decoration:none;
+  padding:5px 14px; border-radius:999px; background:rgba(20,83,143,.08);
+}
+.pdfview-note a:hover{ background:rgba(20,83,143,.15); }
+.pdfview-note .meta-note{ flex:1 1 240px; margin:0; }
+
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.7;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:8px 12px; text-align:left; vertical-align:top; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px;
+}
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+/* ===== hình vẽ đường cong ===== */
+.fig{ margin:18px 0 22px; padding:14px 16px 10px; border:1px solid rgba(20,83,143,.16); border-radius:14px; background:#fbfcfe; }
+.fig svg{ display:block; width:100%; height:auto; max-height:70vh; touch-action:none; user-select:none; border-radius:10px; background:#fff; }
+.fig .ctl{ display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:0 0 10px; font-size:.86em; }
+.fig .ctl label{ display:inline-flex; gap:8px; align-items:center; font-weight:600; color:var(--muted); }
+.fig input[type=range]{ width:150px; accent-color:var(--accent); }
+.fig input[type=number]{ font:inherit; font-size:.9em; width:5.2em; padding:3px 6px; border:1px solid rgba(20,83,143,.25); border-radius:8px; }
+.fig .eq{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.95em; font-weight:700; color:var(--accent); }
+.fig .result{ margin:10px 0 4px; }
+.fig .grid{ stroke:rgba(31,41,55,.08); stroke-width:1; }
+.fig .axis{ stroke:rgba(31,41,55,.45); stroke-width:1.2; }
+.fig .frame{ fill:none; stroke:rgba(31,41,55,.35); }
+.fig .mirror{ stroke:rgba(42,157,143,.35); stroke-dasharray:4 4; }
+.fig .curve{ fill:none; stroke:var(--accent); stroke-width:2.4; }
+.fig .chord{ stroke:#b45309; stroke-width:1.6; }
+.fig .tangent{ stroke:#b45309; stroke-width:1.6; stroke-dasharray:7 4; }
+.fig .reflect{ stroke:rgba(31,41,55,.5); stroke-width:1.2; stroke-dasharray:3 4; }
+.fig .arrow{ stroke:rgba(42,157,143,.6); stroke-width:1.4; }
+.fig .pt{ fill:rgba(20,83,143,.55); stroke:none; }
+.fig .pt.p{ fill:#b45309; stroke:#fff; stroke-width:1.5; cursor:grab; }
+.fig .pt.q{ fill:#7c3aed; stroke:#fff; stroke-width:1.5; cursor:grab; }
+.fig .pt.sum{ fill:var(--accent2); stroke:#fff; stroke-width:1.5; }
+.fig .pt.third{ fill:#fff; stroke:#b45309; stroke-width:1.6; }
+.fig .pt.orbit{ fill:none; stroke:var(--accent2); stroke-width:1.6; }
+.fig .pt.orbit.cur{ stroke:#b45309; stroke-width:2.4; }
+.fig .pt.gen{ fill:none; stroke:var(--accent); stroke-width:2; }
+.fig text{ font-family:"Inter",Arial,sans-serif; fill:var(--text); }
+.fig .lbl{ font-size:13px; font-weight:700; }
+.fig .tick{ font-size:10px; fill:var(--muted); }
+.fig .num{ font-size:10px; font-weight:700; fill:#15695f; }
+.fig .warn{ font-size:16px; font-weight:800; fill:#9b1d28; }
+.ladder tr.one td{ background:rgba(42,157,143,.07); }
+.ladder td.bit{ font-weight:800; }
+/* ===== phòng thí nghiệm ===== */
+.trace{ margin:4px 0 10px; padding:8px 12px; border-radius:10px; background:#f6f8fb; font-size:.84em; }
+.trace[hidden]{ display:none; }
+.tl{ display:flex; flex-wrap:wrap; gap:4px 12px; padding:3px 0; border-bottom:1px dashed rgba(31,41,55,.08); }
+.tl:last-child{ border-bottom:0; }
+.tk{ flex:0 1 100%; color:var(--muted); font-weight:600; }
+.tv{ flex:1 1 100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.92em; word-break:break-all; background:none; padding:0; color:#27323f; }
+.tl.ok .tv{ color:#15695f; font-weight:700; }
+.tl.bad .tv{ color:#9b1d28; font-weight:700; }
+.tn{ color:#2d3748; }
+.cmp{ list-style:none; padding:0; margin:6px 0 0; font-size:.9em; }
+.cmp li b{ display:inline-block; width:1.4em; }
+.exrow{ display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 12px; }
+.exrow .ex{ font:inherit; font-size:.74em; font-weight:600; cursor:pointer; padding:4px 10px; border-radius:999px; border:1px solid rgba(42,157,143,.4); background:rgba(42,157,143,.08); color:#11574f; text-align:left; }
+.exrow .ex:hover{ background:rgba(42,157,143,.18); }
+.exl{ font-size:.78rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:10px 0 2px; }
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+@media(max-width:640px){ .two{ grid-template-columns:1fr; } }
+#sg-k-wrap:not(.given) textarea{ background:#f1f4f8; color:#55606d; }
+/* ==== house-format v1 — bilingual-personal-site skill, scripts/house-format.css. Prose is justified on every page.
+     Do not edit this block in a page: edit the skill's copy, re-run apply_format.py; check_site.py fails a page whose
+     block differs. ==== */
+main p, main li, main blockquote, main dd, main .art-desc, main .art-quote{ text-align:justify; text-justify:inter-word; hyphens:auto; }
+main .refs li, main .art-links li, main .songlist li, main .toc-wrap li, main .listen p, main .pair li, main .result li, main table p, main table li{ text-align:left; hyphens:manual; }
+main .poem-credit, main .video-cap, main figcaption p, main figcaption li{ text-align:center; hyphens:manual; }
+main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
+/* ==== /house-format ==== */
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+<h1><span lang="vi">Đường cong elliptic: ECDH và ECDSA trên năm đường cong NIST</span><span lang="en">Elliptic curves: ECDH and ECDSA on the five NIST curves</span></h1>
+<div class="meta"><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi · 02/11/2026 · Frank Nguyen</span><span lang="en">Post-Quantum Cryptography, AI &amp; Error-Correcting Codes · 2 Nov 2026 · Frank Nguyen</span></div>
+<p class="lede" lang="vi">Hầu hết kết nối an toàn hôm nay - TLS khi bạn mở một trang web, chữ ký trên firmware của một con chip, thẻ chip và hộ chiếu điện tử - đều dùng <strong>mật mã đường cong elliptic</strong>: trao đổi khoá <strong>ECDH</strong> và chữ ký số <strong>ECDSA</strong> trên một trong năm đường cong NIST P-192, P-224, P-256, P-384, P-521. Bài này giải thích ý tưởng bằng hình: bạn kéo hai điểm trên đường cong để thấy phép "cộng", đếm điểm trên một trường hữu hạn nhỏ, nhìn phép nhân vô hướng chạy từng bit - rồi vào phòng thí nghiệm chạy đúng các phép kiểm của NIST (CAVP / ACVP) ngay trong trình duyệt, với vết từng bước. Lưu ý về tên: trên trang này "ECC" luôn đi kèm "đường cong elliptic"; ở bài <a href="tu-ma-luong-tu-den-ecc.html">mã sửa lỗi</a>, ECC là chữ viết tắt của error-correcting code.</p><p class="lede" lang="en">Most secure connections today - TLS when you open a web page, the signature on a chip's firmware, smart cards and e-passports - use <strong>elliptic-curve cryptography</strong>: the <strong>ECDH</strong> key exchange and the <strong>ECDSA</strong> digital signature on one of the five NIST curves P-192, P-224, P-256, P-384, P-521. This article explains the idea with pictures: drag two points on a curve to see the "addition", count the points over a small finite field, watch scalar multiplication run bit by bit - then enter the lab and run NIST's own test types (CAVP / ACVP) in your browser, with a step-by-step trace. A note on names: on this page "ECC" always comes with "elliptic-curve"; in the <a href="tu-ma-luong-tu-den-ecc.html">error-correction article</a>, ECC abbreviates error-correcting code.</p>
+<noscript><p class="nojs"><span lang="vi">Hình tương tác và phòng thí nghiệm cần JavaScript. Phần giải thích vẫn đọc được bình thường.</span><span lang="en">The figures and the lab need JavaScript. The explanations read fine without it.</span></p></noscript>
+<div class="selftest"><button class="btn" id="bt-selftest" type="button"><span lang="vi">Chạy kiểm chứng</span><span lang="en">Run the self-test</span></button><span id="st-status" class="pill wait"><span lang="vi">chưa chạy</span><span lang="en">not run yet</span></span><span class="st-note"><span lang="vi">Chạy lại trong máy bạn các vector mẫu của NIST mà trang mang theo (KeyPair, PKV, KAS ECC CDH, SigGen, DetECDSA, SigVer) và RFC 6979 A.2.5, cộng các con số của ba hình. Bạn tự thấy bằng chứng, không phải tin lời tôi.</span><span lang="en">Replays, on your machine, the NIST example vectors the page carries (KeyPair, PKV, KAS ECC CDH, SigGen, DetECDSA, SigVer) and RFC 6979 A.2.5, plus the numbers of the three figures. You see the evidence rather than take my word.</span></span></div>
+<div id="st-detail" class="hexbox" hidden></div>
+<h2><span lang="vi">Đường cong elliptic dùng để làm gì</span><span lang="en">What elliptic curves are for</span></h2>
+<p lang="vi">Mật mã khoá công khai cần một việc <em>dễ làm, khó đảo ngược</em>. Với RSA đó là nhân hai số nguyên tố lớn. Với đường cong elliptic đó là <strong>nhân vô hướng</strong>: từ một điểm G trên đường cong và một số k, tính k·G = G + G + … + G (k lần) là nhanh; nhưng nhìn G và k·G mà tìm lại k - bài toán <em>logarit rời rạc trên đường cong elliptic</em> (ECDLP) - thì không ai biết cách nào nhanh hơn khoảng √n phép thử, với n là số điểm (cỡ 2<sup>256</sup> cho P-256). Vì thế khoá 256 bit trên đường cong cho độ an toàn 128 bit, ngang khoá RSA 3&#8239;072 bit (SP 800-57 phần 1, bảng 2): khoá ngắn hơn khoảng mười hai lần, chữ ký nhỏ hơn, tính nhanh hơn - lý do nó thắng RSA trong thiết bị nhúng.</p><p lang="en">Public-key cryptography needs something <em>easy to do, hard to undo</em>. For RSA that is multiplying two large primes. For elliptic curves it is <strong>scalar multiplication</strong>: given a point G on the curve and a number k, computing k·G = G + G + … + G (k times) is fast; but seeing G and k·G and finding k - the <em>elliptic-curve discrete-logarithm problem</em> (ECDLP) - nobody knows how to do faster than about √n trials, with n the number of points (about 2<sup>256</sup> for P-256). That is why a 256-bit key on a curve gives 128 bits of security, the same as a 3&#8239;072-bit RSA key (SP 800-57 part 1, table 2): keys about twelve times shorter, smaller signatures, faster arithmetic - the reason it beat RSA in embedded devices.</p>
+<p lang="vi">Phép "cộng" hai điểm là ý tưởng duy nhất cần hiểu, và nó là hình học: kẻ đường thẳng qua P và Q, đường ấy cắt đường cong tại đúng một điểm thứ ba, lấy đối xứng điểm đó qua trục hoành là P + Q. Hình 1 cho bạn kéo thử; hình 2 làm cùng phép ấy trên một trường hữu hạn nhỏ, nơi không còn "hình" nhưng công thức vẫn y nguyên. Một ví dụ bạn tính được bằng tay, trên y² ≡ x³ + 2x + 2 (mod 17) với G = (5, 1):</p><p lang="en">The "addition" of two points is the one idea to grasp, and it is geometric: draw the line through P and Q, it meets the curve at exactly one third point, mirror that point across the x-axis and you have P + Q. Figure 1 lets you drag it; figure 2 does the same operation over a small finite field, where there is no "picture" left but the formulas are unchanged. An example you can do by hand, on y² ≡ x³ + 2x + 2 (mod 17) with G = (5, 1):</p>
+<pre lang="vi">2G: λ = (3·x₁² + a)·(2·y₁)⁻¹ = (3·25 + 2)·(2)⁻¹ = 77 · 9 ≡ 9 · 9 = 81 ≡ 13   (mod 17; 2⁻¹ = 9 vì 2·9 = 18 ≡ 1)
+    x₃ = λ² − 2x₁ = 169 − 10 = 159 ≡ 6        y₃ = λ(x₁ − x₃) − y₁ = 13·(5 − 6) − 1 = −14 ≡ 3        → 2G = (6, 3)
+3G = 2G + G: λ = (1 − 3)·(5 − 6)⁻¹ = (−2)·(−1)⁻¹ = 2        x₃ = 4 − 6 − 5 ≡ 10        y₃ = 2·(6 − 10) − 3 = −11 ≡ 6   → 3G = (10, 6)
+… 19G = O: G có bậc 19 = #E, nhóm có đúng 19 phần tử (18 điểm + O). Hình 2 vẽ đủ 19 bước.</pre>
+<pre lang="en">2G: λ = (3·x₁² + a)·(2·y₁)⁻¹ = (3·25 + 2)·(2)⁻¹ = 77 · 9 ≡ 9 · 9 = 81 ≡ 13   (mod 17; 2⁻¹ = 9 because 2·9 = 18 ≡ 1)
+    x₃ = λ² − 2x₁ = 169 − 10 = 159 ≡ 6        y₃ = λ(x₁ − x₃) − y₁ = 13·(5 − 6) − 1 = −14 ≡ 3        → 2G = (6, 3)
+3G = 2G + G: λ = (1 − 3)·(5 − 6)⁻¹ = (−2)·(−1)⁻¹ = 2        x₃ = 4 − 6 − 5 ≡ 10        y₃ = 2·(6 − 10) − 3 = −11 ≡ 6   → 3G = (10, 6)
+… 19G = O: G has order 19 = #E, the group has exactly 19 elements (18 points + O). Figure 2 draws all 19 steps.</pre>
+<p lang="vi">Ở đây <strong>O</strong> là "điểm vô cực" - phần tử không của phép cộng điểm, đóng vai số 0; <em>bậc</em> của G là số lần cộng G vào chính nó để về O; <strong>#E</strong> là số phần tử của nhóm (mọi điểm, cộng thêm O). Mục toán học bên dưới nói kỹ hơn.</p>
+<p lang="en">Here <strong>O</strong> is the "point at infinity" - the zero of point addition, playing the role of 0; the <em>order</em> of G is how many times G must be added to itself to reach O; <strong>#E</strong> is the number of elements of the group (every point, plus O). The math section below says more.</p>
+<p lang="vi">Hai cách dùng mà phòng thí nghiệm bên dưới tái hiện đúng theo chuẩn: <strong>ECDH</strong> (SP 800-56A r3) - hai bên có khoá riêng d<sub>A</sub>, d<sub>B</sub>, trao nhau khoá công khai Q<sub>A</sub> = d<sub>A</sub>G, Q<sub>B</sub> = d<sub>B</sub>G, mỗi bên nhân khoá riêng của mình với khoá công khai của bên kia và cùng ra d<sub>A</sub>d<sub>B</sub>G; kẻ nghe lén thấy Q<sub>A</sub>, Q<sub>B</sub> mà không tính được. <strong>ECDSA</strong> (FIPS 186-5) - người ký biến giá trị băm của thông điệp thành hai số (r, s) bằng khoá riêng d và một số bí mật dùng một lần k; ai có Q cũng xác minh được, không ai không có d tạo được.</p><p lang="en">The two uses the lab below reproduces exactly as the standards define them: <strong>ECDH</strong> (SP 800-56A r3) - two parties hold private keys d<sub>A</sub>, d<sub>B</sub>, exchange public keys Q<sub>A</sub> = d<sub>A</sub>G, Q<sub>B</sub> = d<sub>B</sub>G, each multiplies its own private key by the other's public key and both reach d<sub>A</sub>d<sub>B</sub>G; an eavesdropper sees Q<sub>A</sub>, Q<sub>B</sub> and cannot compute it. <strong>ECDSA</strong> (FIPS 186-5) - the signer turns the hash of a message into two numbers (r, s) with the private key d and a one-time secret number k; anyone with Q can verify, nobody without d can forge.</p>
+<h3><span lang="vi">Hiện trạng (tính đến 11/2026) và lượng tử</span><span lang="en">Status (as of 11/2026) and quantum computers</span></h3>
+<ul lang="vi">
+  <li><strong>SP 800-186</strong> (02/2023) ghi tham số miền của năm đường cong Weierstrass P-192 … P-521 (cùng Edwards25519 / 448); các đường cong trên trường nhị phân (B-, K-) bị xếp loại không còn được khuyến nghị (deprecated).</li>
+  <li><strong>FIPS 186-5</strong> (02/2023) định nghĩa ECDSA (mục 6), sinh khoá (phụ lục A.2) và - lần đầu - cho phép <em>ECDSA tất định</em> theo RFC 6979 (mục 6.3.2), kể cả biến thể trộn thêm ngẫu nhiên vào đầu vào của HMAC_DRBG.</li>
+  <li><strong>SP 800-56A r3</strong> (04/2018) định nghĩa ECDH (nguyên thuỷ ECC CDH, mục 5.7.1.2) và bắt buộc kiểm tra khoá công khai của bên kia (mục 5.6.2.3.3) trước khi nhân.</li>
+  <li><strong>SP 800-131A r2</strong> (03/2019): độ an toàn dưới 112 bit không còn được chấp nhận để tạo chữ ký hay thoả thuận khoá; xác minh chữ ký cũ chỉ còn ở mức "legacy use". P-192 cho khoảng 80 bit, nên các bộ vector ECDSA hiện hành của NIST (ACVP KeyGen / SigGen) bắt đầu từ P-224, còn file CAVS SigVer vẫn có P-192 để xác minh chữ ký cũ. Phòng thí nghiệm làm đúng như vậy: P-192 có ở mọi thẻ trừ thẻ tạo chữ ký.</li>
+  <li><strong>Lượng tử</strong>: thuật toán Shor giải ECDLP trong thời gian đa thức, và một đường cong 256 bit cần <em>ít</em> qubit logic hơn RSA-3072 (ước tính của Roetteler và cộng sự, 2017: khoảng 2&#8239;330 qubit logic cho P-256). Bản cuối của <strong>NIST IR 8547</strong> (27/10/2026) đặt lộ trình: mọi thuật toán khoá công khai dễ bị máy lượng tử phá — ECDSA và ECDH ở mọi mức từ 112 bit trở lên — không còn được khuyến nghị (deprecated) sau 2030 và bị cấm theo các chuẩn của NIST sau 2035; các hệ thống liên bang nhạy cảm nhất còn phải chuyển sớm hơn (trao đổi khoá trước 31/12/2030, chữ ký trước 31/12/2031). Người kế nhiệm là ML-KEM / ML-DSA - thử trong <a href="pqc-calculator.html">máy tính ML-KEM / ML-DSA</a> và <a href="nist-205-206-207-calculator.html">máy tính SLH-DSA / FN-DSA / HQC</a> trên trang này.</li>
+</ul>
+<ul lang="en">
+  <li><strong>SP 800-186</strong> (02/2023) gives the domain parameters of the five Weierstrass curves P-192 … P-521 (plus Edwards25519 / 448); the binary-field curves (B-, K-) are deprecated.</li>
+  <li><strong>FIPS 186-5</strong> (02/2023) defines ECDSA (section 6), key generation (appendix A.2) and - for the first time - allows <em>deterministic ECDSA</em> per RFC 6979 (section 6.3.2), including the variant that mixes extra randomness into the HMAC_DRBG input.</li>
+  <li><strong>SP 800-56A r3</strong> (04/2018) defines ECDH (the ECC CDH primitive, section 5.7.1.2) and makes validating the peer's public key (section 5.6.2.3.3) mandatory before multiplying.</li>
+  <li><strong>SP 800-131A r2</strong> (03/2019): security strengths below 112 bits are no longer acceptable for signature generation or key agreement; verifying old signatures is "legacy use" only. P-192 gives about 80 bits, which is why NIST's current ECDSA vector sets (ACVP KeyGen / SigGen) start at P-224 while the CAVS SigVer file still has P-192 for verifying old signatures. The lab does the same: P-192 is in every tab except signature generation.</li>
+  <li><strong>Quantum</strong>: Shor's algorithm solves the ECDLP in polynomial time, and a 256-bit curve needs <em>fewer</em> logical qubits than RSA-3072 (Roetteler et al., 2017, estimated about 2&#8239;330 logical qubits for P-256). The final <strong>NIST IR 8547</strong> (27 October 2026) sets the road map: every quantum-vulnerable public-key algorithm — ECDSA and ECDH at every strength from 112 bits up — is deprecated after 2030 and disallowed under NIST standards after 2035; the government's most sensitive systems must move earlier (key establishment by 31 December 2030, signatures by 31 December 2031). The successors are ML-KEM / ML-DSA - try them in the <a href="pqc-calculator.html">ML-KEM / ML-DSA calculator</a> and the <a href="nist-205-206-207-calculator.html">SLH-DSA / FN-DSA / HQC calculator</a> on this site.</li>
+</ul>
+<h2 id="hinh1"><span lang="vi">Hình 1 — Cộng hai điểm trên đường cong thực</span><span lang="en">Figure 1 — Adding two points on a real curve</span></h2>
+<p lang="vi">Kéo thanh trượt a, b để đổi hình dạng y² = x³ + ax + b. Chọn "P" hay "Q" rồi bấm / kéo trên hình: điểm sẽ bám vào đường cong. Đường màu cam là dây cung qua P và Q (hoặc tiếp tuyến khi P = Q), vòng rỗng là giao điểm thứ ba, điểm xanh là P + Q sau khi lấy đối xứng. Khi Q = −P đường thẳng thẳng đứng và tổng là điểm vô cực O.</p><p lang="en">Drag the a, b sliders to reshape y² = x³ + ax + b. Pick "P" or "Q", then click / drag on the figure: the point snaps to the curve. The orange line is the chord through P and Q (or the tangent when P = Q), the hollow circle is the third intersection, the green point is P + Q after mirroring. When Q = −P the line is vertical and the sum is the point at infinity O.</p>
+<div class="fig" id="fig1">
+<div class="ctl"><span class="eq" id="g1-eq"></span><span id="g1-disc" class="cnt"></span></div>
+<div class="ctl"><label>a <input type="range" id="g1-a" min="-5" max="5" step="0.1" value="-1"/><span id="g1-a-val"></span></label><label>b <input type="range" id="g1-b" min="-5" max="5" step="0.1" value="1"/><span id="g1-b-val"></span></label><div class="chips"><span class="chips-l"><span lang="vi">Kéo điểm</span><span lang="en">Drag point</span></span><label class="chip"><input type="radio" name="g1-pick" value="P" checked/><span>P</span></label><label class="chip"><input type="radio" name="g1-pick" value="Q"/><span>Q</span></label></div>
+<span class="chips"><button class="btn ghost sm" id="g1-preset-add" type="button"><span lang="vi">P + Q</span><span lang="en">P + Q</span></button><button class="btn ghost sm" id="g1-preset-dbl" type="button"><span lang="vi">P = Q (tiếp tuyến)</span><span lang="en">P = Q (tangent)</span></button><button class="btn ghost sm" id="g1-preset-inf" type="button"><span lang="vi">Q = −P</span><span lang="en">Q = −P</span></button></span></div>
+<svg id="g1-svg" viewBox="0 0 560 400" role="img" aria-label="y^2 = x^3 + a x + b"></svg>
+<div class="result info" id="g1-out"></div>
+</div>
+<h2><span lang="vi">Toán học: luật nhóm, rồi chuyển sang trường hữu hạn</span><span lang="en">The math: the group law, then over to a finite field</span></h2>
+<p lang="vi">Hình học ở trên viết thành công thức. Với P = (x₁, y₁), Q = (x₂, y₂) trên y² = x³ + ax + b:</p><p lang="en">The geometry above becomes formulas. For P = (x₁, y₁), Q = (x₂, y₂) on y² = x³ + ax + b:</p>
+<pre lang="vi">λ = (y₂ − y₁) / (x₂ − x₁)        nếu P ≠ ±Q      (dây cung)
+λ = (3x₁² + a) / (2y₁)           nếu P = Q       (tiếp tuyến)
+x₃ = λ² − x₁ − x₂                y₃ = λ(x₁ − x₃) − y₁          P + Q = (x₃, y₃)
+P + (−P) = O,   P + O = P,   −(x, y) = (x, −y),   4a³ + 27b² ≠ 0</pre>
+<pre lang="en">λ = (y₂ − y₁) / (x₂ − x₁)        if P ≠ ±Q       (chord)
+λ = (3x₁² + a) / (2y₁)           if P = Q        (tangent)
+x₃ = λ² − x₁ − x₂                y₃ = λ(x₁ − x₃) − y₁          P + Q = (x₃, y₃)
+P + (−P) = O,   P + O = P,   −(x, y) = (x, −y),   4a³ + 27b² ≠ 0</pre>
+<ul lang="vi">
+  <li><strong>λ</strong> (lambda) là hệ số góc của đường thẳng; đường cong bậc ba nên đường thẳng cắt nó đúng ba lần (kể cả bội) - đó là lý do "điểm thứ ba" luôn tồn tại.</li>
+  <li><strong>O</strong>, điểm vô cực, là phần tử trung hoà: thứ ta cần để tập các điểm thành một <em>nhóm</em> (kết hợp, có nghịch đảo). Trong máy tính nó là một cờ, không phải toạ độ.</li>
+  <li><strong>4a³ + 27b² ≠ 0</strong> loại các đường cong suy biến (có điểm nhọn hoặc tự cắt), nơi luật cộng đổ vỡ; hình 1 và hình 2 từ chối các trường hợp đó.</li>
+  <li><strong>Trường hữu hạn F<sub>p</sub></strong>: thay số thực bằng các số 0 … p − 1 với p nguyên tố, mọi phép tính lấy dư mod p và phép chia thành nhân với <em>nghịch đảo modulo</em> (x⁻¹ là số thoả x·x⁻¹ ≡ 1). Công thức không đổi một ký tự - chỉ "hình" biến mất, như hình 2 cho thấy.</li>
+  <li><strong>#E</strong>, số điểm kể cả O, gần p + 1: định lý Hasse cho |#E − (p + 1)| ≤ 2√p. <strong>Bậc</strong> của một điểm G là số bước nhỏ nhất để G, 2G, 3G, … quay về O; nó luôn chia hết #E. NIST chọn đường cong có #E = n nguyên tố, nên mọi điểm khác O đều có bậc n ("đồng thừa số" h = 1) - không có nhóm con nhỏ để kẻ tấn công lợi dụng.</li>
+</ul>
+<ul lang="en">
+  <li><strong>λ</strong> (lambda) is the slope of the line; the curve is cubic, so a line meets it exactly three times (counting multiplicity) - which is why the "third point" always exists.</li>
+  <li><strong>O</strong>, the point at infinity, is the identity: what we need for the set of points to be a <em>group</em> (associative, with inverses). In a computer it is a flag, not coordinates.</li>
+  <li><strong>4a³ + 27b² ≠ 0</strong> rules out singular curves (a cusp or a self-crossing), where the addition law breaks; figures 1 and 2 refuse those cases.</li>
+  <li><strong>The finite field F<sub>p</sub></strong>: replace the reals by the numbers 0 … p − 1 with p prime, reduce everything mod p, and division becomes multiplication by the <em>modular inverse</em> (x⁻¹ is the number with x·x⁻¹ ≡ 1). Not one character of the formulas changes - only the "picture" disappears, as figure 2 shows.</li>
+  <li><strong>#E</strong>, the number of points including O, is close to p + 1: Hasse's theorem gives |#E − (p + 1)| ≤ 2√p. The <strong>order</strong> of a point G is the smallest number of steps for G, 2G, 3G, … to return to O; it always divides #E. NIST picks curves with #E = n prime, so every point other than O has order n ("cofactor" h = 1) - no small subgroup for an attacker to exploit.</li>
+</ul>
+<h2 id="hinh2"><span lang="vi">Hình 2 — Cùng luật ấy trên F<sub>p</sub>: đếm điểm, bậc của G, P + Q bằng số học modulo</span><span lang="en">Figure 2 — The same law over F<sub>p</sub>: counting points, the order of G, P + Q in modular arithmetic</span></h2>
+<p lang="vi">Chọn p, a, b. Mỗi chấm là một điểm (x, y) với y² ≡ x³ + ax + b (mod p); đối xứng qua đường gạch ngang ở giữa chính là y ↔ p − y, tức P ↔ −P. Bấm "Bước" / "Chạy" để đi G → 2G → 3G … tới O (các vòng tròn đánh số, mũi tên nối bước trước với bước sau): số bước là bậc của G. Chọn chế độ G / P / Q rồi bấm vào một chấm để đổi điểm; phép tính P + Q được viết ra đầy đủ bên dưới. Thử p = 23, a = 22, b = 5: G mặc định chỉ có bậc 3 - một nhóm con nhỏ, điều NIST tránh bằng cách chọn #E nguyên tố.</p><p lang="en">Choose p, a, b. Every dot is a point (x, y) with y² ≡ x³ + ax + b (mod p); mirroring across the dashed middle line is y ↔ p − y, that is P ↔ −P. Press "Step" / "Play" to walk G → 2G → 3G … to O (numbered rings, arrows from each step to the next): the number of steps is the order of G. Pick the G / P / Q mode, then click a dot to change that point; the P + Q computation is written out in full below. Try p = 23, a = 22, b = 5: the default G has order only 3 - a small subgroup, what NIST avoids by choosing #E prime.</p>
+<div class="fig" id="fig2">
+<div class="ctl"><div class="chips"><span class="chips-l"><span lang="vi">p</span><span lang="en">p</span></span><label class="chip"><input type="radio" name="g2-p" value="17" checked/><span>17</span></label><label class="chip"><input type="radio" name="g2-p" value="23"/><span>23</span></label><label class="chip"><input type="radio" name="g2-p" value="29"/><span>29</span></label><label class="chip"><input type="radio" name="g2-p" value="97"/><span>97</span></label><label class="chip"><input type="radio" name="g2-p" value="101"/><span>101</span></label></div>
+<label>a <input type="number" id="g2-a" min="0" max="100" step="1" value="2"/></label><label>b <input type="number" id="g2-b" min="0" max="100" step="1" value="2"/></label><span class="eq" id="g2-eq"></span></div>
+<div class="ctl"><div class="chips"><span class="chips-l"><span lang="vi">Chuột</span><span lang="en">Mouse</span></span><label class="chip"><input type="radio" name="g2-mode" value="G" checked/><span><span lang="vi">bấm để chọn G</span><span lang="en">click to set G</span></span></label><label class="chip"><input type="radio" name="g2-mode" value="P"/><span><span lang="vi">bấm để chọn P</span><span lang="en">click to set P</span></span></label><label class="chip"><input type="radio" name="g2-mode" value="Q"/><span><span lang="vi">bấm để chọn Q</span><span lang="en">click to set Q</span></span></label></div>
+<span class="chips"><button class="btn sm" id="g2-step" type="button"><span lang="vi">Bước</span><span lang="en">Step</span></button><button class="btn ghost sm" id="g2-play" type="button"><span lang="vi">Chạy / Dừng</span><span lang="en">Play / Pause</span></button><button class="btn ghost sm" id="g2-reset" type="button"><span lang="vi">Về G</span><span lang="en">Back to G</span></button></span></div>
+<div class="two"><div><svg id="g2-svg" viewBox="0 0 520 520" role="img" aria-label="E(F_p)"></svg><div class="hint" id="g2-pickmsg"></div></div>
+<div><div class="result info" id="g2-count"></div><div class="hint" id="g2-hasse"></div><div class="result info" id="g2-order"></div><div class="trace" id="g2-add"></div></div></div>
+</div>
+<h2 id="hinh3"><span lang="vi">Hình 3 — Nhân vô hướng k·G từng bit: nhân đôi-và-cộng so với thang Montgomery</span><span lang="en">Figure 3 — Scalar multiplication k·G bit by bit: double-and-add versus the Montgomery ladder</span></h2>
+<p lang="vi">Không ai cộng G với chính nó k lần khi k có 256 bit. Thay vào đó đọc k theo nhị phân từ trái sang phải: mỗi bit <em>nhân đôi</em> kết quả, và nếu bit là 1 thì <em>cộng</em> thêm G - khoảng 256 nhân đôi và trung bình 128 phép cộng. Bảng dưới chạy đúng thuật toán ấy trên đường cong và G của hình 2 (k ≤ 999), cạnh <strong>thang Montgomery</strong>: hai thanh ghi R₀, R₁ luôn giữ R₁ − R₀ = G, và bit 0 hay 1 đều làm <em>một phép cộng và một phép nhân đôi</em>, chỉ khác thanh ghi nào nhận kết quả. Kết quả cuối giống nhau; chuỗi thao tác thì không.</p><p lang="en">Nobody adds G to itself k times when k has 256 bits. Instead read k in binary from left to right: every bit <em>doubles</em> the result, and if the bit is 1 you also <em>add</em> G - about 256 doublings and on average 128 additions. The table below runs exactly that on the curve and G of figure 2 (k ≤ 999), next to the <strong>Montgomery ladder</strong>: two registers R₀, R₁ always keep R₁ − R₀ = G, and a 0 bit or a 1 bit each do <em>one addition and one doubling</em>, differing only in which register receives what. The final result is the same; the sequence of operations is not.</p>
+<div class="fig" id="fig3"><div class="ctl"><label>k <input type="number" id="g3-k" min="1" max="999" step="1" value="13"/></label></div>
+<div class="hint" id="g3-ops"></div>
+<div class="tbl-wrap"><table class="ladder"><thead><tr><th><span lang="vi">bit số</span><span lang="en">bit index</span></th><th>bit</th><th colspan="2"><span lang="vi">Nhân đôi-và-cộng</span><span lang="en">Double-and-add</span></th><th colspan="3"><span lang="vi">Thang Montgomery</span><span lang="en">Montgomery ladder</span></th></tr><tr><th></th><th></th><th><span lang="vi">phép</span><span lang="en">ops</span></th><th>R</th><th><span lang="vi">phép</span><span lang="en">ops</span></th><th>R₀</th><th>R₁</th></tr></thead><tbody id="g3-table"></tbody></table></div>
+<div class="result info" id="g3-res"></div></div>
+<p lang="vi">Vì sao điều này quan trọng với phần cứng: một phép cộng điểm và một phép nhân đôi tiêu thụ dòng điện khác nhau và mất thời gian khác nhau. Với nhân đôi-và-cộng, ai đo được dòng điện của chip chỉ cần đếm "có cộng hay không" sau mỗi nhân đôi là đọc được từng bit của k - mà k là khoá riêng (hoặc nonce của chữ ký). Thang Montgomery làm cùng một việc ở mọi bit, nên dấu vết công suất không còn mang thông tin; các engine phần cứng còn thay toạ độ affine bằng toạ độ xạ ảnh để tránh phép nghịch đảo đắt tiền và dữ liệu-phụ-thuộc ở mỗi bước (xem góc phần cứng bên dưới).</p><p lang="en">Why this matters in hardware: a point addition and a point doubling draw different current and take different time. With double-and-add, anyone who can measure the chip's current only has to count "was there an addition or not" after each doubling to read k bit by bit - and k is the private key (or the signature nonce). The Montgomery ladder does the same work at every bit, so the power trace carries no information; hardware engines also replace affine by projective coordinates to avoid the expensive, data-dependent inversion at every step (see the hardware angle below).</p>
+<h2><span lang="vi">Năm đường cong NIST</span><span lang="en">The five NIST curves</span></h2>
+<p lang="vi">SP 800-186 (trước đó là FIPS 186-4, phụ lục D) cho mỗi đường cong một số nguyên tố p, hệ số a = −3 (tiết kiệm một phép nhân trong công thức nhân đôi), hệ số b, điểm sinh G, bậc n nguyên tố (h = 1) và một SEED 160 bit từ đó b được dẫn ra bằng SHA-1 - để chứng tỏ b không bị chọn có chủ đích. Tất cả p đều là số nguyên tố "Mersenne tổng quát" (Solinas): tổng hiệu của vài luỹ thừa của 2 (P-521 = 2<sup>521</sup> − 1 là Mersenne thật), khiến phép rút gọn mod p trong phần cứng thành vài phép cộng / trừ thay vì một phép chia. Bảng này được tính tại chỗ từ hằng số của trang:</p><p lang="en">SP 800-186 (before it FIPS 186-4, appendix D) gives each curve a prime p, the coefficient a = −3 (it saves a multiplication in the doubling formula), the coefficient b, a generator G, a prime order n (h = 1) and a 160-bit SEED from which b is derived with SHA-1 - to show b was not chosen with a hidden purpose. Every p is a "generalised Mersenne" (Solinas) prime: a signed sum of a few powers of 2 (P-521 = 2<sup>521</sup> − 1 is a true Mersenne prime), which turns the reduction mod p in hardware into a few additions / subtractions instead of a division. This table is computed on the spot from the page's constants:</p>
+<div class="tbl-wrap"><table><thead><tr><th><span lang="vi">Đường cong</span><span lang="en">Curve</span></th><th><span lang="vi">bit của p</span><span lang="en">bits of p</span></th><th>N = ⌈log₂ n⌉</th><th><span lang="vi">từ 32 bit</span><span lang="en">32-bit words</span></th><th>p</th><th><span lang="vi">độ an toàn (bit)</span><span lang="en">security (bits)</span></th></tr></thead><tbody id="curve-rows"></tbody></table></div>
+<h2><span lang="vi">ECDH và ECDSA, từng bước</span><span lang="en">ECDH and ECDSA, step by step</span></h2>
+<h3><span lang="vi">Trao đổi khoá ECDH (SP 800-56A r3, nguyên thuỷ ECC CDH, mục 5.7.1.2)</span><span lang="en">ECDH key exchange (SP 800-56A r3, ECC CDH primitive, section 5.7.1.2)</span></h3>
+<ul lang="vi">
+  <li>Mỗi bên sinh cặp khoá: d ngẫu nhiên trong [1, n − 1], Q = d·G (FIPS 186-5, A.2).</li>
+  <li>Nhận khoá công khai của bên kia và <em>kiểm tra đầy đủ</em> (mục 5.6.2.3.3): Q ≠ O; 0 ≤ x, y ≤ p − 1; y² ≡ x³ − 3x + b; n·Q = O. Bước này không phải thủ tục: bỏ nó là <em>tấn công đường cong sai</em> - kẻ tấn công gửi một điểm nằm trên một đường cong khác có nhóm con nhỏ, ép bạn tính d·Q trên đó và lộ dần d (Biehl, Meyer và Müller, 2000; Jager, Schwenk và Somorovsky chứng minh nó thực tế trên TLS năm 2015).</li>
+  <li>Tính P = h·d·Q<sub>peer</sub> (h = 1); nếu P = O thì lỗi; Z = x(P), viết thành chuỗi ⌈log₂ p / 8⌉ byte. Hai bên có cùng Z vì d<sub>A</sub>(d<sub>B</sub>G) = d<sub>B</sub>(d<sub>A</sub>G).</li>
+  <li>Z chưa phải khoá phiên: nó đi qua một hàm dẫn xuất khoá (SP 800-56C) cùng với thông tin về hai bên. Phòng thí nghiệm dừng ở Z, đúng phạm vi của phép kiểm "KAS ECC CDH primitive" của NIST.</li>
+</ul>
+<ul lang="en">
+  <li>Each side generates a key pair: random d in [1, n − 1], Q = d·G (FIPS 186-5, A.2).</li>
+  <li>Receive the peer's public key and <em>fully validate</em> it (section 5.6.2.3.3): Q ≠ O; 0 ≤ x, y ≤ p − 1; y² ≡ x³ − 3x + b; n·Q = O. This step is not a formality: skipping it is the <em>invalid-curve attack</em> - the attacker sends a point on a different curve with a small subgroup, makes you compute d·Q there and learns d piece by piece (Biehl, Meyer and Müller, 2000; shown practical against TLS by Jager, Schwenk and Somorovsky, 2015).</li>
+  <li>Compute P = h·d·Q<sub>peer</sub> (h = 1); if P = O, error; Z = x(P), written as a ⌈log₂ p / 8⌉-byte string. Both sides get the same Z because d<sub>A</sub>(d<sub>B</sub>G) = d<sub>B</sub>(d<sub>A</sub>G).</li>
+  <li>Z is not yet a session key: it goes through a key-derivation function (SP 800-56C) together with information about both parties. The lab stops at Z, the scope of NIST's "KAS ECC CDH primitive" test.</li>
+</ul>
+<h3><span lang="vi">Chữ ký ECDSA (FIPS 186-5, mục 6.4)</span><span lang="en">ECDSA signatures (FIPS 186-5, section 6.4)</span></h3>
+<pre lang="vi">Ký:        e = bits2int(H(M))      k ∈ [1, n−1]      R = k·G      r = R.x mod n ≠ 0      s = k⁻¹ (e + d·r) mod n ≠ 0      → (r, s)
+Xác minh:  1 ≤ r, s ≤ n−1      w = s⁻¹ mod n      u₁ = e·w      u₂ = r·w      R′ = u₁·G + u₂·Q      hợp lệ ⇔ R′ ≠ O và R′.x mod n = r
+Vì sao đúng:   u₁G + u₂Q = w(e + d·r)·G = k·G = R   nên R′.x = r</pre>
+<pre lang="en">Sign:      e = bits2int(H(M))      k ∈ [1, n−1]      R = k·G      r = R.x mod n ≠ 0      s = k⁻¹ (e + d·r) mod n ≠ 0      → (r, s)
+Verify:    1 ≤ r, s ≤ n−1      w = s⁻¹ mod n      u₁ = e·w      u₂ = r·w      R′ = u₁·G + u₂·Q      valid ⇔ R′ ≠ O and R′.x mod n = r
+Why it works:  u₁G + u₂Q = w(e + d·r)·G = k·G = R   so R′.x = r</pre>
+<ul lang="vi">
+  <li><strong>bits2int</strong> (mục 6.4.1, bước 2): lấy min(N, độ dài băm) bit <em>trái nhất</em> của H(M) làm số nguyên e, với N = số bit của n. SHA-512 với P-256 chỉ dùng 256 bit đầu; SHA-256 với P-521 dùng cả 256 bit. Thẻ Ký viết rõ bước cắt này - nó là chỗ hay sai nhất khi tự viết ECDSA.</li>
+  <li><strong>k</strong> là số bí mật dùng một lần: ngẫu nhiên từ bộ sinh đạt SP 800-90 (mục 6.3.1), hoặc tất định theo RFC 6979 - k = HMAC_DRBG(d, H(M)) (mục 6.3.2). Lặp k, hay chỉ lộ vài bit của k ở nhiều chữ ký, là lộ d; thẻ Tấn công tính thử ngay.</li>
+  <li><strong>r, s</strong> mỗi số dài ⌈N / 8⌉ byte; chữ ký P-256 là 64 byte. r = 0 hoặc s = 0 (xác suất cỡ 2<sup>−N</sup>) thì chọn k khác.</li>
+  <li>Người xác minh chỉ có Q nên cũng phải <em>kiểm tra Q</em> (ít nhất là ≠ O, trong phạm vi, trên đường cong) trước khi tính - cùng lý do như ECDH.</li>
+</ul>
+<ul lang="en">
+  <li><strong>bits2int</strong> (section 6.4.1, step 2): take the <em>leftmost</em> min(N, hash length) bits of H(M) as the integer e, with N the bit length of n. SHA-512 with P-256 uses only the first 256 bits; SHA-256 with P-521 uses all 256. The Sign tab shows this truncation explicitly - it is the most common mistake in a hand-written ECDSA.</li>
+  <li><strong>k</strong> is the one-time secret number: random from an SP 800-90 generator (section 6.3.1), or deterministic per RFC 6979 - k = HMAC_DRBG(d, H(M)) (section 6.3.2). Reusing k, or leaking just a few bits of k over many signatures, reveals d; the Attacks tab computes it live.</li>
+  <li><strong>r, s</strong> are each ⌈N / 8⌉ bytes; a P-256 signature is 64 bytes. If r = 0 or s = 0 (probability about 2<sup>−N</sup>), pick another k.</li>
+  <li>The verifier only has Q, so it must <em>validate Q</em> too (at least ≠ O, in range, on the curve) before computing - for the same reason as in ECDH.</li>
+</ul>
+<h2><span lang="vi">Góc phần cứng: một engine đường cong elliptic phải làm đúng những gì</span><span lang="en">The hardware angle: what an elliptic-curve engine must get right</span></h2>
+<p lang="vi">Phần này là góc nhìn chung của một kỹ sư bảo mật SoC, không gắn với sản phẩm nào. Một engine ECC trên silicon là bốn tầng chồng lên nhau, và mỗi tầng có chỗ để sai lặng lẽ:</p><p lang="en">This is the generic view of an SoC security engineer, tied to no product. An elliptic-curve engine in silicon is four layers stacked up, and each has a place to fail silently:</p>
+<ul lang="vi">
+  <li><strong>Số học trường F<sub>p</sub></strong>: bộ nhân modulo nhiều từ (thường 32 hoặc 64 bit một từ, 6 … 17 từ cho P-192 … P-521). Hai cách rút gọn: <em>Montgomery</em> (tổng quát, dùng chung với RSA) hoặc <em>rút gọn riêng cho số nguyên tố Mersenne tổng quát</em> của NIST - gấp các từ cao xuống bằng vài phép cộng / trừ nhờ 2<sup>bits</sup> ≡ c (mod p), rồi trừ p vài lần (FIPS 186-4, D.2 cho công thức từng từ). Nghịch đảo (cho bước affine cuối, cho k⁻¹ và s⁻¹ mod n) bằng Fermat x<sup>p−2</sup> thì đều về thời gian, bằng Euclid nhị phân thì nhanh hơn nhưng số vòng lặp phụ thuộc dữ liệu.</li>
+  <li><strong>Toạ độ</strong>: affine cần một nghịch đảo mỗi phép cộng điểm - quá đắt. Toạ độ Jacobian (X, Y, Z) với x = X/Z², y = Y/Z³ bỏ nghịch đảo khỏi vòng lặp: nhân đôi tốn khoảng 4 phép nhân + 4 bình phương khi a = −3, cộng hỗn hợp (một điểm affine) khoảng 8 nhân + 3 bình phương; một nghịch đảo duy nhất ở cuối. Đó là lý do a = −3 của NIST không phải thẩm mỹ.</li>
+  <li><strong>Nhân vô hướng đều</strong>: thang Montgomery (hình 3) hoặc cửa sổ cố định với bảng được đọc theo cách không phụ thuộc chỉ số; thêm <em>làm mù vô hướng</em> (d′ = d + r·n với r ngẫu nhiên; kết quả không đổi vì n·G = O) và <em>ngẫu nhiên hoá toạ độ xạ ảnh</em> (nhân X, Y, Z với λ², λ³, λ) để chống phân tích công suất vi sai. Tránh phép cộng "giả" chỉ để đều nhịp: nó mở cửa cho tấn công <em>safe-error</em> - gây lỗi vào phép cộng giả, kết quả vẫn đúng tức bit là 0.</li>
+  <li><strong>Kiểm tra điểm trong phần cứng</strong>: trên đường cong trước khi nhân (ECDH, xác minh) <em>và</em> sau khi nhân (một lỗi tiêm vào giữa phép tính thường đẩy kết quả ra khỏi đường cong - kiểm tra y² = x³ − 3x + b ở đầu ra bắt được nó). Tấn công <em>đổi dấu</em> (sign-change fault) đặc biệt khó chịu: đảo dấu một toạ độ Y giữa chừng cho ra một điểm vẫn nằm trên đường cong; phòng bằng cách tính trên "đường cong ghép" theo mod p·t với một số nguyên tố phụ t nhỏ rồi kiểm lại kết quả theo mod t (Blömer, Otto và Seifert, 2006), hoặc kiểm tra bất biến của thang (R₁ − R₀ = G).</li>
+  <li><strong>Nonce là điểm yếu nhất</strong>: gần như mọi vụ lộ khoá ECDSA được công bố đến nay đều ở k, không ở ECDLP - k lặp (PlayStation 3, 2010), k lệch vài bit (Minerva, TPM-Fail, 2019), k từ bộ sinh yếu (ví Bitcoin trên Android, 2013). Trong SoC, k phải đến từ DRBG đạt SP 800-90A nuôi bằng nguồn entropy đạt SP 800-90B, hoặc từ RFC 6979; không bao giờ từ LFSR hay bộ đếm. Và k⁻¹ cũng phải tính đều thời gian.</li>
+</ul>
+<ul lang="en">
+  <li><strong>F<sub>p</sub> arithmetic</strong>: a multi-word modular multiplier (usually 32- or 64-bit words, 6 … 17 words for P-192 … P-521). Two ways to reduce: <em>Montgomery</em> (generic, shared with RSA) or a <em>reduction special to NIST's generalised Mersenne primes</em> - fold the high words down with a few additions / subtractions because 2<sup>bits</sup> ≡ c (mod p), then subtract p a few times (FIPS 186-4, D.2 gives the word-level formulas). Inversion (for the final affine step, for k⁻¹ and s⁻¹ mod n) by Fermat x<sup>p−2</sup> is uniform in time; by binary Euclid it is faster but its iteration count depends on the data.</li>
+  <li><strong>Coordinates</strong>: affine needs one inversion per point addition - far too expensive. Jacobian coordinates (X, Y, Z) with x = X/Z², y = Y/Z³ remove the inversion from the loop: a doubling costs about 4 multiplications + 4 squarings when a = −3, a mixed addition (one affine point) about 8 multiplications + 3 squarings; one single inversion at the end. That is why NIST's a = −3 is not cosmetic.</li>
+  <li><strong>Uniform scalar multiplication</strong>: the Montgomery ladder (figure 3) or a fixed window whose table is read in an index-independent way; add <em>scalar blinding</em> (d′ = d + r·n with random r; the result is unchanged because n·G = O) and <em>projective-coordinate randomisation</em> (multiply X, Y, Z by λ², λ³, λ) against differential power analysis. Avoid "dummy" additions inserted only to even out the rhythm: they invite the <em>safe-error</em> attack - inject a fault into the dummy addition; if the result is still correct, that bit was 0.</li>
+  <li><strong>Point validation in hardware</strong>: on the curve before multiplying (ECDH, verification) <em>and</em> after (a fault injected mid-computation usually pushes the result off the curve - checking y² = x³ − 3x + b at the output catches it). The <em>sign-change</em> fault is especially nasty: flipping the sign of a Y coordinate midway yields a point that is still on the curve; the defence is to compute on a "combined curve" modulo p·t with a small auxiliary prime t and check the result modulo t (Blömer, Otto and Seifert, 2006), or to check the ladder invariant (R₁ − R₀ = G).</li>
+  <li><strong>The nonce is the weak spot</strong>: nearly every published ECDSA key compromise so far has been in k, not in the ECDLP - a repeated k (PlayStation 3, 2010), a k biased by a few bits (Minerva, TPM-Fail, 2019), a k from a weak generator (Android Bitcoin wallets, 2013). In an SoC, k must come from an SP 800-90A DRBG fed by an SP 800-90B entropy source, or from RFC 6979; never from an LFSR or a counter. And k⁻¹ must be computed in uniform time too.</li>
+</ul>
+<h3><span lang="vi">Kỹ sư kiểm chứng nên thử gì</span><span lang="en">What a verification engineer should test</span></h3>
+<ul lang="vi">
+  <li>Đúng các loại ca của NIST trong phòng thí nghiệm dưới đây: KeyPair (Q = d·G), PKV (bốn bước, kể cả điểm ngoài đường cong và toạ độ = p), KAS ECC CDH (Z từng curve), SigGen với k cho trước (file CAVS cho k, nên so được từng giá trị), SigVer với cả ca F (đổi thông điệp, đổi r, đổi s, đổi Q, r = 0, s = 0).</li>
+  <li>Vô hướng biên: d = 1, d = 2, d = n − 1 (Q = −G), d = n − 2, và k = n (phải ra O, phải bị từ chối); các giá trị gần p trong toạ độ (x = p − 1, x = p) ở ô kiểm tra điểm; hàm băm dài hơn n (SHA-512 với P-256) để bắt lỗi bits2int; thông điệp rỗng.</li>
+  <li>Một mô hình tham chiếu độc lập (Python, viết từ chuẩn) chạy song song với RTL, và một chiến dịch "làm hỏng có chủ đích": sửa một hằng số, bỏ một bước kiểm tra, đảo một dấu - bộ kiểm phải đỏ. Đó cũng là cách trang này được kiểm (mục "Mã này có đáng tin không").</li>
+  <li>Đo thời gian và công suất theo bit của k trên FPGA / mô phỏng cổng: một thang đều không được lộ tương quan với k (kiểm tra kiểu TVLA - Test Vector Leakage Assessment, so sánh thống kê hai tập vết công suất); nhưng nhớ rằng mô phỏng không thấy rò rỉ của silicon thật.</li>
+</ul>
+<ul lang="en">
+  <li>Exactly NIST's case types in the lab below: KeyPair (Q = d·G), PKV (all four steps, including a point off the curve and a coordinate = p), KAS ECC CDH (Z per curve), SigGen with a given k (the CAVS file supplies k, so every value can be compared), SigVer including the F cases (message, r, s or Q modified, r = 0, s = 0).</li>
+  <li>Edge scalars: d = 1, d = 2, d = n − 1 (Q = −G), d = n − 2, and k = n (must give O, must be refused); coordinates near p (x = p − 1, x = p) in the point check; a hash longer than n (SHA-512 with P-256) to catch bits2int errors; the empty message.</li>
+  <li>An independent reference model (Python, written from the standards) running alongside the RTL, and a campaign of deliberate breakage: change a constant, drop a validation step, flip a sign - the tests must go red. That is also how this page was checked (section "Can this code be trusted").</li>
+  <li>Measure timing and power against the bits of k on FPGA / gate-level simulation: a uniform ladder must show no correlation with k (a TVLA-style check - Test Vector Leakage Assessment, a statistical comparison of two sets of power traces); but remember that simulation does not see the leakage of real silicon.</li>
+</ul>
+<h2 id="lab"><span lang="vi">Phòng thí nghiệm: các phép kiểm của NIST, chạy trong máy bạn</span><span lang="en">The lab: NIST's test types, run on your machine</span></h2>
+<p lang="vi"><strong>CAVP</strong> (Cryptographic Algorithm Validation Program) là chương trình của NIST kiểm định rằng một bản hiện thực tính đúng thuật toán. Nó có hai thế hệ bộ vector: <strong>CAVS</strong> - các tệp văn bản cũ (.rsp, .txt) ghi sẵn đầu vào và đáp án, đánh số bằng COUNT - và <strong>ACVP</strong> (Automated Cryptographic Validation Protocol) - vector dạng JSON trao đổi tự động, mỗi ca có số hiệu tcId. Trong các tệp ấy, <strong>IUT</strong> (implementation under test) là bản hiện thực đang được kiểm.</p>
+<p lang="en"><strong>CAVP</strong> (Cryptographic Algorithm Validation Program) is NIST's programme for validating that an implementation computes an algorithm correctly. It has two generations of test vectors: <strong>CAVS</strong> - the older text files (.rsp, .txt) listing inputs and answers, numbered by COUNT - and <strong>ACVP</strong> (Automated Cryptographic Validation Protocol) - JSON vectors exchanged automatically, each case numbered by a tcId. In those files the <strong>IUT</strong> (implementation under test) is the implementation being checked.</p>
+<p lang="vi">Mỗi thẻ là một loại ca kiểm của CAVP / ACVP. Chọn đường cong bằng các nút tròn, điền (hoặc để ngẫu nhiên), bấm nút lớn; vết từng bước hiện bên dưới. Các nút "ví dụ NIST" điền đúng một bản ghi của file NIST tương ứng, chạy, và so từng giá trị với đáp án trong file (✓ / ✕). Mọi số đều là hex, không có tiền tố 0x.</p><p lang="en">Each tab is one CAVP / ACVP test type. Pick the curve with the round buttons, fill in (or leave random), press the big button; the step-by-step trace appears below. The "NIST example" buttons load one record of the corresponding NIST file, run it, and compare every value with the file's answer (✓ / ✕). All numbers are hex without a 0x prefix.</p>
+<div class="tabs" role="tablist">
+  <button class="tab" id="tab-kg" type="button" role="tab" aria-selected="true" aria-controls="panel-kg"><span lang="vi">Sinh cặp khoá</span><span lang="en">Key pair</span></button>
+  <button class="tab" id="tab-pv" type="button" role="tab" aria-selected="false" aria-controls="panel-pv"><span lang="vi">Kiểm tra khoá công khai</span><span lang="en">Public-key validation</span></button>
+  <button class="tab" id="tab-dh" type="button" role="tab" aria-selected="false" aria-controls="panel-dh"><span lang="vi">ECDH</span><span lang="en">ECDH</span></button>
+  <button class="tab" id="tab-sg" type="button" role="tab" aria-selected="false" aria-controls="panel-sg"><span lang="vi">Ký ECDSA</span><span lang="en">ECDSA sign</span></button>
+  <button class="tab" id="tab-sv" type="button" role="tab" aria-selected="false" aria-controls="panel-sv"><span lang="vi">Xác minh ECDSA</span><span lang="en">ECDSA verify</span></button>
+  <button class="tab" id="tab-at" type="button" role="tab" aria-selected="false" aria-controls="panel-at"><span lang="vi">Tấn công nonce</span><span lang="en">Nonce attacks</span></button>
+</div>
+<section class="panel" id="panel-kg" role="tabpanel" aria-labelledby="tab-kg">
+<p class="hint"><span lang="vi">FIPS 186-5, phụ lục A.2: A.2.1 "extra random bits" lấy N + 64 bit ngẫu nhiên c và đặt d = (c mod (n − 1)) + 1 - 64 bit thừa làm độ lệch thống kê nhỏ hơn 2⁻⁶⁴; A.2.2 "rejection sampling" lấy N bit c, loại bỏ nếu c > n − 2, đặt d = c + 1. Trang này cài cả hai; Q = d·G bằng thang Montgomery. Tương ứng CAVS KeyPair.rsp và ACVP ECDSA-KeyGen (hai chế độ "extra bits" / "testing candidates").</span><span lang="en">FIPS 186-5, appendix A.2: A.2.1 "extra random bits" draws N + 64 random bits c and sets d = (c mod (n − 1)) + 1 - the 64 extra bits make the statistical bias smaller than 2⁻⁶⁴; A.2.2 "rejection sampling" draws N bits c, rejects if c > n − 2, sets d = c + 1. This page implements both; Q = d·G by the Montgomery ladder. Corresponds to CAVS KeyPair.rsp and ACVP ECDSA-KeyGen (modes "extra bits" / "testing candidates").</span></p>
+<div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Đường cong</span><span lang="en">Curve</span></span><label class="chip"><input type="radio" name="kg-curve" value="P-192"/><span>P-192</span></label><label class="chip"><input type="radio" name="kg-curve" value="P-224"/><span>P-224</span></label><label class="chip"><input type="radio" name="kg-curve" value="P-256" checked/><span>P-256</span></label><label class="chip"><input type="radio" name="kg-curve" value="P-384"/><span>P-384</span></label><label class="chip"><input type="radio" name="kg-curve" value="P-521"/><span>P-521</span></label></div>
+<div class="chips"><span class="chips-l"><span lang="vi">Cách sinh</span><span lang="en">Method</span></span><label class="chip"><input type="radio" name="kg-method" value="A.2.1" checked/><span><span lang="vi">A.2.1 bit thừa</span><span lang="en">A.2.1 extra bits</span></span></label><label class="chip"><input type="radio" name="kg-method" value="A.2.2"/><span><span lang="vi">A.2.2 loại bỏ</span><span lang="en">A.2.2 rejection</span></span></label></div>
+</div>
+<div class="fld"><div class="fld-head"><label for="kg-d"><span lang="vi">Khoá riêng d (hex)</span><span lang="en">Private key d (hex)</span></label> <label class="chk"><input type="checkbox" id="kg-d-rnd" checked/><span lang="vi">d ngẫu nhiên</span><span lang="en">random d</span></label><span class="cnt" id="kg-d-cnt"></span></div><textarea id="kg-d" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="kg-d-tools"></div></div>
+<div class="row"><button class="btn" id="kg-gen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate the key pair</span></button></div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="kg-qx"><span lang="vi">Q.x</span><span lang="en">Q.x</span></label><span class="cnt" id="kg-qx-cnt"></span></div><textarea id="kg-qx" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="kg-qx-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="kg-qy"><span lang="vi">Q.y</span><span lang="en">Q.y</span></label><span class="cnt" id="kg-qy-cnt"></span></div><textarea id="kg-qy" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="kg-qy-tools"></div></div>
+</div>
+<div class="trace" id="kg-trace" hidden></div><div class="result info" id="kg-result"></div>
+<div class="exl"><span lang="vi">Ví dụ NIST (điền d, sinh Q, so với đáp án)</span><span lang="en">NIST examples (load d, generate Q, compare with the answer)</span></div><div class="exrow" id="kg-ex"></div>
+</section>
+<section class="panel" id="panel-pv" role="tabpanel" aria-labelledby="tab-pv" hidden>
+<p class="hint"><span lang="vi">SP 800-56A r3, mục 5.6.2.3.3 (kiểm tra đầy đủ) - cũng là ACVP ECDSA-KeyVer và CAVS PKV.rsp: (1) Q ≠ O; (2) 0 ≤ x, y ≤ p − 1; (3) y² ≡ x³ − 3x + b (mod p); (4) n·Q = O. Trang trả về bước đầu tiên bị hỏng. Hai ví dụ "F" của NIST: toạ độ ngoài phạm vi, và điểm không nằm trên đường cong - chính là điểm mà tấn công đường cong sai gửi tới.</span><span lang="en">SP 800-56A r3, section 5.6.2.3.3 (full validation) - also ACVP ECDSA-KeyVer and CAVS PKV.rsp: (1) Q ≠ O; (2) 0 ≤ x, y ≤ p − 1; (3) y² ≡ x³ − 3x + b (mod p); (4) n·Q = O. The page reports the first failing step. NIST's two "F" examples: a coordinate out of range, and a point not on the curve - exactly what the invalid-curve attack sends.</span></p>
+<div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Đường cong</span><span lang="en">Curve</span></span><label class="chip"><input type="radio" name="pv-curve" value="P-192"/><span>P-192</span></label><label class="chip"><input type="radio" name="pv-curve" value="P-224"/><span>P-224</span></label><label class="chip"><input type="radio" name="pv-curve" value="P-256" checked/><span>P-256</span></label><label class="chip"><input type="radio" name="pv-curve" value="P-384"/><span>P-384</span></label><label class="chip"><input type="radio" name="pv-curve" value="P-521"/><span>P-521</span></label></div>
+</div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="pv-qx"><span lang="vi">Q.x (hex)</span><span lang="en">Q.x (hex)</span></label><span class="cnt" id="pv-qx-cnt"></span></div><textarea id="pv-qx" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="pv-qx-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="pv-qy"><span lang="vi">Q.y (hex)</span><span lang="en">Q.y (hex)</span></label><span class="cnt" id="pv-qy-cnt"></span></div><textarea id="pv-qy" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="pv-qy-tools"></div></div>
+</div>
+<div class="row"><button class="btn" id="pv-check" type="button"><span lang="vi">Kiểm tra khoá công khai</span><span lang="en">Validate the public key</span></button><button class="btn ghost" id="pv-from-kg" type="button"><span lang="vi">Lấy Q từ thẻ Sinh cặp khoá</span><span lang="en">Take Q from the key-pair tab</span></button><button class="btn ghost" id="pv-break" type="button"><span lang="vi">Q.y + 1 (ra khỏi đường cong)</span><span lang="en">Q.y + 1 (leave the curve)</span></button></div>
+<div class="trace" id="pv-trace" hidden></div><div class="result info" id="pv-result"></div>
+<div class="exl"><span lang="vi">Ví dụ NIST (P = hợp lệ, F = không hợp lệ, kèm lý do trong file)</span><span lang="en">NIST examples (P = valid, F = invalid, with the file's reason)</span></div><div class="exrow" id="pv-ex"></div>
+</section>
+<section class="panel" id="panel-dh" role="tabpanel" aria-labelledby="tab-dh" hidden>
+<p class="hint"><span lang="vi">SP 800-56A r3, nguyên thuỷ ECC CDH (mục 5.7.1.2), hai vai như trang máy tính ML-KEM: Alice bên trái, Bob bên phải. Bước 1 mỗi bên sinh cặp khoá; bước 2 trao đổi Q; bước 3 mỗi bên kiểm tra đầy đủ khoá của bên kia rồi tính Z = x(d·Q_peer). Tương ứng CAVS KAS_ECC_CDH_PrimitiveTest.txt (Alice = IUT - implementation under test, bản hiện thực được kiểm; Bob = CAVS) và ACVP KAS-ECC-CDH-Component.</span><span lang="en">SP 800-56A r3, ECC CDH primitive (section 5.7.1.2), two roles like the ML-KEM calculator page: Alice on the left, Bob on the right. Step 1 each side generates a key pair; step 2 exchange Q; step 3 each side fully validates the other's key and computes Z = x(d·Q_peer). Corresponds to CAVS KAS_ECC_CDH_PrimitiveTest.txt (Alice = IUT - the implementation under test; Bob = CAVS) and ACVP KAS-ECC-CDH-Component.</span></p>
+<div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Đường cong</span><span lang="en">Curve</span></span><label class="chip"><input type="radio" name="dh-curve" value="P-192"/><span>P-192</span></label><label class="chip"><input type="radio" name="dh-curve" value="P-224"/><span>P-224</span></label><label class="chip"><input type="radio" name="dh-curve" value="P-256" checked/><span>P-256</span></label><label class="chip"><input type="radio" name="dh-curve" value="P-384"/><span>P-384</span></label><label class="chip"><input type="radio" name="dh-curve" value="P-521"/><span>P-521</span></label></div>
+</div>
+<div class="flow"><div class="actor recv">Alice</div><div class="actor send">Bob</div>
+<section class="card recv" id="dh-c1"><h4><span class="no">1</span><span lang="vi">Cặp khoá của Alice</span><span lang="en">Alice's key pair</span><span class="who">Alice</span></h4><div class="fld"><div class="fld-head"><label for="dh-da"><span lang="vi">d_A (hex)</span><span lang="en">d_A (hex)</span></label> <label class="chk"><input type="checkbox" id="dh-da-rnd" checked/><span lang="vi">ngẫu nhiên</span><span lang="en">random</span></label><span class="cnt" id="dh-da-cnt"></span></div><textarea id="dh-da" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="dh-da-tools"></div></div>
+<div class="row"><button class="btn sm" id="dh-gen-a" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate</span></button></div><div class="two"><div class="fld"><div class="fld-head"><label for="dh-qax"><span lang="vi">Q_A.x</span><span lang="en">Q_A.x</span></label><span class="cnt" id="dh-qax-cnt"></span></div><textarea id="dh-qax" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="dh-qax-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="dh-qay"><span lang="vi">Q_A.y</span><span lang="en">Q_A.y</span></label><span class="cnt" id="dh-qay-cnt"></span></div><textarea id="dh-qay" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="dh-qay-tools"></div></div>
+</div></section>
+<section class="card send" id="dh-c2"><h4><span class="no">1</span><span lang="vi">Cặp khoá của Bob</span><span lang="en">Bob's key pair</span><span class="who">Bob</span></h4><div class="fld"><div class="fld-head"><label for="dh-db"><span lang="vi">d_B (hex)</span><span lang="en">d_B (hex)</span></label> <label class="chk"><input type="checkbox" id="dh-db-rnd" checked/><span lang="vi">ngẫu nhiên</span><span lang="en">random</span></label><span class="cnt" id="dh-db-cnt"></span></div><textarea id="dh-db" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="dh-db-tools"></div></div>
+<div class="row"><button class="btn sm" id="dh-gen-b" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate</span></button></div><div class="two"><div class="fld"><div class="fld-head"><label for="dh-qbx"><span lang="vi">Q_B.x</span><span lang="en">Q_B.x</span></label><span class="cnt" id="dh-qbx-cnt"></span></div><textarea id="dh-qbx" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="dh-qbx-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="dh-qby"><span lang="vi">Q_B.y</span><span lang="en">Q_B.y</span></label><span class="cnt" id="dh-qby-cnt"></span></div><textarea id="dh-qby" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="dh-qby-tools"></div></div>
+</div></section>
+<div class="arrow" id="dh-arrow"><span class="lbl"><span class="no">2</span><span lang="vi">trao đổi Q_A ⇄ Q_B (công khai)</span><span lang="en">exchange Q_A ⇄ Q_B (public)</span></span></div>
+<section class="card full" id="dh-c3"><h4><span class="no">3</span><span lang="vi">Mỗi bên kiểm tra khoá bên kia rồi tính Z</span><span lang="en">Each side validates the other's key, then computes Z</span></h4><div class="row"><button class="btn" id="dh-compute" type="button"><span lang="vi">Trao đổi và tính Z</span><span lang="en">Exchange and compute Z</span></button><button class="btn ghost" id="dh-break" type="button"><span lang="vi">Làm hỏng Q_B (y + 1)</span><span lang="en">Corrupt Q_B (y + 1)</span></button></div><div class="two"><div class="fld"><div class="fld-head"><label for="dh-za"><span lang="vi">Z của Alice = x(d_A·Q_B)</span><span lang="en">Alice's Z = x(d_A·Q_B)</span></label><span class="cnt" id="dh-za-cnt"></span></div><textarea id="dh-za" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="dh-za-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="dh-zb"><span lang="vi">Z của Bob = x(d_B·Q_A)</span><span lang="en">Bob's Z = x(d_B·Q_A)</span></label><span class="cnt" id="dh-zb-cnt"></span></div><textarea id="dh-zb" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="dh-zb-tools"></div></div>
+</div></section>
+</div>
+<div class="trace" id="dh-trace" hidden></div><div class="result info" id="dh-result"></div>
+<div class="exl"><span lang="vi">Ví dụ NIST (Alice = IUT với d_IUT, Bob = khoá công khai của CAVS / server; so Q_IUT và Z)</span><span lang="en">NIST examples (Alice = IUT with d_IUT, Bob = the CAVS / server public key; Q_IUT and Z compared)</span></div><div class="exrow" id="dh-ex"></div>
+</section>
+<section class="panel" id="panel-sg" role="tabpanel" aria-labelledby="tab-sg" hidden>
+<p class="hint"><span lang="vi">FIPS 186-5, mục 6.4.1. Hàm băm SHA-2 (FIPS 180-4) và SHA-3 (FIPS 202) như trong ACVP ECDSA-SigGen. k: ngẫu nhiên; tất định RFC 6979 (so được với ACVP DetECDSA-SigGen và RFC 6979 A.2.5); hoặc cho trước (file CAVS SigGen.txt liệt kê k nên so được r, s). P-192 bị từ chối ở thẻ này - xem lý do ở phần hiện trạng.</span><span lang="en">FIPS 186-5, section 6.4.1. SHA-2 (FIPS 180-4) and SHA-3 (FIPS 202) hash functions as in ACVP ECDSA-SigGen. k: random; deterministic RFC 6979 (comparable with ACVP DetECDSA-SigGen and RFC 6979 A.2.5); or given (CAVS SigGen.txt lists k, so r, s can be compared). P-192 is refused in this tab - see the status section for the reason.</span></p>
+<div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Đường cong</span><span lang="en">Curve</span></span><label class="chip"><input type="radio" name="sg-curve" value="P-192"/><span>P-192</span></label><label class="chip"><input type="radio" name="sg-curve" value="P-224"/><span>P-224</span></label><label class="chip"><input type="radio" name="sg-curve" value="P-256" checked/><span>P-256</span></label><label class="chip"><input type="radio" name="sg-curve" value="P-384"/><span>P-384</span></label><label class="chip"><input type="radio" name="sg-curve" value="P-521"/><span>P-521</span></label></div>
+</div><div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Hàm băm</span><span lang="en">Hash</span></span><label class="chip"><input type="radio" name="sg-hash" value="SHA2-224"/><span>SHA-224</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA2-256" checked/><span>SHA-256</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA2-384"/><span>SHA-384</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA2-512"/><span>SHA-512</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA2-512/224"/><span>SHA-512/224</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA2-512/256"/><span>SHA-512/256</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA3-224"/><span>SHA3-224</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA3-256"/><span>SHA3-256</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA3-384"/><span>SHA3-384</span></label><label class="chip"><input type="radio" name="sg-hash" value="SHA3-512"/><span>SHA3-512</span></label></div>
+</div>
+<div class="fld"><div class="fld-head"><label for="sg-d"><span lang="vi">Khoá riêng d (hex)</span><span lang="en">Private key d (hex)</span></label> <label class="chk"><input type="checkbox" id="sg-d-rnd" checked/><span lang="vi">d ngẫu nhiên</span><span lang="en">random d</span></label><span class="cnt" id="sg-d-cnt"></span></div><textarea id="sg-d" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sg-d-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="sg-msg"><span lang="vi">Thông điệp M</span><span lang="en">Message M</span></label><span class="cnt" id="sg-msg-cnt"></span></div><textarea id="sg-msg" rows="3" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sg-msg-tools"></div></div>
+<div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Số k</span><span lang="en">Nonce k</span></span><label class="chip"><input type="radio" name="sg-kmode" value="random" checked/><span><span lang="vi">k ngẫu nhiên</span><span lang="en">random k</span></span></label><label class="chip"><input type="radio" name="sg-kmode" value="det"/><span><span lang="vi">k tất định (RFC 6979)</span><span lang="en">deterministic k (RFC 6979)</span></span></label><label class="chip"><input type="radio" name="sg-kmode" value="given"/><span><span lang="vi">k cho trước</span><span lang="en">given k</span></span></label></div>
+</div>
+<div id="sg-k-wrap"><div class="fld"><div class="fld-head"><label for="sg-k"><span lang="vi">k (hex) — chỉ nhập khi chọn "k cho trước"</span><span lang="en">k (hex) — editable only with "given k"</span></label><span class="cnt" id="sg-k-cnt"></span></div><textarea id="sg-k" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sg-k-tools"></div></div>
+</div>
+<div class="row"><button class="btn" id="sg-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button><button class="btn ghost" id="sg-to-verify" type="button"><span lang="vi">Đưa sang thẻ Xác minh</span><span lang="en">Send to the Verify tab</span></button></div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="sg-r"><span lang="vi">r</span><span lang="en">r</span></label><span class="cnt" id="sg-r-cnt"></span></div><textarea id="sg-r" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="sg-r-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="sg-s"><span lang="vi">s</span><span lang="en">s</span></label><span class="cnt" id="sg-s-cnt"></span></div><textarea id="sg-s" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="sg-s-tools"></div></div>
+</div>
+<div class="trace" id="sg-trace" hidden></div><div class="result info" id="sg-result"></div>
+<div class="exl"><span lang="vi">Ví dụ NIST và RFC (CAVS SigGen.txt với k cho trước; ACVP DetECDSA và RFC 6979 A.2.5 với k tất định)</span><span lang="en">NIST and RFC examples (CAVS SigGen.txt with a given k; ACVP DetECDSA and RFC 6979 A.2.5 with a deterministic k)</span></div><div class="exrow" id="sg-ex"></div>
+</section>
+<section class="panel" id="panel-sv" role="tabpanel" aria-labelledby="tab-sv" hidden>
+<p class="hint"><span lang="vi">FIPS 186-5, mục 6.4.2 - CAVS SigVer.rsp và ACVP ECDSA-SigVer. Kết quả là hợp lệ / không hợp lệ kèm lý do: r hoặc s ngoài [1, n − 1], Q không hợp lệ, hoặc x(R′) mod n ≠ r. File SigVer của NIST ghi chú đã đổi gì ở mỗi ca F (thông điệp, R, S hay Q) - dòng ấy được hiện lại cạnh kết quả. P-192 được phép ở đây (xác minh chữ ký cũ).</span><span lang="en">FIPS 186-5, section 6.4.2 - CAVS SigVer.rsp and ACVP ECDSA-SigVer. The result is valid / invalid with the reason: r or s outside [1, n − 1], an invalid Q, or x(R′) mod n ≠ r. NIST's SigVer file notes what was changed in each F case (message, R, S or Q) - that line is shown next to the result. P-192 is allowed here (verifying old signatures).</span></p>
+<div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Đường cong</span><span lang="en">Curve</span></span><label class="chip"><input type="radio" name="sv-curve" value="P-192"/><span>P-192</span></label><label class="chip"><input type="radio" name="sv-curve" value="P-224"/><span>P-224</span></label><label class="chip"><input type="radio" name="sv-curve" value="P-256" checked/><span>P-256</span></label><label class="chip"><input type="radio" name="sv-curve" value="P-384"/><span>P-384</span></label><label class="chip"><input type="radio" name="sv-curve" value="P-521"/><span>P-521</span></label></div>
+</div><div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Hàm băm</span><span lang="en">Hash</span></span><label class="chip"><input type="radio" name="sv-hash" value="SHA2-224"/><span>SHA-224</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA2-256" checked/><span>SHA-256</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA2-384"/><span>SHA-384</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA2-512"/><span>SHA-512</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA2-512/224"/><span>SHA-512/224</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA2-512/256"/><span>SHA-512/256</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA3-224"/><span>SHA3-224</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA3-256"/><span>SHA3-256</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA3-384"/><span>SHA3-384</span></label><label class="chip"><input type="radio" name="sv-hash" value="SHA3-512"/><span>SHA3-512</span></label></div>
+</div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="sv-qx"><span lang="vi">Q.x (hex)</span><span lang="en">Q.x (hex)</span></label><span class="cnt" id="sv-qx-cnt"></span></div><textarea id="sv-qx" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sv-qx-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="sv-qy"><span lang="vi">Q.y (hex)</span><span lang="en">Q.y (hex)</span></label><span class="cnt" id="sv-qy-cnt"></span></div><textarea id="sv-qy" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sv-qy-tools"></div></div>
+</div>
+<div class="fld"><div class="fld-head"><label for="sv-msg"><span lang="vi">Thông điệp M</span><span lang="en">Message M</span></label><span class="cnt" id="sv-msg-cnt"></span></div><textarea id="sv-msg" rows="3" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sv-msg-tools"></div></div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="sv-r"><span lang="vi">r (hex)</span><span lang="en">r (hex)</span></label><span class="cnt" id="sv-r-cnt"></span></div><textarea id="sv-r" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sv-r-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="sv-s"><span lang="vi">s (hex)</span><span lang="en">s (hex)</span></label><span class="cnt" id="sv-s-cnt"></span></div><textarea id="sv-s" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sv-s-tools"></div></div>
+</div>
+<div class="row"><button class="btn" id="sv-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button><button class="btn ghost" id="sv-flip" type="button"><span lang="vi">Lật 1 bit của thông điệp rồi xác minh</span><span lang="en">Flip one message bit, then verify</span></button></div>
+<div class="trace" id="sv-trace" hidden></div><div class="result info" id="sv-result"></div>
+<div class="exl"><span lang="vi">Ví dụ NIST (P = hợp lệ; F = không hợp lệ, với ghi chú của NIST về chỗ đã đổi)</span><span lang="en">NIST examples (P = valid; F = invalid, with NIST's note on what was changed)</span></div><div class="exrow" id="sv-ex"></div>
+</section>
+<section class="panel" id="panel-at" role="tabpanel" aria-labelledby="tab-at" hidden>
+<p class="hint"><span lang="vi">Hai chữ ký ECDSA dùng cùng k thì có cùng r, và hai phương trình s₁ = k⁻¹(e₁ + d·r), s₂ = k⁻¹(e₂ + d·r) đủ để giải ra k rồi d. Thẻ này ký hai thông điệp với cùng k (lỗi cố ý), khôi phục d và kiểm lại bằng d·G = Q. Nút thứ ba cho thấy chỉ cần lộ k của một chữ ký cũng đủ. Hàm băm: SHA-256.</span><span lang="en">Two ECDSA signatures that use the same k share r, and the two equations s₁ = k⁻¹(e₁ + d·r), s₂ = k⁻¹(e₂ + d·r) are enough to solve for k and then d. This tab signs two messages with the same k (a deliberate flaw), recovers d and checks it with d·G = Q. The third button shows that one leaked k of a single signature is enough too. Hash: SHA-256.</span></p>
+<div class="bar"><div class="chips"><span class="chips-l"><span lang="vi">Đường cong</span><span lang="en">Curve</span></span><label class="chip"><input type="radio" name="at-curve" value="P-192"/><span>P-192</span></label><label class="chip"><input type="radio" name="at-curve" value="P-224"/><span>P-224</span></label><label class="chip"><input type="radio" name="at-curve" value="P-256" checked/><span>P-256</span></label><label class="chip"><input type="radio" name="at-curve" value="P-384"/><span>P-384</span></label><label class="chip"><input type="radio" name="at-curve" value="P-521"/><span>P-521</span></label></div>
+</div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="at-d"><span lang="vi">Khoá riêng d (hex)</span><span lang="en">Private key d (hex)</span></label> <label class="chk"><input type="checkbox" id="at-d-rnd" checked/><span lang="vi">ngẫu nhiên</span><span lang="en">random</span></label><span class="cnt" id="at-d-cnt"></span></div><textarea id="at-d" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="at-d-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="at-k"><span lang="vi">k dùng chung (hex)</span><span lang="en">shared k (hex)</span></label> <label class="chk"><input type="checkbox" id="at-k-rnd" checked/><span lang="vi">ngẫu nhiên</span><span lang="en">random</span></label><span class="cnt" id="at-k-cnt"></span></div><textarea id="at-k" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="at-k-tools"></div></div>
+</div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="at-m1"><span lang="vi">Thông điệp 1</span><span lang="en">Message 1</span></label><span class="cnt" id="at-m1-cnt"></span></div><textarea id="at-m1" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="at-m1-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="at-m2"><span lang="vi">Thông điệp 2</span><span lang="en">Message 2</span></label><span class="cnt" id="at-m2-cnt"></span></div><textarea id="at-m2" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="at-m2-tools"></div></div>
+</div>
+<div class="row"><button class="btn" id="at-sign" type="button"><span lang="vi">Ký hai thông điệp với cùng k</span><span lang="en">Sign two messages with the same k</span></button><button class="btn ghost" id="at-ex" type="button"><span lang="vi">Ví dụ từ CAVS SigGen.txt (P-256)</span><span lang="en">Example from CAVS SigGen.txt (P-256)</span></button></div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="at-qx"><span lang="vi">Q.x (công khai)</span><span lang="en">Q.x (public)</span></label><span class="cnt" id="at-qx-cnt"></span></div><textarea id="at-qx" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-qx-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="at-qy"><span lang="vi">Q.y (công khai)</span><span lang="en">Q.y (public)</span></label><span class="cnt" id="at-qy-cnt"></span></div><textarea id="at-qy" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-qy-tools"></div></div>
+</div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="at-r1"><span lang="vi">r₁</span><span lang="en">r₁</span></label><span class="cnt" id="at-r1-cnt"></span></div><textarea id="at-r1" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-r1-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="at-s1"><span lang="vi">s₁</span><span lang="en">s₁</span></label><span class="cnt" id="at-s1-cnt"></span></div><textarea id="at-s1" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-s1-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="at-r2"><span lang="vi">r₂</span><span lang="en">r₂</span></label><span class="cnt" id="at-r2-cnt"></span></div><textarea id="at-r2" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-r2-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="at-s2"><span lang="vi">s₂</span><span lang="en">s₂</span></label><span class="cnt" id="at-s2-cnt"></span></div><textarea id="at-s2" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-s2-tools"></div></div>
+</div>
+<div class="row"><button class="btn" id="at-recover" type="button"><span lang="vi">Khôi phục d từ hai chữ ký</span><span lang="en">Recover d from the two signatures</span></button><button class="btn ghost" id="at-leak" type="button"><span lang="vi">Khôi phục d từ k bị lộ (một chữ ký)</span><span lang="en">Recover d from a leaked k (one signature)</span></button></div>
+<div class="two"><div class="fld"><div class="fld-head"><label for="at-d2"><span lang="vi">d khôi phục từ hai chữ ký</span><span lang="en">d recovered from two signatures</span></label><span class="cnt" id="at-d2-cnt"></span></div><textarea id="at-d2" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-d2-tools"></div></div>
+<div class="fld"><div class="fld-head"><label for="at-d3"><span lang="vi">d khôi phục từ k bị lộ</span><span lang="en">d recovered from the leaked k</span></label><span class="cnt" id="at-d3-cnt"></span></div><textarea id="at-d3" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="at-d3-tools"></div></div>
+</div>
+<div class="trace" id="at-trace" hidden></div><div class="result info" id="at-result"></div>
+</section>
+<h2><span lang="vi">Các trường hợp NIST kiểm</span><span lang="en">What NIST's tests check</span></h2>
+<div class="tbl-wrap"><table><thead><tr><th><span lang="vi">Thẻ</span><span lang="en">Tab</span></th><th><span lang="vi">Tên của NIST</span><span lang="en">NIST's name</span></th><th><span lang="vi">Trang này làm gì</span><span lang="en">What the lab does</span></th><th><span lang="vi">Qua được chứng tỏ</span><span lang="en">A pass proves</span></th><th><span lang="vi">Không chứng tỏ</span><span lang="en">It does not prove</span></th></tr></thead><tbody>
+<tr><td><span lang="vi">Sinh cặp khoá</span><span lang="en">Key pair</span></td><td data-i18n="neutral">CAVS KeyPair.rsp · ACVP ECDSA-KeyGen-FIPS186-5</td><td><span lang="vi">Q = d·G từ d cho trước; sinh d theo A.2.1 / A.2.2</span><span lang="en">Q = d·G from a given d; d generated by A.2.1 / A.2.2</span></td><td><span lang="vi">nhân vô hướng và hằng số đường cong đúng</span><span lang="en">scalar multiplication and curve constants are right</span></td><td><span lang="vi">chất lượng của nguồn ngẫu nhiên sinh d</span><span lang="en">the quality of the randomness behind d</span></td></tr>
+<tr><td><span lang="vi">Kiểm tra khoá công khai</span><span lang="en">Public-key validation</span></td><td data-i18n="neutral">CAVS PKV.rsp · ACVP ECDSA-KeyVer-FIPS186-5</td><td><span lang="vi">bốn bước của 5.6.2.3.3, trả về bước hỏng</span><span lang="en">the four steps of 5.6.2.3.3, reporting the failing step</span></td><td><span lang="vi">điểm ngoài phạm vi / ngoài đường cong bị từ chối</span><span lang="en">out-of-range / off-curve points are refused</span></td><td><span lang="vi">bước n·Q = O trên đường cong h = 1 (mọi điểm hợp lệ đều qua)</span><span lang="en">the n·Q = O step on h = 1 curves (every valid point passes it)</span></td></tr>
+<tr><td><span lang="vi">ECDH</span><span lang="en">ECDH</span></td><td data-i18n="neutral">CAVS KAS_ECC_CDH_PrimitiveTest.txt · ACVP KAS-ECC-CDH-Component-Sp800-56Ar3</td><td><span lang="vi">Z = x(d·Q_peer) và Q_IUT = d·G</span><span lang="en">Z = x(d·Q_peer) and Q_IUT = d·G</span></td><td><span lang="vi">nguyên thuỷ CDH đúng trên cả năm đường cong</span><span lang="en">the CDH primitive is right on all five curves</span></td><td><span lang="vi">hàm dẫn xuất khoá, xác thực hai bên (SP 800-56A lược đồ đầy đủ)</span><span lang="en">key derivation, authentication of the parties (full SP 800-56A schemes)</span></td></tr>
+<tr><td><span lang="vi">Ký ECDSA</span><span lang="en">ECDSA sign</span></td><td data-i18n="neutral">CAVS SigGen.txt · ACVP ECDSA-SigGen-FIPS186-5 · ACVP DetECDSA-SigGen-FIPS186-5</td><td><span lang="vi">(r, s) từ d, M, k cho trước; k tất định RFC 6979</span><span lang="en">(r, s) from given d, M, k; deterministic k per RFC 6979</span></td><td><span lang="vi">bits2int, k⁻¹, công thức s, HMAC_DRBG của RFC 6979</span><span lang="en">bits2int, k⁻¹, the s formula, RFC 6979's HMAC_DRBG</span></td><td><span lang="vi">tính ngẫu nhiên của k khi k do bạn sinh; kênh bên</span><span lang="en">the randomness of k when you generate it; side channels</span></td></tr>
+<tr><td><span lang="vi">Xác minh ECDSA</span><span lang="en">ECDSA verify</span></td><td data-i18n="neutral">CAVS SigVer.rsp · ACVP ECDSA-SigVer-FIPS186-5</td><td><span lang="vi">hợp lệ / không hợp lệ với lý do, kể cả ca sửa thông điệp / r / s / Q và r = 0, s = 0</span><span lang="en">valid / invalid with the reason, incl. modified message / r / s / Q and r = 0, s = 0</span></td><td><span lang="vi">mọi nhánh từ chối hoạt động</span><span lang="en">every rejection branch works</span></td><td><span lang="vi">tấn công sai dạng mã hoá (DER - cách mã hoá nhị phân của chữ ký trong chứng chỉ và giao thức), hành vi với Q không hợp lệ ngoài hai ca của file</span><span lang="en">encoding malleability (DER - the binary encoding of a signature in certificates and protocols), behaviour on invalid Q beyond the file's two cases</span></td></tr>
+<tr><td><span lang="vi">Tấn công nonce</span><span lang="en">Nonce attacks</span></td><td><span lang="vi">— (không có trong CAVP / ACVP; dựa trên bản ghi CAVS SigGen.txt)</span><span lang="en">— (not in CAVP / ACVP; built on a CAVS SigGen.txt record)</span></td><td><span lang="vi">khôi phục d từ hai chữ ký cùng k; từ k bị lộ</span><span lang="en">recover d from two signatures with the same k; from a leaked k</span></td><td><span lang="vi">đại số của ECDSA đúng như lý thuyết</span><span lang="en">the algebra of ECDSA behaves as the theory says</span></td><td><span lang="vi">tấn công k lệch vài bit (cần lưới) - ngoài phạm vi trang</span><span lang="en">biased-k attacks (lattice based) - out of this page's scope</span></td></tr>
+</tbody></table></div>
+<h2><span lang="vi">Mã này có đáng tin không</span><span lang="en">Can this code be trusted</span></h2>
+<p lang="vi">Phần tính toán là JavaScript tôi viết từ các văn bản chuẩn (SP 800-186, FIPS 186-5, SP 800-56A r3, RFC 6979), không thư viện ngoài, dùng BigInt. Để chứng minh nó:</p><p lang="en">The computations are JavaScript I wrote from the standards (SP 800-186, FIPS 186-5, SP 800-56A r3, RFC 6979), with no external library, using BigInt. To prove it:</p>
+<ul lang="vi">
+  <li>So với ba nguồn độc lập: các file CAVP / ACVP của NIST (KeyPair, PKV, KAS ECC CDH, SigGen, DetECDSA, SigVer, KeyGen, KeyVer, CDH-Component), một mô hình tham chiếu Python viết từ chuẩn, và thư viện mật mã của Node.js (OpenSSL) trên cùng năm đường cong: <span data-i18n="neutral">1&#8239;676</span> phép so, tất cả khớp. Ba hình cũng có kiểm: số điểm đếm bằng vét cạn, đường Hasse, quỹ đạo về O sau đúng ord(G) bước, hai thuật toán nhân vô hướng ra cùng điểm, λ / x₃ / y₃ trên số thực.</li>
+  <li>Cho một trình duyệt giả lập bấm qua mọi thẻ, mọi nút ví dụ và cả ba hình - <span data-i18n="neutral">165</span> phép kiểm - và sau mỗi cú bấm soát xem có câu nào chỉ có một ngôn ngữ không; cũng cố tình đổi một đáp án trong bộ vector và đòi nút ví dụ lẫn nút kiểm chứng phải báo đúng chỗ sai.</li>
+  <li>Cố tình làm hỏng mã <span data-i18n="neutral">37</span> lần (luật nhóm, lý do kiểm tra khoá, bits2int, RFC 6979, lý do xác minh, λ của hình, dây nối giao diện) và đòi bộ kiểm phải đỏ: <span data-i18n="neutral">37</span> lần đỏ. Lượt đầu còn một lần xanh: thay đổi "A.2.2 nhận c = n − 1" không bị bắt vì bộ kiểm chưa thử đúng ranh giới ấy - đã thêm ca c = n − 2 (nhận) và c = n − 1 (loại) vào oracle, rồi lần đó đỏ.</li>
+  <li>Nút "Chạy kiểm chứng" ở đầu trang lặp lại các phép so với vector NIST mà trang mang theo, ngay trong máy bạn.</li>
+</ul>
+<ul lang="en">
+  <li>Compared with three independent sources: NIST's CAVP / ACVP files (KeyPair, PKV, KAS ECC CDH, SigGen, DetECDSA, SigVer, KeyGen, KeyVer, CDH-Component), a Python reference model written from the standards, and Node.js's crypto library (OpenSSL) on the same five curves: <span data-i18n="neutral">1&#8239;676</span> comparisons, all matching. The three figures are tested too: point counts by brute force, the Hasse bounds, the orbit returning to O after exactly ord(G) steps, both scalar-multiplication algorithms giving the same point, λ / x₃ / y₃ over the reals.</li>
+  <li>Had a simulated browser click through every tab, every example button and all three figures - <span data-i18n="neutral">165</span> checks - and, after every click, look for any sentence present in one language only; also planted one wrong answer in the vector set and required both the example button and the self-test to report exactly that mismatch.</li>
+  <li>Broke the code on purpose <span data-i18n="neutral">37</span> times (group law, validation reasons, bits2int, RFC 6979, verification reasons, the figure's λ, UI wiring) and required the tests to go red: <span data-i18n="neutral">37</span> went red. The first run left one green: the change "A.2.2 accepts c = n − 1" was not caught because the tests never tried that exact boundary - the cases c = n − 2 (accepted) and c = n − 1 (rejected) were added to the oracle, and then it went red too.</li>
+  <li>The "Run the self-test" button at the top repeats the comparisons with the NIST vectors the page carries, on your machine.</li>
+</ul>
+<div class="callout"><span lang="vi"><strong>Đừng dùng mã này để bảo vệ thứ gì thật.</strong> Nó viết cho việc học: BigInt của JavaScript không chạy đều thời gian (thời gian phụ thuộc giá trị của d và k - đúng loại rò rỉ mà góc phần cứng ở trên cảnh báo), khoá nằm trong bộ nhớ của trang, và không có che chắn kênh bên hay lỗi tiêm nào.</span><span lang="en"><strong>Do not protect anything real with this code.</strong> It is written for learning: JavaScript's BigInt is not constant-time (its timing depends on the values of d and k - exactly the leakage the hardware angle above warns about), keys live in the page's memory, and there is no side-channel or fault countermeasure at all.</span></div>
+<h2><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/186/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-186, Recommendations for Discrete Logarithm-based Cryptography: Elliptic Curve Domain Parameters</a> — 02/2023.</li>
+  <li><a href="https://csrc.nist.gov/pubs/fips/186-5/final" target="_blank" rel="noopener" data-i18n="neutral">NIST FIPS 186-5, Digital Signature Standard (DSS)</a> — 02/2023; <span lang="vi">ECDSA (mục 6), sinh khoá (A.2), nonce tất định (6.3.2).</span><span lang="en">ECDSA (section 6), key generation (A.2), deterministic nonce (6.3.2).</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/56/a/r3/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-56A Rev. 3, Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm Cryptography</a> — 04/2018; <span lang="vi">kiểm tra khoá công khai (5.6.2.3.3), ECC CDH (5.7.1.2).</span><span lang="en">public-key validation (5.6.2.3.3), ECC CDH (5.7.1.2).</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/131/a/r2/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-131A Rev. 2, Transitioning the Use of Cryptographic Algorithms and Key Lengths</a> — 03/2019.</li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-57 Part 1 Rev. 5, Recommendation for Key Management</a> — <span lang="vi">bảng 2: độ an toàn theo kích thước khoá.</span><span lang="en">table 2: security strength by key size.</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/ir/8547/final" target="_blank" rel="noopener" data-i18n="neutral">NIST IR 8547, Transition to Post-Quantum Cryptography Standards</a> — 10/2026 <span lang="vi">(bản cuối; bảng 2 và 4: lộ trình của ECDSA và ECDH).</span><span lang="en">(final; tables 2 and 4: the ECDSA and ECDH timeline).</span></li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc6979" target="_blank" rel="noopener" data-i18n="neutral">RFC 6979, Deterministic Usage of DSA and ECDSA</a> — <span lang="vi">phụ lục A.2.5 là vector P-256 mà trang dùng.</span><span lang="en">appendix A.2.5 is the P-256 vector the page uses.</span></li>
+  <li><a href="https://www.secg.org/sec1-v2.pdf" target="_blank" rel="noopener" data-i18n="neutral">SEC 1 v2.0, Elliptic Curve Cryptography (Certicom Research, 2009)</a> — <span lang="vi">luật nhóm, nén điểm, ECDSA / ECDH ở dạng công nghiệp.</span><span lang="en">group law, point compression, ECDSA / ECDH in their industry form.</span></li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener" data-i18n="neutral">RFC 8446, TLS 1.3</a> — <span lang="vi">nơi P-256 / P-384 / P-521 được dùng mỗi ngày (secp256r1 …).</span><span lang="en">where P-256 / P-384 / P-521 are used every day (secp256r1 …).</span></li>
+  <li><a href="https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program" target="_blank" rel="noopener" data-i18n="neutral">NIST CAVP</a> · <a href="https://pages.nist.gov/ACVP/" target="_blank" rel="noopener" data-i18n="neutral">ACVP</a> — <span lang="vi">các chương trình kiểm định mà tên các file vector trên trang này lấy từ đó.</span><span lang="en">the validation programmes the vector-file names on this page come from.</span></li>
+  <li><a href="pqc-calculator.html" data-i18n="neutral">ML-KEM &amp; ML-DSA</a> · <a href="nist-205-206-207-calculator.html" data-i18n="neutral">SLH-DSA, FN-DSA &amp; HQC-KEM</a> — <span lang="vi">các máy tính hậu lượng tử trên trang này - người kế nhiệm của ECDH / ECDSA.</span><span lang="en">this site's post-quantum calculators - the successors of ECDH / ECDSA.</span></li>
+</ul>
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">← PQC, AI &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<script src="assets/pqc-sha2.js"></script>
+<script src="assets/pqc-mlkem.js"></script>
+<script src="assets/ec-core.js"></script>
+<script src="assets/ec-plot.js"></script>
+<script src="assets/ec-vectors.js"></script>
+<script src="assets/ec-ui.js"></script>
+
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -204,7 +204,7 @@ footer{
 .sim .no{ display:inline-flex; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-size:.78em; font-weight:800; align-items:center; justify-content:center; flex:none; }
 .sim-row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 10px; }
 .sim-l{ font-size:.74rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-right:4px; }
-.sim .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.88em; word-break:break-all; }
+.sim .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.88em; word-break:normal; overflow-wrap:anywhere; }
 .bits{ display:flex; gap:4px; flex-wrap:wrap; margin:4px 0 8px; }
 .bits.grid{ display:grid; grid-template-columns:repeat(13,34px); gap:4px; }
 .bitc{ display:flex; flex-direction:column; align-items:center; gap:1px; font-size:.66em; line-height:1.3; color:var(--muted); font-weight:700; }
@@ -227,6 +227,41 @@ footer{
 .verdict.warn{ background:#fff4df; border-color:rgba(229,159,26,.45); }
 #sd-st.ok{ color:#1b6b4a; font-weight:700; } #sd-st.bad{ color:#b23b3b; font-weight:700; }
 @media(max-width:560px){ .bit{ width:22px; height:24px; font-size:.8rem; border-radius:6px; } .bits{ gap:3px; } .bits.grid{ grid-template-columns:repeat(13,22px); gap:3px; } .bitc{ font-size:.58em; } }
+/* ===== Hamming (ma trận kiểm) và BCH (ba khâu giải mã, vách đá) ===== */
+.mx-wrap{ overflow-x:auto; margin:4px 0 8px; }
+table.hmx{ border-collapse:separate; border-spacing:3px; width:auto; min-width:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.8em; }
+table.hmx th, table.hmx td{ border:0; padding:0; width:26px; min-width:26px; height:24px; text-align:center; vertical-align:middle; border-radius:5px; line-height:24px; }
+table.hmx th{ background:none; color:var(--muted); font-weight:700; }
+table.hmx th.rl{ width:auto; text-align:right; padding-right:6px; white-space:nowrap; font-family:"Inter",Arial,sans-serif; font-size:.95em; }
+table.hmx td.rv{ background:#f7f8fa; border:1px solid rgba(31,41,55,.15); font-weight:800; }
+table.hmx td.cv{ background:#dfe8f5; color:var(--accent); font-weight:800; box-shadow:inset 0 0 0 1px rgba(20,83,143,.35); }
+table.hmx .cf{ background:#fde9c8; color:#9a5b00; }
+table.hmx td.cv.cf{ background:#f8d49a; }
+table.hmx th.cs{ box-shadow:inset 0 0 0 2px #2a9d6f; color:#1b6b4a; }
+table.hmx th.cs.bad{ box-shadow:inset 0 0 0 2px #c83c3c; color:#b23b3b; }
+table.hmx td.res{ width:44px; font-weight:800; font-family:"Inter",Arial,sans-serif; }
+table.hmx td.res.ok{ background:#e6f6ee; color:#1b6b4a; } table.hmx td.res.bad{ background:#fdeaea; color:#b23b3b; }
+.legend i.cv{ background:#dfe8f5; border-color:rgba(20,83,143,.35); } .legend i.pick{ background:#fff; border:2px solid #2a9d6f; } .legend i.pick.bad{ border-color:#c83c3c; }
+.legend i.bad{ background:#fdeaea; border-color:#c83c3c; }
+.stage{ display:flex; gap:8px; align-items:baseline; font-size:.86em; font-weight:700; color:var(--text); margin:10px 0 4px; }
+.stage-n{ color:var(--accent); }
+.gfb{ color:var(--muted); font-size:.9em; margin-left:4px; }
+.gfv{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:30px; border-radius:7px; border:1px solid rgba(31,41,55,.15); background:#f7f8fa; color:var(--text); font-size:1.32em; font-weight:700; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+.gfv.root{ background:#dcf3e6; border-color:#2a9d6f; color:#1b6b4a; } .gfv.root.bad{ background:#fdeaea; border-color:#c83c3c; color:#b23b3b; } .gfv.miss{ background:#fde9c8; border-color:#e59f1a; }
+details.gf{ margin:8px 0 2px; font-size:.86em; } details.gf summary{ cursor:pointer; color:var(--accent); font-weight:700; }
+.gf-grid{ display:flex; flex-wrap:wrap; gap:4px 12px; margin:8px 0 6px; }
+.gfe b{ color:var(--accent); }
+table.cliff{ width:auto; min-width:0; font-size:.84em; font-variant-numeric:tabular-nums; }
+table.cliff th, table.cliff td{ padding:4px 10px; text-align:right; }
+table.cliff th{ font-size:.92em; }
+table.cliff td.g{ color:#1b6b4a; } table.cliff td.a{ color:#9a5b00; } table.cliff td.r{ color:#b23b3b; }
+table.cliff tr.edge td{ border-top:2px solid #c83c3c; }
+table.cliff tr.cur td{ background:rgba(20,83,143,.07); font-weight:700; }
+table.cliff td.barc{ width:140px; }
+.bar{ display:flex; width:130px; height:12px; border-radius:6px; overflow:hidden; background:#eef1f5; }
+.bar i{ display:block; height:100%; } .bar i.g{ background:#2a9d6f; } .bar i.a{ background:#e59f1a; } .bar i.r{ background:#c83c3c; }
+.st.ok{ color:#1b6b4a; font-weight:700; } .st.bad{ color:#b23b3b; font-weight:700; }
+@media(max-width:560px){ table.hmx th, table.hmx td{ width:19px; min-width:19px; height:20px; line-height:20px; } table.hmx{ border-spacing:2px; font-size:.72em; } .gfv{ width:22px; height:24px; font-size:1.05em; border-radius:6px; } table.cliff td.barc, .bar{ width:70px; } }
 /* ==== house-format v1 — bilingual-personal-site skill, scripts/house-format.css. Prose is justified on every page.
      Do not edit this block in a page: edit the skill's copy, re-run apply_format.py; check_site.py fails a page whose
      block differs. ==== */
@@ -444,24 +479,76 @@ phân. Khi đó hội chứng đọc ra <strong>chính là số thứ tự của
 <p lang="en">The prettiest trick in this code: put the check bits at positions 1, 2, 4 and 8 — the
 powers of two — and let check bit <em>i</em> cover every position whose index has bit <em>i</em> set.
 The syndrome then reads out as <strong>the number of the broken position itself</strong>:</p>
-<pre lang="vi"><code>dữ liệu D0..D7 = 0 1 0 0 1 1 1 1
-từ mã   (12 bit) = 1 0 0 0 1 0 0 0 1 1 1 1
-nhận được        = 1 0 0 0 0 0 0 0 1 1 1 1     (bit số 5 bị lật)
+<div class="sim" id="sim-ham">
+<h3><span lang="vi">Thử ngay: mã Hamming — hội chứng chỉ thẳng vào ô hỏng</span><span lang="en">Try it: a Hamming code — the syndrome points straight at the broken cell</span></h3>
+<p class="hint"><span lang="vi">Trình mô phỏng mở sẵn đúng ví dụ tính tay: dữ liệu 0 1 0 0 1 1 1 1, bit số 5 bị lật. Bấm ô dữ liệu để
+đổi bit, bấm ô của từ nhận được để gây lỗi hay gỡ lỗi. Bảng ở bước 4 là <em>ma trận kiểm</em>: mỗi hàng là một phép kiểm chẵn lẻ,
+mỗi cột là một vị trí, ô tô xanh là vị trí phép kiểm ấy phụ trách. Cột của ô hỏng có đúng hình dạng các hàng báo ✗ — vì thế hội
+chứng đọc ra chính là số thứ tự của ô ấy.</span><span lang="en">The simulator opens on the hand example: data 0 1 0 0 1 1 1 1, bit 5
+flipped. Click a data cell to change a bit, click a cell of the received word to inject or remove an error. The table in step 4 is
+the <em>parity-check matrix</em>: each row is one parity check, each column one position, and the blue cells are the positions that
+check covers. The broken cell's column has exactly the shape of the rows marked ✗ — which is why the syndrome reads out as that
+cell's number.</span></p>
+<p class="nojs" lang="vi">Trình mô phỏng cần JavaScript.</p>
+<p class="nojs" lang="en">The simulator needs JavaScript.</p>
+<div class="sim-step"><h4><span class="no">1</span><span lang="vi">Chọn mã, rồi đặt dữ liệu</span><span lang="en">Pick a code, then set the data</span></h4>
+  <div class="sim-row chips">
+    <span class="sim-l"><span lang="vi">Mã</span><span lang="en">Code</span></span>
+    <label class="chip"><input type="radio" name="hm-code" value="7,4"><span>(7, 4)</span></label>
+    <label class="chip"><input type="radio" name="hm-code" value="12,8" checked><span>(12, 8) · <span lang="vi">ví dụ trong bài</span><span lang="en">the example</span></span></label>
+    <label class="chip"><input type="radio" name="hm-code" value="15,11"><span>(15, 11)</span></label>
+  </div>
+  <p class="hint" id="hm-rule"></p>
+  <div class="sim-row"><div class="bits" id="hm-data"></div></div>
+  <div class="sim-row">
+    <button type="button" class="btn ghost sm" id="hm-example"><span lang="vi">Ví dụ trong bài</span><span lang="en">The example above</span></button>
+    <button type="button" class="btn ghost sm" id="hm-rand"><span lang="vi">Dữ liệu ngẫu nhiên</span><span lang="en">Random data</span></button>
+  </div>
+</div>
+<div class="sim-step"><h4><span class="no">2</span><span lang="vi">Mã hoá: bit kiểm ở các vị trí 1, 2, 4, 8</span><span lang="en">Encode: check bits at positions 1, 2, 4, 8</span></h4>
+  <div class="legend" data-i18n="neutral"><span><i></i>D0…</span><span><i class="c"></i>C1 · C2 · C4 · C8</span></div>
+  <div class="bits" id="hm-code"></div>
+  <div class="cover" id="hm-cover"></div>
+</div>
+<div class="sim-step"><h4><span class="no">3</span><span lang="vi">Kênh nhiễu: bấm vào một ô để lật bit</span><span lang="en">Noisy channel: click a cell to flip it</span></h4>
+  <div class="bits" id="hm-recv"></div>
+  <div class="sim-row">
+    <button type="button" class="btn ghost sm" id="hm-flip1"><span lang="vi">Lật thêm 1 bit ngẫu nhiên</span><span lang="en">Flip 1 more random bit</span></button>
+    <button type="button" class="btn ghost sm" id="hm-flip2"><span lang="vi">Đúng 2 bit</span><span lang="en">Exactly 2 bits</span></button>
+    <button type="button" class="btn ghost sm" id="hm-clear"><span lang="vi">Xoá lỗi</span><span lang="en">Clear errors</span></button>
+    <span class="hint" id="hm-nerr" style="margin:0"></span>
+  </div>
+</div>
+<div class="sim-step"><h4><span class="no">4</span><span lang="vi">Giải mã: tính lại từng phép kiểm trên từ nhận</span><span lang="en">Decode: redo every check on the received word</span></h4>
+  <div class="mx-wrap" id="hm-matrix"></div>
+  <div class="legend"><span><i class="cv"></i><span lang="vi">phép kiểm phụ trách ô này</span><span lang="en">this check covers the cell</span></span><span><i class="flip"></i><span lang="vi">cột của ô bị lật</span><span lang="en">column of a flipped cell</span></span><span><i class="pick"></i><span lang="vi">ô bộ giải mã lật — đúng ô hỏng</span><span lang="en">the cell the decoder flips — the broken one</span></span><span><i class="pick bad"></i><span lang="vi">… lật nhầm một ô lành</span><span lang="en">… a healthy cell, by mistake</span></span></div>
+  <p class="hint"><span lang="vi">Dấu phẩy trên phân biệt phép kiểm với bit kiểm: C1′ là XOR của chính ô C1 với mọi ô nó phụ trách, tính trên từ <em>nhận được</em> — bằng 0 khi phép kiểm đúng, bằng 1 khi có lỗi trong vùng nó trông.</span><span lang="en">The prime tells a check from a check bit: C1′ is the XOR of cell C1 itself and every cell it covers, computed on the <em>received</em> word — 0 when the check passes, 1 when an error sits in its area.</span></p>
+  <div class="mono" id="hm-syn"></div>
+  <div class="verdict" id="hm-verdict"></div>
+  <div id="hm-out"></div>
+</div>
+<div class="sim-step">
+  <div class="sim-row">
+    <button type="button" class="btn sm" id="hm-selftest"><span lang="vi">Kiểm tra toàn bộ 268 496 trường hợp</span><span lang="en">Check all 268 496 cases</span></button>
+    <span id="hm-st"></span>
+  </div>
+  <p class="hint"><span lang="vi">Cả ba mã × mọi giá trị dữ liệu × mọi mẫu lỗi tới 2 bit: từ có ≤ 1 lỗi phải trở về đúng dữ liệu, từ có
+  2 lỗi ở ô a và b phải cho đúng S = a ⊕ b. Chạy ngay trong máy bạn.</span><span lang="en">All three codes × every data value × every
+  error pattern of up to 2 bits: a word with ≤ 1 error must come back as the right data, a word with 2 errors at cells a and b must give
+  exactly S = a ⊕ b. Runs on your machine.</span></p>
+</div>
+</div>
 
-tính lại 4 phép kiểm  ->  hội chứng = 0101 nhị phân = 5
-                      ->  lật bit số 5  ->  từ mã trở lại nguyên vẹn</code></pre>
-<pre lang="en"><code>data D0..D7      = 0 1 0 0 1 1 1 1
-codeword (12 b)  = 1 0 0 0 1 0 0 0 1 1 1 1
-received         = 1 0 0 0 0 0 0 0 1 1 1 1     (bit 5 flipped)
-
-recompute the 4 parities  ->  syndrome = 0101 binary = 5
-                          ->  flip bit 5  ->  the word is whole again</code></pre>
-<p lang="vi">Thêm một bit kiểm chẵn lẻ trên toàn bộ 12 bit thì <em>d<sub>min</sub></em> lên 4, và ta
-được <strong>SECDED</strong>: sửa được một lỗi, phát hiện được hai lỗi mà không sửa bừa. Đây chính
-là lý do các thanh RAM máy chủ có ECC thường là 64 bit dữ liệu + 8 bit kiểm = 72 bit.</p>
-<p lang="en">Add one more parity bit over all 12 and <em>d<sub>min</sub></em> rises to 4, giving
-<strong>SECDED</strong>: correct one error, detect two without mis-correcting. This is why ECC
-server memory usually comes as 64 data bits + 8 check bits = 72.</p>
+<p lang="vi">Bấm "Đúng 2 bit" ở trên để thấy vì sao còn thiếu một thứ: với hai lỗi ở ô <em>a</em> và
+<em>b</em>, hội chứng là <em>a ⊕ b</em>, và bộ giải mã lật nhầm một ô lành. Thêm một bit kiểm chẵn lẻ
+trên toàn bộ 12 bit thì <em>d<sub>min</sub></em> lên 4, và ta được <strong>SECDED</strong>: sửa được
+một lỗi, phát hiện được hai lỗi mà không sửa bừa. Đây chính là lý do các thanh RAM máy chủ có ECC
+thường là 64 bit dữ liệu + 8 bit kiểm = 72 bit.</p>
+<p lang="en">Press "Exactly 2 bits" above to see what is still missing: with errors at cells <em>a</em>
+and <em>b</em> the syndrome is <em>a ⊕ b</em>, and the decoder flips a healthy cell. Add one more
+parity bit over all 12 and <em>d<sub>min</sub></em> rises to 4, giving <strong>SECDED</strong>:
+correct one error, detect two without mis-correcting. This is why ECC server memory usually comes as
+64 data bits + 8 check bits = 72.</p>
 
 <div class="sim" id="sim-secded">
 <h3><span lang="vi">Thử ngay: mã SECDED (13, 8) trong trình duyệt</span><span lang="en">Try it: the (13, 8) SECDED code in your browser</span></h3>
@@ -514,31 +601,99 @@ errors and watch what the decoder says — and whether it is right.</span></p>
 <h2><span lang="vi">7. Khi cần sửa nhiều bit: BCH và Reed–Solomon</span><span lang="en">7. When more bits must be fixed: BCH and Reed–Solomon</span></h2>
 <p lang="vi">Muốn sửa nhiều hơn một bit, ta phải rời khỏi số học nhị phân thông thường và bước vào
 <strong>trường hữu hạn</strong> — một tập hữu hạn phần tử mà vẫn cộng, trừ, nhân, chia được bình
-thường. Trong đó phép cộng chính là XOR, còn phép nhân thành phép cộng số mũ. Nhờ có phép chia, ta
+thường. Trong các trường GF(2<sup>m</sup>) dùng cho mã nhị phân, phép cộng chính là XOR, còn phép nhân thành phép cộng số mũ. Nhờ có phép chia, ta
 <em>giải</em> được ra vị trí lỗi thay vì phải dò từng bit.</p>
 <p lang="en">To fix more than one bit you must leave ordinary binary arithmetic and step into a
 <strong>finite field</strong> — a finite set of elements where you can still add, subtract, multiply
-and divide. There, addition is simply XOR and multiplication becomes addition of exponents. Because
+and divide. In the GF(2<sup>m</sup>) fields used for binary codes, addition is simply XOR and multiplication becomes addition of exponents. Because
 division exists, you can <em>solve</em> for the error positions instead of searching bit by bit.</p>
 <p lang="vi">Mã <strong>BCH</strong> (đặt theo tên Bose, Ray-Chaudhuri và Hocquenghem, cuối những năm
 1950) được dựng sao cho đa thức sinh có <em>2t</em> nghiệm liên tiếp trong trường ấy, và điều đó bảo
-đảm <em>d<sub>min</sub> ≥ 2t + 1</em> — tức là sửa được <em>t</em> bit. Ví dụ với
-<em>n = 15, t = 2</em>:</p>
+đảm <em>d<sub>min</sub> ≥ 2t + 1</em> — tức là sửa được <em>t</em> bit. Trình mô phỏng dưới đây
+dựng đúng mã ấy với <em>n = 15</em> và để bạn chọn <em>t</em>:</p>
 <p lang="en">A <strong>BCH</strong> code (named after Bose, Ray-Chaudhuri and Hocquenghem, late
 1950s) is built so that its generator polynomial has <em>2t</em> consecutive roots in that field,
-which guarantees <em>d<sub>min</sub> ≥ 2t + 1</em> — that is, it corrects <em>t</em> bits. For
-example with <em>n = 15, t = 2</em>:</p>
-<pre data-i18n="neutral"><code>g(x) = m1(x) · m3(x)
-     = (x⁴ + x + 1) · (x⁴ + x³ + x² + x + 1)
-     = x⁸ + x⁷ + x⁶ + x⁴ + 1          -> bậc 8 / degree 8
+which guarantees <em>d<sub>min</sub> ≥ 2t + 1</em> — that is, it corrects <em>t</em> bits. The
+simulator below builds exactly such a code with <em>n = 15</em> and lets you choose <em>t</em>:</p>
 
-8 bit kiểm / check bits  ->  k = 15 − 8 = 7   ->  BCH(15,7), t = 2
+<div class="sim" id="sim-bch">
+<h3><span lang="vi">Thử ngay: mã BCH (15, k) sửa t bit</span><span lang="en">Try it: a BCH (15, k) code that fixes t bits</span></h3>
+<p class="hint"><span lang="vi">Trường hữu hạn ở đây là GF(16), sinh bởi x⁴ + x + 1: mười sáu phần tử, mỗi phần tử là 4 bit, cộng
+bằng XOR (bảng ở bước 4). Chọn t, bấm ô để đổi dữ liệu và gây lỗi. Bộ giải mã đi đúng ba khâu như phần cứng — tính hội chứng,
+giải phương trình khoá, dò nghiệm — và bước 5 đếm trên mọi mẫu lỗi xem chuyện gì xảy ra khi vượt quá t.</span><span lang="en">The
+finite field here is GF(16), generated by x⁴ + x + 1: sixteen elements, each one 4 bits, added by XOR (table in step 4). Pick t,
+click cells to change the data and inject errors. The decoder runs the same three stages as the hardware — syndromes, key equation,
+root search — and step 5 counts, over every error pattern, what happens once you go past t.</span></p>
+<p class="nojs" lang="vi">Trình mô phỏng cần JavaScript.</p>
+<p class="nojs" lang="en">The simulator needs JavaScript.</p>
+<div class="sim-step"><h4><span class="no">1</span><span lang="vi">Chọn t — sửa được bao nhiêu bit</span><span lang="en">Pick t — how many bits it fixes</span></h4>
+  <div class="sim-row chips">
+    <label class="chip"><input type="radio" name="bc-t" value="1"><span>t = 1 · (15, 11)</span></label>
+    <label class="chip"><input type="radio" name="bc-t" value="2" checked><span>t = 2 · (15, 7)</span></label>
+    <label class="chip"><input type="radio" name="bc-t" value="3"><span>t = 3 · (15, 5)</span></label>
+  </div>
+  <div class="mono" id="bc-g"></div>
+  <p class="hint" id="bc-param"></p>
+</div>
+<div class="sim-step"><h4><span class="no">2</span><span lang="vi">Dữ liệu k bit — bấm để đổi — và từ mã 15 bit</span><span lang="en">k data bits — click to change — and the 15-bit codeword</span></h4>
+  <div class="sim-row"><div class="bits" id="bc-data"></div>
+    <button type="button" class="btn ghost sm" id="bc-rand"><span lang="vi">Dữ liệu ngẫu nhiên</span><span lang="en">Random data</span></button></div>
+  <div class="legend" data-i18n="neutral"><span><i></i>D0…</span><span><i class="c"></i>C0…</span></div>
+  <div class="bits" id="bc-code"></div>
+  <div class="mono" id="bc-poly"></div>
+  <p class="hint"><span lang="vi">Ô số i là hệ số của xⁱ. Mã hoá hệ thống: dữ liệu nằm nguyên ở các ô cao, còn các ô C là phần dư khi
+  chia x<sup>n−k</sup>·d(x) cho g(x) — nhờ vậy c(x) chia hết cho g(x).</span><span lang="en">Cell i is the coefficient of xⁱ. Systematic
+  encoding: the data sits unchanged in the high cells, and the C cells are the remainder of x<sup>n−k</sup>·d(x) divided by g(x) — which
+  makes c(x) divisible by g(x).</span></p>
+</div>
+<div class="sim-step"><h4><span class="no">3</span><span lang="vi">Kênh nhiễu: bấm vào một ô để lật bit</span><span lang="en">Noisy channel: click a cell to flip it</span></h4>
+  <div class="bits" id="bc-recv"></div>
+  <div class="sim-row">
+    <button type="button" class="btn ghost sm" id="bc-flipt"><span lang="vi">Đúng t bit ngẫu nhiên</span><span lang="en">Exactly t random bits</span></button>
+    <button type="button" class="btn ghost sm" id="bc-flipt1"><span lang="vi">t + 1 bit — vượt sức</span><span lang="en">t + 1 bits — too many</span></button>
+    <button type="button" class="btn ghost sm" id="bc-clear"><span lang="vi">Xoá lỗi</span><span lang="en">Clear errors</span></button>
+    <span class="hint" id="bc-nerr" style="margin:0"></span>
+  </div>
+</div>
+<div class="sim-step"><h4><span class="no">4</span><span lang="vi">Giải mã: ba khâu của phần cứng</span><span lang="en">Decode: the three hardware stages</span></h4>
+  <div class="stage"><span class="stage-n">①</span><span lang="vi">Hội chứng: thay x = α, α², …, α<sup>2t</sup> vào r(x)</span><span lang="en">Syndromes: put x = α, α², …, α<sup>2t</sup> into r(x)</span></div>
+  <div class="mono" id="bc-syn"></div>
+  <p class="hint"><span lang="vi">Với mã nhị phân luôn có S₂ = S₁², S₄ = S₂²… nên phần cứng chỉ cần tính các S lẻ.</span><span lang="en">For a binary code S₂ = S₁², S₄ = S₂²… always hold, so hardware only needs the odd S.</span></p>
+  <div class="stage"><span class="stage-n">②</span><span lang="vi">Phương trình khoá (Berlekamp–Massey): từ các S ra đa thức định vị lỗi Λ(x)</span><span lang="en">Key equation (Berlekamp–Massey): from the S values to the error-locator polynomial Λ(x)</span></div>
+  <div class="mono" id="bc-lam"></div>
+  <p class="hint"><span lang="vi">Λ(x) được dựng sao cho nó bằng 0 tại x = α<sup>−i</sup> với đúng các ô lỗi i; bậc của nó là số lỗi mà bộ giải mã đoán.</span><span lang="en">Λ(x) is built to vanish at x = α<sup>−i</sup> exactly for the broken cells i; its degree is the number of errors the decoder guesses.</span></p>
+  <div class="stage"><span class="stage-n">③</span><span lang="vi">Dò nghiệm (Chien): thử Λ(α<sup>−i</sup>) ở cả 15 vị trí — bằng 0 thì ô i lỗi</span><span lang="en">Root search (Chien): try Λ(α<sup>−i</sup>) at all 15 positions — zero means cell i is wrong</span></div>
+  <div class="bits" id="bc-chien"></div>
+  <div class="legend"><span><i class="fixed"></i><span lang="vi">nghiệm, đúng ô lỗi</span><span lang="en">a root, at a real error</span></span><span><i class="bad"></i><span lang="vi">nghiệm ở ô lành</span><span lang="en">a root at a healthy cell</span></span><span><i class="flip"></i><span lang="vi">ô lỗi không tìm thấy</span><span lang="en">an error not found</span></span></div>
+  <div class="verdict" id="bc-verdict"></div>
+  <div id="bc-out"></div>
+  <details class="gf"><summary><span lang="vi">Bảng GF(16): αⁱ viết thành 4 bit (α³ α² α¹ α⁰)</span><span lang="en">The GF(16) table: αⁱ as 4 bits (α³ α² α¹ α⁰)</span></summary>
+    <div class="gf-grid mono" id="bc-gf"></div>
+    <p class="hint"><span lang="vi">Cộng là XOR từng bit; nhân là cộng số mũ rồi lấy dư cho 15 — ví dụ α⁷ · α¹² = α¹⁹ = α⁴.</span><span lang="en">Addition is a bitwise XOR; multiplication adds the exponents modulo 15 — e.g. α⁷ · α¹² = α¹⁹ = α⁴.</span></p>
+  </details>
+</div>
+<div class="sim-step"><h4><span class="no">5</span><span lang="vi">Vách đá: đếm trên mọi mẫu lỗi</span><span lang="en">The cliff: counted over every error pattern</span></h4>
+  <div class="mx-wrap" id="bc-cliff"></div>
+  <p class="hint" id="bc-cliff-note"></p>
+  <p class="hint"><span lang="vi">Mã tuyến tính và bộ giải mã chỉ nhìn hội chứng, nên kết quả chỉ phụ thuộc mẫu lỗi chứ không phụ thuộc
+  dữ liệu: 2¹⁵ = 32 768 mẫu là đủ mọi trường hợp. "Bỏ lọt" là khi chính mẫu lỗi là một từ mã: mọi hội chứng bằng 0 và bộ giải mã nói "không lỗi". Hàng tô đậm là số bit đang lật ở bước 3.</span><span lang="en">The code is linear and the
+  decoder only looks at syndromes, so the outcome depends on the error pattern, not on the data: 2¹⁵ = 32 768 patterns cover every case.
+  "Missed" means the error pattern is itself a codeword: every syndrome is 0 and the decoder says "no error". The highlighted row is the number of bits flipped in step 3.</span></p>
+  <div class="sim-row">
+    <button type="button" class="btn sm" id="bc-selftest"><span lang="vi">Kiểm tra toàn bộ 66 688 trường hợp</span><span lang="en">Check all 66 688 cases</span></button>
+    <span id="bc-st"></span>
+  </div>
+  <p class="hint"><span lang="vi">Cả ba giá trị t × mọi dữ liệu × mọi mẫu lỗi tới t bit: phải trở về đúng từ mã, đúng các ô lỗi.</span><span lang="en">All three values of t × every data value × every error pattern of up to t bits: each must return to its codeword, at the right cells.</span></p>
+</div>
+</div>
 
-n = 15:   t=1 -> (15,11) R=0.73     t=2 -> (15,7) R=0.47     t=3 -> (15,5) R=0.33</code></pre>
-<p lang="vi">Bảng trên cho thấy cái giá rất rõ: muốn sửa thêm một bit thì phải trả thêm bốn bit kiểm,
-và tỉ lệ mã tụt xuống. Không có bữa trưa miễn phí.</p>
-<p lang="en">The table shows the price plainly: each extra bit of correction costs four more check
-bits, and the code rate falls. There is no free lunch.</p>
+<p lang="vi">Đổi <em>t</em> ở bước 1 là thấy cái giá: từ <em>t = 1</em> lên 2 tốn thêm 4 bit kiểm, từ 2
+lên 3 thêm 2 bit nữa (vì <em>m₅(x)</em> chỉ bậc 2), và tỉ lệ mã tụt từ 0,73 xuống 0,47 rồi 0,33. Với
+trường GF(2<sup>m</sup>), mỗi bit sửa thêm tốn tới <em>m</em> bit kiểm. Không có bữa trưa miễn phí.</p>
+<p lang="en">Change <em>t</em> in step 1 and the price shows: going from <em>t = 1</em> to 2 costs 4
+more check bits, from 2 to 3 another 2 (because <em>m₅(x)</em> has degree 2 only), and the code rate
+falls from 0.73 to 0.47 and then 0.33. Over GF(2<sup>m</sup>), each extra bit of correction costs up to
+<em>m</em> check bits. There is no free lunch.</p>
 <p lang="vi"><strong>Reed–Solomon</strong> là phiên bản làm việc trên <em>ký hiệu</em> thay vì bit:
 mỗi ký hiệu là một nhóm <em>m</em> bit. Một chuỗi lỗi liên tiếp nằm gọn trong một ký hiệu thì chỉ
 tính là <em>một</em> lỗi — nên nó rất hợp với vết xước trên đĩa CD, vết bẩn trên mã QR, hay lỗi cụm
@@ -628,14 +783,18 @@ SHA-256 of R, first 16 bytes shown.</span></p>
 
 <h2><span lang="vi">9. Vách đá và dốc thoải</span><span lang="en">9. A cliff and a slope</span></h2>
 <p lang="vi">Một điểm tôi hay nhắc khi giảng, vì nó đổi cách ta thiết kế hệ thống. BCH có một
-<strong>vách đá</strong>: dưới <em>t</em> lỗi thì sửa đúng gần như tuyệt đối; vượt <em>t</em> một bit
+<strong>vách đá</strong>: tới <em>t</em> lỗi thì luôn sửa đúng; vượt <em>t</em> một bit
 thôi là hỏng hẳn — và tệ hơn, bộ giải mã có thể "sửa" sang một từ mã sai mà vẫn tưởng mình đúng.
+Bước 5 của trình mô phỏng BCH ở mục 7 đếm đúng điều đó: với <em>t = 2</em> và 3 bit lỗi, 180 trong
+455 mẫu bị "sửa" sang từ mã sai, 275 mẫu còn lại bị phát hiện, không mẫu nào được sửa đúng.
 LDPC thì ngược lại: nó cho một <strong>dốc thoải</strong>, xác suất giải mã thành công giảm dần chứ
 không rơi, nhưng cũng không bao giờ đạt 100%.</p>
 <p lang="en">One point I always stress when teaching, because it changes how systems get designed.
-BCH has a <strong>cliff</strong>: below <em>t</em> errors it is essentially always right; one error
+BCH has a <strong>cliff</strong>: with up to <em>t</em> errors it is always right; one error
 past <em>t</em> and it fails outright — and worse, the decoder may "correct" towards a wrong codeword
-while believing it succeeded. LDPC is the opposite: it gives a <strong>slope</strong>, where the
+while believing it succeeded. Step 5 of the BCH simulator in section 7 counts exactly that: with
+<em>t = 2</em> and 3 bit errors, 180 of the 455 patterns are "corrected" to a wrong codeword, the other
+275 are detected, and none is fixed right. LDPC is the opposite: it gives a <strong>slope</strong>, where the
 probability of decoding falls gradually rather than dropping, but never reaches 100%.</p>
 <p lang="vi">Hệ quả thực tế rất rõ: cả hai kiểu đều cần một lớp bảo vệ thứ hai, thường là CRC, đặt
 bên trên. Mã sửa lỗi không bao giờ nên là người gác cổng duy nhất.</p>
@@ -678,13 +837,13 @@ trong đầu rồi.</p>
 phone in your pocket has DRAM, flash memory, a 5G modem and a USB-C port — which code protects each
 one, and why that code? Answer that, and most of the lecture is already in your head.</p>
 
-<h2><span lang="vi">Về hai trình mô phỏng</span><span lang="en">About the two simulators</span></h2>
+<h2><span lang="vi">Về bốn trình mô phỏng</span><span lang="en">About the four simulators</span></h2>
 <p lang="vi">Phần mô phỏng là mã JavaScript tôi tự viết, không dùng thư viện ngoài (SHA-256 lấy từ máy tính PQC
 cùng trang này). Để chắc nó nói đúng, tôi so với một mô hình viết riêng bằng Python theo định nghĩa (ma trận kiểm
 H có cột <em>p</em> là số <em>p</em> viết nhị phân): ví dụ trong bài, toàn bộ 23 552 trường hợp "mọi dữ liệu × mọi
 mẫu lỗi tới 2 bit" (so bằng một giá trị băm của cả bảng), 120 từ có 3 lỗi — trong đó 88 từ bị "sửa" sang dữ liệu
 sai mà bộ giải mã vẫn tin mình đúng — và 16 lần dựng lại khoá PUF với khoá tính bằng <code>hashlib</code>:
-<span data-i18n="neutral">332</span> phép so, tất cả khớp. Một trình duyệt giả lập bấm qua mọi bước của cả hai trình mô phỏng
+<span data-i18n="neutral">332</span> phép so, tất cả khớp. Một trình duyệt giả lập bấm qua mọi bước của hai trình mô phỏng SECDED và PUF
 (<span data-i18n="neutral">44</span> phép kiểm, soát hai ngôn ngữ sau mỗi cú bấm), và tôi cố tình làm hỏng mã
 <span data-i18n="neutral">16</span> lần để chắc bộ kiểm đỏ được: cả 16 lần đều đỏ. Nút "Kiểm tra toàn bộ" ở trên lặp lại phần lớn việc đó
 ngay trong máy bạn.</p>
@@ -694,9 +853,26 @@ on this site). To be sure they tell the truth I compared them with a separate Py
 cases of "every data value × every error pattern of up to 2 bits" (compared through one hash over the whole table), 120
 three-error words — 88 of which are "corrected" to wrong data while the decoder believes it succeeded — and 16 PUF key
 rebuilds with keys computed by <code>hashlib</code>: <span data-i18n="neutral">332</span> comparisons, all matching. A simulated
-browser clicked through every step of both simulators (<span data-i18n="neutral">44</span> checks, both languages audited
+browser clicked through every step of the SECDED and PUF simulators (<span data-i18n="neutral">44</span> checks, both languages audited
 after each click), and I broke the code on purpose <span data-i18n="neutral">16</span> times to be sure the tests can go
 red: all 16 went red. The "Check all cases" button above repeats most of that on your machine.</p>
+<p lang="vi">Hai trình mô phỏng Hamming và BCH được kiểm theo cùng cách, với một mô hình Python khác, viết theo định nghĩa và
+cố ý tính theo lối khác: mã BCH ở đó được giải bằng một bảng phần dư của mọi mẫu lỗi tới <em>t</em> bit — không có
+Berlekamp–Massey, không có bảng log của GF(16) — còn Λ(x) được nhân thẳng từ các vị trí lỗi. Các phép so gồm: mọi dữ liệu ×
+mọi mẫu lỗi tới 2 bit của cả ba mã Hamming (464 + 20 224 + 247 808 trường hợp, so qua một giá trị băm); mọi từ nhận có thể có —
+2¹⁵ = 32 768 từ cho mỗi <em>t</em> — được giải ra giống hệt cách giải "tìm từ mã cách không quá <em>t</em> bit"; hội chứng và
+Λ(x) của mọi mẫu lỗi tới <em>t</em> bit; và cả ba bảng vách đá: <span data-i18n="neutral">153</span> phép so, tất cả khớp.
+Trình duyệt giả lập bấm qua mọi nút của hai trình mô phỏng này (<span data-i18n="neutral">141</span> phép kiểm, soát hai ngôn
+ngữ sau khoảng 280 cú bấm), và <span data-i18n="neutral">22</span> lần cố tình làm hỏng mã đều bị bắt.</p>
+<p lang="en">The Hamming and BCH simulators were checked the same way, against another Python model written from the definition
+and deliberately computed differently: there the BCH code is decoded with a table of remainders of every error pattern up to
+<em>t</em> bits — no Berlekamp–Massey, no GF(16) log tables — and Λ(x) is multiplied out directly from the error positions. The
+comparisons: every data value × every error pattern of up to 2 bits for all three Hamming codes (464 + 20 224 + 247 808 cases,
+compared through one hash); every possible received word — 2¹⁵ = 32 768 per <em>t</em> — decoded exactly as "find the codeword
+within <em>t</em> bits" decodes it; the syndromes and Λ(x) of every error pattern up to <em>t</em> bits; and all three cliff
+tables: <span data-i18n="neutral">153</span> comparisons, all matching. The simulated browser clicked every control of these two
+simulators (<span data-i18n="neutral">141</span> checks, both languages audited after about 280 clicks), and all
+<span data-i18n="neutral">22</span> deliberate breakages of the code were caught.</p>
 <div class="callout">
   <span lang="vi"><strong>Chỉ để học.</strong> Một PUF thật dùng mã mạnh hơn nhiều (BCH sửa hàng chục bit trên vài trăm
   bit), bỏ phiếu nhiều lần trước khi sửa, và một hàm dẫn xuất khoá đúng chuẩn thay cho một lần băm; 52 ô ở đây là để
@@ -753,6 +929,8 @@ closing part on working habits — here it is:</p>
 <script src="assets/pqc-sha2.js"></script>
 <script src="assets/ecc-sim.js"></script>
 <script src="assets/ecc-sim-ui.js"></script>
+<script src="assets/ecc-hamming-bch.js"></script>
+<script src="assets/ecc-hamming-bch-ui.js"></script>
 
 <footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
 

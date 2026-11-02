@@ -86,7 +86,7 @@
       txt = bi('Một lỗi (S ≠ 0, P′ = 1): S = ' + r.pos + ' là số thứ tự của ô hỏng → lật lại ô ' + r.pos + ' (' + dlabel(r.pos) + ').',
         'One error (S ≠ 0, P′ = 1): S = ' + r.pos + ' names the broken cell → flip cell ' + r.pos + ' (' + dlabel(r.pos) + ') back.');
       if (!good) txt += ' ' + bi('<strong>Sửa sai mà không biết:</strong> từ nhận có ' + nerr + ' bit lật, bộ giải mã "sửa" sang một từ mã khác và tin là mình đúng. Đây là vách đá ở mục 9.',
-        '<strong>Mis-corrected without knowing:</strong> ' + nerr + ' bits are flipped, the decoder "fixes" towards another codeword and believes it. This is the cliff of section 9.');
+        '<strong>Silently mis-corrected:</strong> ' + nerr + ' bits are flipped, the decoder "fixes" towards another codeword and believes it. This is the cliff of section 9.');
     } else if (r.kind === 'double') {
       cls = 'warn';
       txt = bi('Hai lỗi (S ≠ 0, P′ = 0): <strong>phát hiện được, không sửa</strong> — đúng như thiết kế SECDED. Hệ thống phải đọc lại hoặc báo lỗi.' + (nerr !== 2 ? ' (Thực tế có ' + nerr + ' bit lật: số chẵn lỗi nào cũng ra P′ = 0.)' : ''),
@@ -191,6 +191,7 @@
     setData: function (b) { S.data = b.slice(); sdEncode(); sdRender(); },
     setRecv: function (b) { S.recv = b.slice(); sdRender(); },
     flipRecv: function (p) { S.recv[p] ^= 1; sdRender(); },
-    enroll: pfEnroll, read: pfRead, flipRp: function (p) { P.Rp[p] ^= 1; pfRender(); }
+    enroll: pfEnroll, read: pfRead, flipRp: function (p) { P.Rp[p] ^= 1; pfRender(); },
+    lib: { bi: bi, num: num, same: same, randBits: randBits, pick: pick, renderBits: renderBits }   // dùng lại ở ecc-hamming-bch-ui.js
   };
 })(window, document);

@@ -12,7 +12,9 @@ Không framework, không bước build: mở `index.html` là chạy.
 index.html          trang chủ: giới thiệu + mục lục + 4 chuyên mục (#s1..#s4) + #about
 posts/              mỗi bài là một file HTML độc lập, cũng song ngữ
 posts/assets/       ảnh, hình SVG tự vẽ, PDF bài giảng, và mã JavaScript của ba máy tính PQC
-                    (ML-KEM / ML-DSA, SMAUG-T / HAETAE, SLH-DSA / FN-DSA / HQC-KEM)
+                    (ML-KEM / ML-DSA, SMAUG-T / HAETAE, SLH-DSA / FN-DSA / HQC-KEM), của ba phòng
+                    thí nghiệm mật mã cổ điển (RSA, đường cong elliptic, SHA-2 / SHA-3) và của các
+                    trình mô phỏng mã sửa lỗi
 ```
 
 Chuyên mục:
@@ -227,10 +229,28 @@ sống, chỉ ra ba chỗ phép kiểm hở; vá chỗ thứ hai lộ ra một l
 nào cũng in được (ví dụ dk 32 byte toàn 0x09) bị từ chối — nay `readKeyFile` coi chính các byte là khoá thô khi văn bản không
 phải PEM / hex / Base64. Hai trang ML và KpqC đã chạy lại xanh sau thay đổi này.
 
-## Trình mô phỏng SECDED & khoá PUF — trong `posts/tu-ma-luong-tu-den-ecc.html`
+## Bốn trình mô phỏng ECC — trong `posts/tu-ma-luong-tu-den-ecc.html`
 
-Hai trình mô phỏng nằm ngay trong bài viết về ECC, cùng cách dùng như các máy tính PQC (bấm là thấy,
-không nhập liệu phức tạp, mọi chuỗi hiện ra đều song ngữ):
+Bốn trình mô phỏng nằm ngay trong bài viết về ECC, cùng một kiểu dùng (bấm là thấy, không nhập liệu, mọi
+chuỗi hiện ra đều song ngữ): mỗi bit là một ô bấm được, số vị trí ở trên, vai trò ở dưới (D dữ liệu, C bit
+kiểm, P chẵn lẻ), ô cam = bit đã lật, ô xanh = bit bộ giải mã sửa; các bước đánh số 1, 2, 3…; khung kết luận
+xanh / vàng / đỏ **nói cả điều bộ giải mã tin lẫn sự thật** (trang còn nhớ dữ liệu gốc).
+
+- **Hamming — mục 6** (thay cho khung ví dụ nền đen cũ). Chọn mã (7, 4), (12, 8) — đúng ví dụ tính tay —
+  hoặc (15, 11); dòng quy tắc `2^r ≥ k + r + 1` tính sống và nói mã hoàn hảo hay rút gọn. Mở sẵn đúng ví dụ
+  của bài (dữ liệu 0 1 0 0 1 1 1 1, bit 5 lật). Bước 4 là **ma trận kiểm** bấm-là-đổi: mỗi hàng một phép
+  kiểm (C8 ở trên, C1 ở dưới), mỗi cột một vị trí, ô tô xanh là vị trí phép kiểm phụ trách và hiện bit nhận
+  được; cột cuối ⊕ ghi ✓ / ✗. Cột ✗ đọc từ trên xuống chính là S viết nhị phân, và cột của ô hỏng có đúng
+  hình ấy. Nút "Đúng 2 bit" cho thấy vì sao cần SECDED: S = a ⊕ b, bộ giải mã lật nhầm một ô lành (hoặc
+  với mã rút gọn, S > n: phát hiện mà không sửa). Tự kiểm 268 496 trường hợp.
+- **BCH (15, k) trên GF(16) — mục 7** (thay cho khung g(x) nền đen cũ). Chọn t = 1 / 2 / 3 → g(x) dạng tích
+  các đa thức tối tiểu và dạng khai triển, số bit kiểm, k, tỉ lệ mã, d_min. Bấm ô dữ liệu → từ mã hệ thống
+  và c(x); bấm ô để gây lỗi (hoặc "đúng t bit", "t + 1 bit"). Giải mã hiện đủ ba khâu của phần cứng:
+  ① hội chứng S_j = r(α^j) (dạng α^i và 4 bit) → ② Berlekamp–Massey ra Λ(x) → ③ dò nghiệm Chien: hàng 15 ô
+  Λ(α^−i), ô bằng 0 là ô lỗi (xanh nếu đúng, đỏ nếu nghiệm rơi vào ô lành). Bảng GF(16) trong một mục mở
+  rộng. Bước 5 là **vách đá**: đếm trên mọi 2^15 mẫu lỗi xem bao nhiêu được sửa đúng / bị phát hiện / bị sửa
+  sai, với hàng của số lỗi đang có được tô đậm — ví dụ t = 2, 3 lỗi: 180 / 455 sửa sai, 275 phát hiện.
+  Tự kiểm 66 688 trường hợp.
 
 - **SECDED (13, 8)** — đúng cách xếp của ví dụ trong bài: bit kiểm C1 C2 C4 C8 ở vị trí 1 2 4 8, dữ liệu
   D0..D7 ở các vị trí còn lại, bit P ở vị trí 0. Bốn bước: bấm ô để đổi dữ liệu → từ mã 13 bit kèm các
@@ -248,12 +268,74 @@ không nhập liệu phức tạp, mọi chuỗi hiện ra đều song ngữ):
 |---|---|---|
 | `assets/ecc-sim.js` | mã hoá / hội chứng / giải mã SECDED (13, 8), sketch hội chứng 4 khối, đóng gói 52 bit → 7 byte → SHA-256, tự kiểm 23 552 trường hợp | `ECCSim` |
 | `assets/ecc-sim-ui.js` | ô bit bấm được, bốn bước SECDED, ba bước PUF, mọi chuỗi qua `bi(vi, en)` | `ECCSimPage` (cửa cho kiểm thử) |
+| `assets/ecc-hamming-bch.js` | Hamming (7,4) / (12,8) / (15,11): mã hoá, hội chứng, giải mã, tự kiểm 268 496; GF(16), BCH (15, k) t = 1..3: đa thức tối tiểu, g(x), mã hoá hệ thống, hội chứng, Berlekamp–Massey, Chien, bảng vách đá, tự kiểm 66 688 | `ECCHam`, `ECCBch` |
+| `assets/ecc-hamming-bch-ui.js` | ma trận kiểm của Hamming, ba khâu giải mã BCH, bảng vách đá; ô bit và `bi()` dùng lại từ `ecc-sim-ui.js` (`ECCSimPage.lib`) | `ECCHbPage` (cửa cho kiểm thử) |
 | `assets/pqc-sha2.js` | SHA-256 dùng chung với các máy tính PQC | `PQCSHA2` |
 
 Kiểm chứng (ngoài repo): một mô hình Python viết riêng theo định nghĩa (ma trận kiểm H) — 332 phép so,
 gồm ví dụ trong bài, toàn bộ 23 552 trường hợp qua một giá trị băm, 120 từ 3 lỗi (88 bị sửa sai) và 16 lần
 dựng khoá PUF với SHA-256 của `hashlib`; 44 phép kiểm giao diện bằng trình duyệt giả lập, soát hai ngôn ngữ
 sau mỗi cú bấm; 16 đột biến cố ý — cả 16 bị bắt (8 bởi bộ so mô hình, 8 bởi bộ kiểm giao diện). Nút tự kiểm trên trang được chứng minh đỏ được bằng một bộ giải mã cài sai.
+
+Hamming và BCH kiểm theo cùng cách (ngoài repo), với một mô hình Python thứ hai cố ý tính theo lối khác: BCH giải bằng bảng
+phần dư của mọi mẫu lỗi ≤ t bit (không Berlekamp–Massey, không bảng log GF(16)), Λ(x) nhân thẳng từ vị trí lỗi — 153 phép so,
+gồm giá trị băm của mọi dữ liệu × mẫu lỗi ≤ 2 bit cho cả ba mã Hamming, mọi 2^15 từ nhận cho mỗi t, hội chứng + Λ(x) của mọi
+mẫu ≤ t bit và ba bảng vách đá; 141 phép kiểm giao diện (soát hai ngôn ngữ sau ~280 cú bấm); 22 đột biến cố ý — cả 22 bị bắt (11 bởi bộ so mô hình, 11 bởi bộ kiểm giao diện; 3 phút 20 giây).
+Một bản xem lại độc lập (đọc mã, không chạy) chỉ ra câu cũ "mỗi bit sửa thêm tốn thêm bốn bit kiểm" là sai (t = 2 → 3 chỉ
+thêm 2) và vài chỗ chữ / ký hiệu khó hiểu; đã sửa. Chưa xem trên trình duyệt thật — trên điện thoại, hàng 15 ô xuống hai dòng.
+
+## Ba bài mật mã cổ điển có phòng thí nghiệm — RSA, đường cong elliptic, SHA-2 / SHA-3
+
+Ba bài viết cho người không chuyên (giải thích trước, công thức sau, ví dụ tính tay được, góc nhìn của người làm
+phần cứng), mỗi bài kèm một **phòng thí nghiệm** chạy trong trình duyệt. Mỗi thẻ của phòng thí nghiệm là một loại
+phép kiểm của NIST (CAVP / ACVP): nhập hoặc sinh ngẫu nhiên đầu vào, bấm chạy, xem **từng giá trị trung gian** kèm
+một dòng giải thích hai thứ tiếng, và một dòng kết luận rõ ràng (với phép xác minh / thẩm định thì nêu cả lý do
+hỏng). Nút **"Nạp ví dụ của NIST"** điền đầu vào lấy từ file vector công khai của NIST (ghi đúng tên file / tcId /
+COUNT của NIST), chạy, rồi đánh dấu ✓ / ✗ từng giá trị so với giá trị NIST ghi. Mã viết từ văn bản chuẩn công khai,
+số học lớn bằng `BigInt`, không thư viện ngoài, không gửi gì ra mạng.
+
+| bài | chuẩn | các thẻ = loại phép kiểm NIST |
+|---|---|---|
+| `posts/rsa-fips-186-5.html` | FIPS 186-5, SP 800-56B r2, RFC 8017 | **KeyGen** (sinh khoá theo phụ lục A.1.3 với mọi phép kiểm hiện ✓ / ✗, hoặc từ p, q cho trước, hoặc kiểm một cặp khoá), **Mã hoá** (RSAEP, RSAES-OAEP SHA-256), **Giải mã** (RSADP thường và theo CRT đặt cạnh nhau, làm mù, tấn công Bellcore), **Ký / xác minh** (PKCS#1 v1.5, PSS). Khoá 512 / 1024 (chỉ để thử, có nhãn) / 2048 / 3072 / 4096 bit |
+| `posts/ecdh-ecdsa-nist-curves.html` | FIPS 186-5, SP 800-186, SP 800-56A r3, RFC 6979 | ba hình tương tác (cộng điểm trên đường cong thực; mọi điểm, quỹ đạo k·G và chặn Hasse trên trường F_p nhỏ; nhân vô hướng từng bit: nhân đôi-và-cộng so với thang Montgomery) + **Sinh cặp khoá** (A.2.1 / A.2.2), **Kiểm tra khoá công khai** (SP 800-56A mục 5.6.2.3.3), **ECDH** (nguyên thuỷ KAS-ECC CDH, hai bên), **Ký ECDSA** (k ngẫu nhiên / tất định RFC 6979 / cho trước), **Xác minh** có lý do, **Tấn công** dùng lại nonce. P-192 chỉ xác minh, P-224, P-256, P-384, P-521 |
+| `posts/sha2-sha3-keccak.html` | FIPS 180-4, FIPS 202, SP 800-185 | **Băm + vết** (15 hàm: SHA-1 cũ, sáu SHA-2, bốn SHA3, SHAKE128 / 256, cSHAKE128 / 256; bản đồ đệm khối cuối, bảng từng vòng, lưới 5 × 5 lane sau θ ρ π χ ι), **ShortMsg / LongMsg** (kể cả thông điệp lẻ bit), **Monte Carlo** 100 điểm kiểm, **SHAKE VariableOut**, lật bit / số khối theo độ dài / ngày sinh; ô tấn công mở rộng độ dài và ô sinh IV của SHA-512/t |
+
+Các file (mỗi trang nạp `pqc-mlkem.js` và `pqc-sha2.js` dùng chung với các máy tính PQC trước, rồi các file riêng
+theo thứ tự trong bảng):
+
+| file | nội dung | biến toàn cục |
+|---|---|---|
+| `assets/rsa-core.js` | Miller–Rabin + chia thử, sinh khoá A.1.3 từ seed (luật SHAKE256(seed ‖ bộ đếm) ghi trên trang, để khoá lặp lại được), khoá từ p, q, RSAEP / RSADP theo hai miền giá trị (RFC 8017 và SP 800-56B), CRT theo Garner, Bellcore, OAEP, PKCS#1 v1.5 (DigestInfo tính từ OID), PSS, Montgomery — không đụng DOM | `RSACore` |
+| `assets/rsa-vectors.js` | ví dụ CAVP / ACVP + một khoá ví dụ riêng cho mỗi cỡ NIST không có | `RSA_VECTORS` |
+| `assets/rsa-ui.js` | thẻ khoá dùng chung, bốn thẻ, nút ví dụ NIST, tự kiểm | `RSALab` (cửa cho kiểm thử) |
+| `assets/rsa-worker.js` | Web Worker cho sinh khoá 3072 / 4096 bit (vài giây) | — |
+| `assets/ec-core.js` | năm đường cong NIST, luật nhóm affine có vết λ, Jacobian, thang Montgomery, nhân đôi-và-cộng, sinh khoá A.2.1 / A.2.2, thẩm định khoá công khai có tên bước hỏng, ECDH, bits2int, ECDSA có mã lý do, HMAC + RFC 6979, khôi phục khoá khi lặp nonce | `EC` |
+| `assets/ec-plot.js` | ba hình SVG (đường cong thực, lưới F_p, bảng thang từng bit), theo màu sáng / tối của trang | `ECPlot` |
+| `assets/ec-vectors.js` | tập con nhỏ của KeyPair.rsp, PKV.rsp, KAS_ECC_CDH_PrimitiveTest.txt, SigGen.txt, SigVer.rsp và các file ACVP tương ứng | `EC_VECTORS` |
+| `assets/ec-ui.js` | ba hình, sáu thẻ, nút ví dụ NIST, tự kiểm | `ECLab` (cửa cho kiểm thử) |
+| `assets/hash-trace.js` | SHA-1, sáu SHA-2, Keccak-p[1600,24], SHA3 / SHAKE / cSHAKE viết riêng để có vết — **độc lập** với `pqc-sha2.js` / `pqc-mlkem.js`, trang tính mỗi digest bằng cả hai và hiện dấu "khớp"; mọi hằng số tính khi nạp | `HashTrace` |
+| `assets/hash-vectors.js` | ví dụ ShortMsg / LongMsg / VariableOut, điểm kiểm Monte Carlo (đủ giá trị ở điểm 0–9 và 99, 8 byte đầu ở các điểm khác — lỗi lan xuống mọi điểm sau nên vẫn bắt được) | `HASH_VECTORS` |
+| `assets/hash-ui.js` | năm thẻ, bản đồ đệm, bảng vòng, lưới lane, Monte Carlo có thanh tiến độ và nút dừng, tự kiểm | `HashLab` (cửa cho kiểm thử) |
+| `assets/hash-worker.js` | Web Worker cho Monte Carlo | — |
+
+Như trang SLH-DSA / FN-DSA / HQC-KEM: phép chậm chạy trong Web Worker; mở trang trực tiếp từ đĩa (`file://`) thì
+trình duyệt chặn Worker và trang tự chạy ở luồng chính sau khi kịp vẽ dòng "đang tính".
+
+Kiểm chứng:
+
+| | RSA | đường cong elliptic | SHA-2 / SHA-3 |
+|---|---|---|---|
+| nút "Chạy kiểm chứng" trên trang | 137 phép kiểm | 112 phép kiểm | 290 phép kiểm |
+| ngoài repo: so với mô hình tham chiếu Python + file vector NIST | 3 358 | 1 676 | 14 363 (cả 6 872 thông điệp lẻ bit) |
+| ngoài repo: kiểm giao diện bằng trình duyệt giả lập, soát hai ngôn ngữ sau mỗi cú bấm | 136 | 165 | 447 |
+| ngoài repo: đột biến cố ý, mỗi cái phải làm bộ kiểm báo đỏ | 45 / 45 bị bắt | 37 / 37 | 45 / 45 |
+| ngoài repo: đối chiếu độc lập với OpenSSL (qua Node) trên khoá / thông điệp ngẫu nhiên | 525 | 800 | 13 176 |
+
+Mỗi nút ví dụ và nút tự kiểm cũng đã được chứng minh **đỏ được**: cài một giá trị sai vào file vector thì trang
+phải báo đúng giá trị đó. Giới hạn: như các máy tính PQC — để học, không để bảo vệ dữ liệu thật (`BigInt` chạy
+thời gian phụ thuộc dữ liệu, không chống kênh bên, khoá nằm trong bộ nhớ JavaScript). Khi sửa: giữ chuỗi `bi()`,
+bấm "Chạy kiểm chứng" phải ra toàn xanh, và đổi thuật toán thì sinh lại file `*-vectors.js` bằng bộ kiểm thử ngoài
+repo, không sửa tay.
 
 ## Thêm một bài mới
 
@@ -282,7 +364,7 @@ kẹp giữa hai dòng chú thích `/* ==== house-format v1 … */` và `/* ====
 - Không ngắt từ bằng gạch nối trong `code`, `pre`, `kbd`, `samp` và link — một tên file bị ngắt thành
   `calcu-lator` đọc như gạch nối thật.
 
-Header, nav và footer không bị khối này chạm tới. Muốn đổi định dạng thì đổi khối này **ở cả mười trang** cho
+Header, nav và footer không bị khối này chạm tới. Muốn đổi định dạng thì đổi khối này **ở mọi trang** cho
 giống hệt nhau (ngoài repo có script chèn / thay khối này cho mọi trang trong một lần); một trang thiếu khối
 hay có khối bị sửa tay sẽ bị bước kiểm tra trước khi đăng từ chối.
 

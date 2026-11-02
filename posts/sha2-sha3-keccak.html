@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="SHA-2 và SHA-3 (Keccak): mở hàm băm ra xem từng bước — ChiU·SoC"
+      data-title-en="SHA-2 and SHA-3 (Keccak): a hash function, opened up step by step — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SHA-2 và SHA-3 (Keccak): mở hàm băm ra xem từng bước — ChiU·SoC</title>
+<meta name="description" content="Phần hai của loạt bài hàm băm: SHA-2 (FIPS 180-4) và SHA-3 / Keccak (FIPS 202, SP 800-185) — Merkle–Damgård và bọt biển, mở rộng độ dài, IV của SHA-512/t, θ ρ π χ ι, hậu tố miền và pad10*1, XOF, cSHAKE, góc phần cứng — kèm phòng thí nghiệm chạy trong trình duyệt: vết từng bước, bản đồ đệm, vector ShortMsg / LongMsg / Monte Carlo / VariableOut của NIST."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:22px 0 7px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+
+/* tranh bìa gốc + chỗ nghe */
+.cover{ margin:0 0 10px; }
+.cover img{
+  display:block; width:100%; height:auto;
+  border-radius:14px; box-shadow:0 10px 30px rgba(15,27,45,.28);
+}
+.cover figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.listen{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  margin:0 0 22px; padding:14px 16px;
+  background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14);
+  border-radius:14px;
+}
+.listen-label{ font-size:.85em; font-weight:700; color:var(--accent); }
+.listen a{
+  font-size:.88em; font-weight:600; color:var(--accent);
+  text-decoration:none; padding:5px 13px; border-radius:999px;
+  background:#fff; border:1px solid rgba(20,83,143,.22);
+}
+.listen a:hover{ background:rgba(20,83,143,.09); }
+.listen .note{ font-size:.8em; color:var(--muted); flex-basis:100%; margin:0; }
+
+/* thư viện ảnh */
+.gallery{ display:grid; gap:16px; margin:22px 0 26px; }
+.gallery.two{ grid-template-columns:repeat(2,1fr); }
+@media(max-width:620px){ .gallery.two{ grid-template-columns:1fr; } }
+.gallery figure{ margin:0; }
+.gallery img{
+  display:block; width:100%; height:auto; border-radius:13px;
+  box-shadow:0 8px 24px rgba(15,27,45,.18); background:#e9eef5;
+}
+.gallery figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; line-height:1.55; }
+.diagram{ margin:22px 0 10px; }
+.diagram img{ display:block; width:100%; height:auto; border-radius:14px;
+  border:1px solid rgba(20,83,143,.14); background:#f7f9fc; }
+.diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; }
+
+/* ===== máy tính PQC ===== */
+.selftest{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  margin:20px 0 10px; padding:16px 18px; border-radius:14px;
+  background:rgba(42,157,143,.07); border:1px solid rgba(42,157,143,.28);
+}
+.st-note{ flex:1 1 260px; font-size:.84em; color:var(--muted); line-height:1.6; }
+.btn{
+  font:inherit; font-size:.88em; font-weight:700; cursor:pointer;
+  color:#fff; border:0; padding:9px 18px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.btn:disabled{ opacity:.5; cursor:default; }
+.btn.ghost{ background:none; color:var(--accent); border:1px solid rgba(20,83,143,.3); }
+.btn.sm{ font-size:.8em; padding:6px 13px; }
+.hexbox{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.78em; line-height:1.6; white-space:pre-wrap; word-break:break-all;
+  background:#0f1b2d; color:#9fd0c8; border-radius:10px;
+  padding:10px 12px; margin:8px 0 0; max-height:200px; overflow:auto;
+}
+.pill{ display:inline-block; font-size:.78em; font-weight:700; padding:3px 11px; border-radius:999px; }
+.pill.ok{ background:rgba(42,157,143,.16); color:#15695f; }
+.pill.bad{ background:rgba(190,30,45,.12); color:#9b1d28; }
+.pill.wait{ background:rgba(234,179,8,.16); color:#8a6100; }
+.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35);
+  padding:12px 16px; border-radius:12px; font-size:.9em; }
+
+.tabs{ display:flex; gap:8px; margin:26px 0 0; flex-wrap:wrap; }
+.tab{
+  font:inherit; font-size:.9em; font-weight:700; cursor:pointer;
+  background:#fff; color:var(--muted); border:1px solid rgba(20,83,143,.2);
+  padding:10px 18px; border-radius:12px 12px 0 0; border-bottom:0;
+}
+.tab[aria-selected="true"]{ color:var(--accent); box-shadow:inset 0 3px 0 var(--accent2); }
+.panel{
+  border:1px solid rgba(20,83,143,.2); border-radius:0 14px 14px 14px;
+  padding:18px 18px 14px; background:#fbfcfe; margin-bottom:26px;
+}
+.panel[hidden]{ display:none; }
+.bar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin:0 0 14px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.chips-l{ font-size:.74rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:6px; }
+.chip{ position:relative; display:inline-flex; }
+.chip input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+.chip > span{
+  font-size:.8em; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid rgba(20,83,143,.25); color:var(--accent); background:#fff; white-space:nowrap;
+}
+.chip input:checked + span{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input:focus-visible + span{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.chip input:disabled{ cursor:not-allowed; }
+.chip input:disabled + span{ color:#9aa4b1; background:#f3f5f8; border-style:dashed; text-decoration:line-through; }
+
+/* năm bước của trao đổi khoá: bên nhận lệch trái, bên gửi lệch phải */
+.flow{ display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:12px 0; }
+.actor{ font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.actor.recv{ grid-column:1/6; color:var(--accent); }
+.actor.send{ grid-column:6/11; color:#1f7f74; text-align:right; }
+.card{
+  min-width:0; background:#fff; border:1px solid rgba(20,83,143,.15); border-radius:14px;
+  padding:14px 16px 4px; transition:box-shadow .2s;
+}
+.card.recv{ grid-column:1/9; border-left:4px solid var(--accent); }
+.card.send{ grid-column:3/11; border-left:4px solid var(--accent2); }
+.card.full{ grid-column:1/-1; border-left:4px solid var(--accent); }
+.card.next{ box-shadow:0 0 0 3px rgba(42,157,143,.28); }
+.card h4{ display:flex; align-items:center; gap:10px; margin:0 0 10px; font-size:.98rem; }
+.no{
+  display:inline-grid; place-items:center; flex:none; width:26px; height:26px; border-radius:50%;
+  background:rgba(20,83,143,.1); color:var(--accent); font-size:.8rem; font-weight:800;
+}
+.card.done > h4 .no{ background:var(--accent2); color:#fff; }
+.who{ margin-left:auto; font-size:.7rem; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+.arrow{ grid-column:1/-1; display:flex; align-items:center; gap:10px; font-size:.82em; color:var(--muted); }
+.arrow::before, .arrow::after{ content:""; flex:1 1 20px; border-top:2px dashed rgba(20,83,143,.22); }
+.arrow .lbl{
+  display:inline-flex; gap:8px; align-items:center; text-align:center;
+  padding:4px 12px; border-radius:999px; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.arrow.lit .lbl{ background:rgba(42,157,143,.12); color:#15695f; border-color:rgba(42,157,143,.35); }
+.arrow .no{ width:22px; height:22px; font-size:.72rem; }
+@media(max-width:640px){
+  .card.recv, .card.send{ grid-column:1/-1; }
+  .actor{ display:none; }
+}
+.row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 12px; }
+.chk{ display:inline-flex; gap:7px; align-items:center; font-size:.84em; font-weight:600; color:var(--muted); cursor:pointer; }
+.chk input{ accent-color:var(--accent2); width:16px; height:16px; }
+.hint{ font-size:.82em; color:var(--muted); margin:0 0 10px; line-height:1.6; }
+
+.fld{ margin:0 0 12px; }
+.fld-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:4px; }
+.fld-head label{ font-size:.82em; font-weight:700; color:var(--muted); }
+.cnt{ font-size:.74em; font-weight:700; font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap; }
+.cnt.ok{ color:#15695f; }
+.cnt.warn{ color:#8a6100; }
+.cnt.bad{ color:#9b1d28; }
+.fld textarea{
+  display:block; width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.74em; line-height:1.6; color:#27323f; background:#fbfcfe;
+  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:8px 10px;
+  resize:vertical; word-break:break-all; max-height:9.6em;
+}
+.fld.big textarea{ max-height:none; min-height:18em; }
+.fld textarea[readonly]{ background:#f1f4f8; color:#55606d; }
+.fld textarea:focus{ outline:2px solid rgba(42,157,143,.45); outline-offset:1px; }
+.tools{ display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; margin-top:5px; }
+.tools:empty{ display:none; }
+.tools button{
+  font:inherit; font-size:.7em; font-weight:700; cursor:pointer; padding:2px 9px;
+  border-radius:7px; border:1px solid rgba(20,83,143,.18); background:#fff; color:var(--accent);
+}
+.tools button:hover{ background:rgba(20,83,143,.07); }
+.tools button[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.tools .gap{ flex:1 1 8px; }
+.tools .flash{ font-size:.72em; font-weight:700; color:#15695f; }
+
+.result{
+  grid-column:1/-1; margin:8px 0 4px; padding:11px 14px; border-radius:12px;
+  font-size:.9em; line-height:1.6; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.result.ok{ background:rgba(42,157,143,.1); border-color:rgba(42,157,143,.38); color:#11574f; }
+.result.bad{ background:rgba(190,30,45,.06); border-color:rgba(190,30,45,.3); color:#8c1a24; }
+.result.info{ color:#2d3748; }
+.result .sub{ display:block; font-size:.9em; color:var(--muted); margin-top:2px; }
+.result .ic{ font-weight:800; margin-right:6px; }
+.pairline{ font-size:.84em; margin:2px 0 12px; padding:9px 12px; border-radius:10px; background:#f6f8fb; }
+.pairline:empty{ display:none; }
+.pairline.ok{ background:rgba(42,157,143,.09); color:#11574f; }
+.pairline.bad{ background:rgba(190,30,45,.06); color:#8c1a24; }
+.pairline summary{ cursor:pointer; font-size:.92em; color:var(--muted); margin-top:3px; }
+.pairline ul{ list-style:none; padding:0; margin:6px 0 2px; }
+.pairline li{ margin:0 0 3px; color:#2d3748; }
+.pairline li b{ display:inline-block; width:1.4em; }
+.ph-note{ font-size:.82em; color:#8a6100; margin:6px 0 0; }
+.ph-note:empty{ display:none; }
+details.pem{ margin:0 0 12px; font-size:.84em; }
+details.pem summary{ cursor:pointer; color:var(--accent); font-weight:700; }
+details.pem pre{ max-height:190px; font-size:.78em; margin:6px 0 0; }
+#file-in{ display:none; }
+
+/* PDF đọc ngay trên trang (ẩn thanh công cụ của trình xem) */
+.pdfview{ margin:20px 0 10px; }
+.pdfview iframe{
+  display:block; width:100%; height:clamp(380px, 74vh, 700px);
+  border:1px solid rgba(20,83,143,.18); border-radius:14px; background:#f7f9fc;
+}
+.pdfview-note{
+  display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
+  margin:10px 0 26px; font-size:.83em; color:var(--muted); line-height:1.6;
+}
+.pdfview-note a{
+  font-weight:700; color:var(--accent); text-decoration:none;
+  padding:5px 14px; border-radius:999px; background:rgba(20,83,143,.08);
+}
+.pdfview-note a:hover{ background:rgba(20,83,143,.15); }
+.pdfview-note .meta-note{ flex:1 1 240px; margin:0; }
+
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.7;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:8px 12px; text-align:left; vertical-align:top; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px;
+}
+
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.songlist{ columns:2; column-gap:28px; font-size:.95em; }
+@media(max-width:560px){ .songlist{ columns:1; } }
+.songlist li{ break-inside:avoid; }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.refs a{ color:var(--accent); }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+
+/* ===== bài băm: sơ đồ, bản đồ đệm, bảng vết, lưới lane ===== */
+.svgfig{ margin:20px 0 14px; }
+.svgfig svg{ display:block; width:100%; height:auto; background:#f7f9fc; border:1px solid rgba(20,83,143,.14); border-radius:14px; }
+.svgfig figcaption{ font-size:.82em; color:var(--muted); margin-top:8px; text-align:center; }
+.svgfig text{ font-family:"Inter",Arial,sans-serif; font-size:13px; fill:#1f2937; }
+.svgfig .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; }
+.svgfig .box{ fill:#fff; stroke:#14538f; stroke-width:1.5; }
+.svgfig .fbox{ fill:rgba(42,157,143,.14); stroke:#2a9d8f; stroke-width:1.5; }
+.svgfig .rpart{ fill:rgba(20,83,143,.12); stroke:#14538f; stroke-width:1.2; }
+.svgfig .cpart{ fill:rgba(31,41,55,.10); stroke:#5f6b7a; stroke-width:1.2; }
+.svgfig .ln{ stroke:#14538f; stroke-width:1.6; fill:none; }
+.svgfig .ln2{ stroke:#2a9d8f; stroke-width:1.6; fill:none; }
+.svgfig .dash{ stroke-dasharray:5 4; }
+.svgfig .small{ font-size:11px; fill:#5f6b7a; }
+.lab-intro{ margin-top:8px; }
+.grp{ display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; margin:0 0 8px; }
+.tag{ font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#8a6100;
+  background:rgba(234,179,8,.18); border-radius:6px; padding:1px 6px; margin-left:4px; }
+.num-in{ font:inherit; font-size:.84em; width:6.6em; padding:4px 8px; border-radius:8px; border:1px solid rgba(20,83,143,.25); }
+.lbl-in{ display:inline-flex; gap:6px; align-items:center; font-size:.84em; font-weight:600; color:var(--muted); }
+.pmap{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.74em; line-height:1.9;
+  background:#fff; border:1px solid rgba(20,83,143,.16); border-radius:10px; padding:8px 10px; margin:6px 0 8px; overflow-x:auto; }
+.pmap .row{ white-space:nowrap; }
+.pmap .off{ color:#9aa4b1; display:inline-block; width:4.2em; }
+.pmap .blk{ font-weight:800; color:var(--accent); margin:6px 0 2px; font-family:"Inter",Arial,sans-serif; font-size:1.05em; }
+.pb{ display:inline-block; width:1.9em; text-align:center; border-radius:3px; margin:0 1px 1px 0; }
+.pb-m{ background:#eef2f7; color:#27323f; }
+.pb-c{ background:rgba(124,58,237,.12); color:#5b21b6; }
+.pb-x, .pb-s{ background:rgba(42,157,143,.28); color:#0e5148; font-weight:800; }
+.pb-mx, .pb-ms, .pb-mse{ background:linear-gradient(90deg,#eef2f7 50%,rgba(42,157,143,.32) 50%); font-weight:800; }
+.pb-z{ background:#fafbfc; color:#b4bcc8; }
+.pb-l{ background:rgba(234,179,8,.25); color:#6b4a00; font-weight:700; }
+.pb-e, .pb-se{ background:rgba(190,30,45,.16); color:#8c1a24; font-weight:800; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.78em; color:var(--muted); margin:2px 0 8px; }
+.legend .pb{ width:auto; padding:0 6px; }
+.trace-wrap{ max-height:330px; overflow:auto; border:1px solid rgba(20,83,143,.16); border-radius:10px; margin:6px 0 10px; background:#fff; }
+table.trace{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.7em; min-width:0; margin:0; }
+table.trace th, table.trace td{ padding:2px 7px; border:0; border-bottom:1px solid rgba(31,41,55,.07); white-space:nowrap; }
+table.trace th{ position:sticky; top:0; background:#eef3f9; }
+table.trace tr.hl td{ background:rgba(42,157,143,.12); }
+.lanes{ display:grid; grid-template-columns:2.4em repeat(5, minmax(0,1fr)); gap:3px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.68em; margin:6px 0 10px; }
+.lanes div{ background:#fff; border:1px solid rgba(20,83,143,.14); border-radius:5px; padding:3px 4px; text-align:center; word-break:break-all; }
+.lanes div.hd{ background:none; border:0; color:var(--muted); font-weight:700; }
+.lanes div.chg{ background:rgba(42,157,143,.16); border-color:rgba(42,157,143,.5); }
+.plist{ font-size:.8em; color:var(--muted); margin:4px 0 10px; }
+.plist button{ font:inherit; font-size:.92em; cursor:pointer; margin:0 4px 4px 0; padding:2px 8px; border-radius:7px;
+  border:1px solid rgba(20,83,143,.2); background:#fff; color:var(--accent); }
+.plist button[aria-pressed="true"]{ background:var(--accent); color:#fff; }
+table.cases{ font-size:.8em; min-width:520px; }
+table.cases td, table.cases th{ padding:5px 8px; }
+table.cases td.v{ font-weight:800; text-align:center; width:2.4em; }
+td.v.ok{ color:#15695f; } td.v.bad{ color:#9b1d28; }
+.prog{ height:10px; border-radius:999px; background:#eef2f7; overflow:hidden; margin:8px 0; }
+.prog > div{ height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .15s; }
+.bits{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.7em; line-height:1.25; word-break:break-all; letter-spacing:1px; margin:6px 0; }
+.bits .d{ color:#9b1d28; font-weight:800; background:rgba(190,30,45,.12); }
+.bits .s{ color:#9aa4b1; }
+.lenbar{ display:flex; height:22px; border-radius:6px; overflow:hidden; margin:6px 0; border:1px solid rgba(20,83,143,.2); }
+.lenbar > span{ display:block; height:100%; }
+.lenbar .m{ background:#cfdae8; } .lenbar .p{ background:rgba(42,157,143,.55); } .lenbar .l{ background:rgba(234,179,8,.6); } .lenbar .z{ background:#f3f5f8; }
+.jump{ color:#9b1d28; font-weight:800; }
+.code-pane{ font-size:.78em; }
+input[type="range"]{ width:100%; accent-color:var(--accent2); }
+.mini{ border:1px dashed rgba(20,83,143,.28); border-radius:14px; padding:14px 16px 6px; margin:14px 0 18px; background:#fbfcfe; }
+.mini h4{ margin:0 0 8px; font-size:.95rem; }
+
+/* ==== house-format v1 — bilingual-personal-site skill, scripts/house-format.css. Prose is justified on every page.
+     Do not edit this block in a page: edit the skill's copy, re-run apply_format.py; check_site.py fails a page whose
+     block differs. ==== */
+main p, main li, main blockquote, main dd, main .art-desc, main .art-quote{ text-align:justify; text-justify:inter-word; hyphens:auto; }
+main .refs li, main .art-links li, main .songlist li, main .toc-wrap li, main .listen p, main .pair li, main .result li, main table p, main table li{ text-align:left; hyphens:manual; }
+main .poem-credit, main .video-cap, main figcaption p, main figcaption li{ text-align:center; hyphens:manual; }
+main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
+/* ==== /house-format ==== */
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">SHA-2 và SHA-3 (Keccak): mở hàm băm ra xem từng bước</span><span lang="en">SHA-2 and SHA-3 (Keccak): a hash function, opened up step by step</span></h1>
+<div class="meta"><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi · 02/11/2026 · Frank Nguyen</span><span lang="en">PQC, AI &amp; ECC · 2 Nov 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Đây là phần hai của loạt bài về hàm băm. <a href="md5-rfc1321.html">Phần một kể về MD5</a> — nhỏ, gọn,
+và đã bị phá. Phần này nói về hai họ hàm băm mà mọi con chip bảo mật và mọi thuật toán hậu lượng tử của NIST đang dùng:
+<strong>SHA-2</strong> (FIPS 180-4) và <strong>SHA-3 / Keccak</strong> (FIPS 202). Chúng được dựng theo hai cách khác hẳn
+nhau — dây chuyền Merkle–Damgård và "bọt biển" (sponge) — và bài này đặt hai cách đó cạnh nhau. Kèm theo là một phòng
+thí nghiệm chạy ngay trong trình duyệt: băm bất cứ thứ gì và xem từng vòng, rồi tự chạy lại các bài kiểm tra của NIST
+(ShortMsg, LongMsg, Monte Carlo, VariableOut).</p>
+<p class="lede" lang="en">This is part two of a series on hash functions. <a href="md5-rfc1321.html">Part one was about
+MD5</a> — small, tidy, and broken. This part covers the two families that every security chip and every post-quantum
+algorithm from NIST uses today: <strong>SHA-2</strong> (FIPS 180-4) and <strong>SHA-3 / Keccak</strong> (FIPS 202). They are
+built in two completely different ways — the Merkle–Damgård chain and the "sponge" — and this article puts the two side
+by side. It comes with a lab that runs in your browser: hash anything and watch every round, then replay NIST's own
+tests (ShortMsg, LongMsg, Monte Carlo, VariableOut) yourself.</p>
+
+<noscript>
+  <p class="nojs"><span lang="vi">Phòng thí nghiệm cần JavaScript. Phần giải thích đọc được bình thường.</span><span lang="en">The lab needs JavaScript. The explanations read fine without it.</span></p>
+</noscript>
+
+<div class="selftest">
+  <button class="btn" id="bt-selftest" type="button"><span lang="vi">Chạy kiểm chứng</span><span lang="en">Run the self-test</span></button>
+  <span id="st-status" class="pill wait"><span lang="vi">chưa chạy</span><span lang="en">not run yet</span></span>
+  <span class="st-note">
+    <span lang="vi">Băm lại các ví dụ chuẩn, các độ dài sát biên khối và tập vector NIST đi kèm trang; mỗi digest được tính hai
+      lần bằng hai bộ mã độc lập (mã có ghi vết của bài này và các file băm dùng chung của trang) rồi so với đáp án.</span>
+    <span lang="en">Re-hashes the standard examples, the lengths next to block boundaries and the NIST vectors shipped with
+      the page; every digest is computed twice by two independent code bases (this article's traced code and the site's
+      shared hash files) and compared with the expected value.</span>
+  </span>
+</div>
+<div id="st-detail" class="hexbox" hidden></div>
+
+<!-- ================================================================ 1 -->
+<h2><span lang="vi">1. Hàm băm hứa gì, và vì sao nó phải dài</span><span lang="en">1. What a hash promises, and why it must be long</span></h2>
+<p lang="vi">Phần một đã kể ba lời hứa của một hàm băm mật mã. Nhắc lại bằng tên gọi chính thức, với một hàm lý tưởng cho
+digest n bit:</p>
+<p lang="en">Part one told the three promises of a cryptographic hash. Here they are again under their formal names, for an
+ideal function with an n-bit digest:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Lời hứa</span><span lang="en">Promise</span></th>
+  <th><span lang="vi">Nghĩa là</span><span lang="en">Meaning</span></th>
+  <th><span lang="vi">Công sức để phá</span><span lang="en">Work to break it</span></th>
+</tr></thead>
+<tbody>
+  <tr><td><span lang="vi">Kháng tiền ảnh</span><span lang="en">Preimage resistance</span></td>
+      <td><span lang="vi">Cho digest d, không tìm được thông điệp M nào có H(M) = d.</span><span lang="en">Given a digest d, no one can find a message M with H(M) = d.</span></td>
+      <td data-i18n="neutral">2<sup>n</sup></td></tr>
+  <tr><td><span lang="vi">Kháng tiền ảnh thứ hai</span><span lang="en">Second-preimage resistance</span></td>
+      <td><span lang="vi">Cho sẵn M, không tìm được M′ ≠ M có cùng digest.</span><span lang="en">Given M, no one can find an M′ ≠ M with the same digest.</span></td>
+      <td data-i18n="neutral">2<sup>n</sup></td></tr>
+  <tr><td><span lang="vi">Kháng va chạm</span><span lang="en">Collision resistance</span></td>
+      <td><span lang="vi">Không tìm được bất kỳ cặp M ≠ M′ nào có cùng digest.</span><span lang="en">No one can find any pair M ≠ M′ with the same digest.</span></td>
+      <td data-i18n="neutral">2<sup>n/2</sup></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Dòng cuối là nghịch lý ngày sinh. Ở phần một tôi dùng con số quen thuộc 23 người. Lần này tính thêm vài lớp
+học, với 365 ngày trong năm:</p>
+<p lang="en">The last row is the birthday paradox. Part one used the familiar figure of 23 people. This time, a few more
+class sizes, with 365 days in a year:</p>
+<div class="tbl-wrap">
+<table style="min-width:0">
+<thead><tr><th><span lang="vi">Sĩ số</span><span lang="en">Class size</span></th>
+  <th><span lang="vi">Xác suất có hai bạn trùng ngày sinh</span><span lang="en">Chance two pupils share a birthday</span></th></tr></thead>
+<tbody>
+  <tr><td class="num">10</td><td class="num"><span lang="vi">11,7 %</span><span lang="en">11.7 %</span></td></tr>
+  <tr><td class="num">23</td><td class="num"><span lang="vi">50,7 %</span><span lang="en">50.7 %</span></td></tr>
+  <tr><td class="num">30</td><td class="num"><span lang="vi">70,6 %</span><span lang="en">70.6 %</span></td></tr>
+  <tr><td class="num">40</td><td class="num"><span lang="vi">89,1 %</span><span lang="en">89.1 %</span></td></tr>
+  <tr><td class="num">57</td><td class="num"><span lang="vi">99,0 %</span><span lang="en">99.0 %</span></td></tr>
+</tbody>
+</table>
+</div>
+<pre data-i18n="neutral"><code>P(k) = 1 − (365 · 364 · … · (365 − k + 1)) / 365^k
+k(50 %) ≈ 1.1774 · √N           N = 365  →  k ≈ 22.5  →  23</code></pre>
+<ul lang="vi">
+  <li><strong>k</strong> — số người (hay số thông điệp đã băm).</li>
+  <li><strong>N</strong> — số giá trị có thể có (365 ngày, hay 2<sup>n</sup> digest).</li>
+  <li><strong>1,1774</strong> — √(2 ln 2): hằng số làm xác suất trùng đạt đúng 50 %.</li>
+</ul>
+<ul lang="en">
+  <li><strong>k</strong> — the number of people (or of messages hashed).</li>
+  <li><strong>N</strong> — the number of possible values (365 days, or 2<sup>n</sup> digests).</li>
+  <li><strong>1.1774</strong> — √(2 ln 2): the constant that puts the chance of a match at exactly 50 %.</li>
+</ul>
+<p lang="vi">Thử thật: cắt SHA-256 chỉ còn 24 bit đầu (N = 2<sup>24</sup>), theo công thức cần khoảng 4&#8239;823 thông điệp cho
+50 % cơ hội trùng. Thẻ cuối của phòng thí nghiệm băm lần lượt <code>msg-0</code>, <code>msg-1</code>, … và gặp va chạm đầu
+tiên ở <code>msg-7216</code> và <code>msg-8433</code>, sau 8&#8239;434 thông điệp — hơi xui (khả năng đi xa tới đó mà chưa
+trùng là khoảng 12 %), nhưng đúng cỡ √N. Với SHA-256 đủ 256 bit, con số đó là khoảng 1,18 · 2<sup>128</sup>: ngoài tầm
+mọi máy tính. Đó là lý do mức an ninh va chạm của một hàm băm luôn chỉ bằng <em>một nửa</em> độ dài digest.</p>
+<p lang="en">Try it for real: cut SHA-256 down to its first 24 bits (N = 2<sup>24</sup>) and the formula says about 4,823
+messages for a 50 % chance of a match. The last tab of the lab hashes <code>msg-0</code>, <code>msg-1</code>, … and meets
+its first collision at <code>msg-7216</code> and <code>msg-8433</code>, after 8,434 messages — a little unlucky (the chance
+of getting that far without a match is about 12 %), but of the order of √N. For the full 256-bit SHA-256 that number is
+about 1.18 · 2<sup>128</sup>: beyond any computer. That is why a hash's collision security is always only <em>half</em> its
+digest length.</p>
+<p lang="vi">Hàm băm có mặt ở khắp nơi: băm rồi mới ký trong chữ ký số, mã xác thực thông điệp (HMAC, KMAC), dẫn xuất
+khoá, bộ sinh số ngẫu nhiên — và bên trong cả năm thuật toán hậu lượng tử NIST đã hoặc đang chuẩn hoá (mục 5).</p>
+<p lang="en">Hash functions are everywhere: hash-then-sign in digital signatures, message authentication codes (HMAC,
+KMAC), key derivation, random bit generators — and inside all five post-quantum algorithms NIST has standardised or is
+standardising (section 5).</p>
+
+<!-- ================================================================ 2 -->
+<h2><span lang="vi">2. Hai cách dựng: dây chuyền Merkle–Damgård và bọt biển</span><span lang="en">2. Two constructions: the Merkle–Damgård chain and the sponge</span></h2>
+<p lang="vi"><strong>Merkle–Damgård</strong> (MD5, SHA-1, SHA-2) dùng một <em>hàm nén</em> f: nhận trạng thái hiện tại (128 bit
+với MD5, 160 với SHA-1, 256 hay 512 với SHA-2) cùng một khối thông điệp (512 hay 1&#8239;024 bit) và trả về trạng thái mới cùng
+cỡ. Thông điệp được đệm cho đủ
+khối, rồi đi qua f từng khối một; trạng thái cuối cùng (hay một phần của nó) là digest.</p>
+<p lang="en"><strong>Merkle–Damgård</strong> (MD5, SHA-1, SHA-2) uses a <em>compression function</em> f: it takes the
+current state (128 bits for MD5, 160 for SHA-1, 256 or 512 for SHA-2) and one message block (512 or 1,024 bits) and returns
+a new state of the same size. The
+message is padded to whole blocks and fed through f one block at a time; the final state (or part of it) is the digest.</p>
+<figure class="svgfig">
+<svg viewBox="0 0 760 190" role="img" aria-label="Merkle–Damgård">
+  <text x="22" y="104" class="mono">IV</text>
+  <line class="ln" x1="48" y1="100" x2="98" y2="100"/><polygon points="98,95 106,100 98,105" fill="#14538f"/>
+  <rect class="fbox" x="106" y="78" width="64" height="44" rx="8"/><text x="133" y="105">f</text>
+  <line class="ln" x1="170" y1="100" x2="238" y2="100"/><polygon points="238,95 246,100 238,105" fill="#14538f"/>
+  <rect class="fbox" x="246" y="78" width="64" height="44" rx="8"/><text x="273" y="105">f</text>
+  <line class="ln dash" x1="310" y1="100" x2="398" y2="100"/><polygon points="398,95 406,100 398,105" fill="#14538f"/>
+  <rect class="fbox" x="406" y="78" width="64" height="44" rx="8"/><text x="433" y="105">f</text>
+  <line class="ln" x1="470" y1="100" x2="548" y2="100"/><polygon points="548,95 556,100 548,105" fill="#14538f"/>
+  <rect class="box" x="556" y="80" width="186" height="40" rx="8"/><text x="566" y="105" class="mono">H(M) = state / Trunc</text>
+  <rect class="box" x="104" y="12" width="68" height="30" rx="6"/><text x="124" y="32" class="mono">M1</text>
+  <rect class="box" x="244" y="12" width="68" height="30" rx="6"/><text x="264" y="32" class="mono">M2</text>
+  <rect class="box" x="388" y="12" width="104" height="30" rx="6"/><text x="398" y="32" class="mono">Mk ‖ pad</text>
+  <line class="ln2" x1="138" y1="42" x2="138" y2="70"/><polygon points="133,70 138,78 143,70" fill="#2a9d8f"/>
+  <line class="ln2" x1="278" y1="42" x2="278" y2="70"/><polygon points="273,70 278,78 283,70" fill="#2a9d8f"/>
+  <line class="ln2" x1="438" y1="42" x2="438" y2="70"/><polygon points="433,70 438,78 443,70" fill="#2a9d8f"/>
+  <text x="180" y="92" class="small">256 / 512</text>
+  <text lang="vi" x="106" y="150" class="small">f: hàm nén (cộng mod 2^32 / 2^64, xoay, Ch, Maj), 64 hay 80 bước mỗi khối</text>
+  <text lang="en" x="106" y="150" class="small">f: compression function (adds mod 2^32 / 2^64, rotations, Ch, Maj), 64 or 80 steps per block</text>
+  <text lang="vi" x="106" y="172" class="small">pad = 1, các bit 0, rồi độ dài thông điệp (64 hay 128 bit, big-endian)</text>
+  <text lang="en" x="106" y="172" class="small">pad = a 1 bit, zero bits, then the message length (64 or 128 bits, big-endian)</text>
+</svg>
+<figcaption><span lang="vi">Hình 1 — Merkle–Damgård: digest chính là trạng thái cuối của dây chuyền (SHA-256, SHA-512) hoặc một phần của nó - "Trunc" trong hình (SHA-224, SHA-384, SHA-512/t).</span><span lang="en">Figure 1 — Merkle–Damgård: the digest is the chain's final state (SHA-256, SHA-512) or part of it - "Trunc" in the figure (SHA-224, SHA-384, SHA-512/t).</span></figcaption>
+</figure>
+<p lang="vi"><strong>Bọt biển</strong> (SHA-3, SHAKE) đổi hẳn cách nhìn. Có một trạng thái lớn 1&#8239;600 bit chia làm hai phần:
+phần <em>tốc độ</em> r bit (rate) là chỗ dữ liệu đi vào và đi ra, phần <em>dung lượng</em> c bit (capacity) không bao giờ
+được đọc hay ghi trực tiếp. Hút vào (<span data-i18n="neutral">absorb</span>): XOR một khối r bit vào phần tốc độ rồi chạy hoán vị f = Keccak-p[1&#8239;600, 24].
+Vắt ra (<span data-i18n="neutral">squeeze</span>): đọc r bit đầu, chạy f, đọc tiếp — muốn bao nhiêu bit cũng được. Toàn bộ an ninh nằm ở c: mức an ninh là
+c/2 bit.</p>
+<p lang="en">The <strong>sponge</strong> (SHA-3, SHAKE) changes the picture completely. There is one large 1,600-bit state
+split in two: the <em>rate</em> of r bits, where data goes in and out, and the <em>capacity</em> of c bits, which is never
+read or written directly. Absorbing: XOR an r-bit block into the rate, then run the permutation f = Keccak-p[1600, 24].
+Squeezing: read the first r bits, run f, read again — as many bits as you like. All the security lives in c: the
+security level is c/2 bits.</p>
+<figure class="svgfig">
+<svg viewBox="0 0 760 210" role="img" aria-label="sponge">
+  <rect class="rpart" x="20" y="60" width="60" height="44"/><rect class="cpart" x="20" y="104" width="60" height="44"/>
+  <text x="44" y="87" class="mono">r</text><text x="44" y="131" class="mono">c</text>
+  <text x="22" y="170" class="small">0…0</text>
+  <circle cx="118" cy="82" r="10" class="box"/><text x="112" y="87" class="mono">⊕</text>
+  <line class="ln" x1="80" y1="82" x2="108" y2="82"/><line class="ln" x1="80" y1="126" x2="150" y2="126"/>
+  <line class="ln" x1="128" y1="82" x2="150" y2="82"/>
+  <rect class="fbox" x="150" y="60" width="70" height="88" rx="8"/><text x="180" y="108">f</text>
+  <circle cx="258" cy="82" r="10" class="box"/><text x="252" y="87" class="mono">⊕</text>
+  <line class="ln" x1="220" y1="82" x2="248" y2="82"/><line class="ln" x1="220" y1="126" x2="290" y2="126"/>
+  <line class="ln" x1="268" y1="82" x2="290" y2="82"/>
+  <rect class="fbox" x="290" y="60" width="70" height="88" rx="8"/><text x="320" y="108">f</text>
+  <line class="ln dash" x1="360" y1="82" x2="420" y2="82"/><line class="ln dash" x1="360" y1="126" x2="420" y2="126"/>
+  <rect class="fbox" x="420" y="60" width="70" height="88" rx="8"/><text x="450" y="108">f</text>
+  <line class="ln" x1="490" y1="82" x2="560" y2="82"/><line class="ln" x1="490" y1="126" x2="560" y2="126"/>
+  <rect class="fbox" x="560" y="60" width="70" height="88" rx="8"/><text x="590" y="108">f</text>
+  <line class="ln" x1="630" y1="82" x2="700" y2="82"/><line class="ln dash" x1="630" y1="126" x2="700" y2="126"/>
+  <rect class="box" x="100" y="12" width="40" height="26" rx="5"/><text x="108" y="30" class="mono">P1</text>
+  <rect class="box" x="238" y="12" width="40" height="26" rx="5"/><text x="246" y="30" class="mono">P2</text>
+  <line class="ln2" x1="118" y1="38" x2="118" y2="64"/><line class="ln2" x1="258" y1="38" x2="258" y2="64"/>
+  <rect class="box" x="490" y="164" width="40" height="26" rx="5"/><text x="498" y="182" class="mono">Z0</text>
+  <rect class="box" x="630" y="164" width="40" height="26" rx="5"/><text x="638" y="182" class="mono">Z1</text>
+  <line class="ln2" x1="510" y1="82" x2="510" y2="160"/><line class="ln2" x1="650" y1="82" x2="650" y2="160"/>
+  <text lang="vi" x="160" y="200" class="small">hút vào: P = M ‖ hậu tố ‖ pad10*1</text>
+  <text lang="en" x="160" y="200" class="small">absorb: P = M ‖ suffix ‖ pad10*1</text>
+  <text lang="vi" x="560" y="40" class="small">vắt ra: Z0 ‖ Z1 ‖ …</text>
+  <text lang="en" x="560" y="40" class="small">squeeze: Z0 ‖ Z1 ‖ …</text>
+  <text x="372" y="40" class="small">r + c = 1600</text>
+</svg>
+<figcaption><span lang="vi">Hình 2 — Bọt biển: dữ liệu chỉ chạm vào r bit; c bit bên dưới không bao giờ lộ ra. f là một hoán vị (đảo ngược được), an ninh đến từ phần bị giấu.</span><span lang="en">Figure 2 — The sponge: data only ever touches r bits; the c bits underneath are never exposed. f is a permutation (invertible); the security comes from the hidden part.</span></figcaption>
+</figure>
+
+<h3><span lang="vi">Tấn công mở rộng độ dài: chỗ hai cách dựng khác nhau rõ nhất</span><span lang="en">Length extension: where the two constructions differ most</span></h3>
+<p lang="vi">Với SHA-256, digest <em>là</em> toàn bộ trạng thái sau khối cuối. Ai biết SHA-256(bí mật ‖ m) và độ dài của
+(bí mật ‖ m) có thể nạp digest đó làm trạng thái và băm tiếp — tính ra SHA-256(bí mật ‖ m ‖ đệm ‖ phần thêm) mà không cần
+biết bí mật. Vì thế H(khoá ‖ thông điệp) <em>không</em> phải là mã xác thực khi H là SHA-256 hay SHA-512; HMAC (FIPS 198-1)
+ra đời để vá chỗ này. Các hàm cắt ngắn giấu bớt trạng thái: SHA-384 giấu 128 bit, SHA-512/256 giấu 256 bit, SHA-512/224
+giấu 288 bit — đủ để chặn. SHA-224 chỉ giấu 32 bit: đoán thử 2<sup>32</sup> lần là xong, nên đừng coi nó là được bảo vệ.
+Với SHA-3 và SHAKE, c bit dung lượng không bao giờ ra ngoài, nên đặt khoá trước thông điệp là một cách xác thực đúng; SP
+800-185 chuẩn hoá nó thành KMAC.</p>
+<p lang="en">With SHA-256 the digest <em>is</em> the whole state after the last block. Anyone who knows SHA-256(secret ‖ m) and
+the length of (secret ‖ m) can load that digest as the state and keep hashing — computing SHA-256(secret ‖ m ‖ padding ‖
+extra) without knowing the secret. So H(key ‖ message) is <em>not</em> a message authentication code when H is SHA-256 or
+SHA-512; HMAC (FIPS 198-1) exists to close that hole. Truncated functions hide part of the state: SHA-384 hides 128 bits,
+SHA-512/256 hides 256, SHA-512/224 hides 288 — enough to stop it. SHA-224 hides only 32 bits: 2<sup>32</sup> guesses and
+it is done, so do not count it as protected. With SHA-3 and SHAKE the c capacity bits never leave, so putting the key in
+front of the message is a sound MAC; SP 800-185 standardises it as KMAC.</p>
+<div class="mini" id="lx-box">
+  <h4><span lang="vi">Thử giả mạo: bạn đóng vai kẻ tấn công, chỉ biết digest và độ dài</span><span lang="en">Try the forgery: you are the attacker, knowing only the digest and the length</span></h4>
+  <div class="chips" role="radiogroup" aria-labelledby="lx-fn-l">
+    <span class="chips-l" id="lx-fn-l"><span lang="vi">Hàm</span><span lang="en">Function</span></span>
+    <label class="chip"><input type="radio" name="lx-fn" value="SHA-256" checked/><span>SHA-256</span></label>
+    <label class="chip"><input type="radio" name="lx-fn" value="SHA-512"/><span>SHA-512</span></label>
+    <label class="chip"><input type="radio" name="lx-fn" value="SHA-1"/><span>SHA-1</span></label>
+    <label class="chip"><input type="radio" name="lx-fn" value="SHA-224"/><span>SHA-224</span></label>
+    <label class="chip"><input type="radio" name="lx-fn" value="SHA-384"/><span>SHA-384</span></label>
+    <label class="chip"><input type="radio" name="lx-fn" value="SHA-512/256"/><span>SHA-512/256</span></label>
+    <label class="chip"><input type="radio" name="lx-fn" value="SHA3-256"/><span>SHA3-256</span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="lx-secret"><span lang="vi">Bí mật của máy chủ (kẻ tấn công chỉ biết độ dài)</span><span lang="en">The server's secret (the attacker knows only its length)</span></label><span class="cnt" id="lx-secret-cnt"></span></div>
+    <textarea id="lx-secret" rows="1" spellcheck="false" autocomplete="off">k3y-only-the-server-knows</textarea>
+    <div class="tools" id="lx-secret-tools"></div>
+  </div>
+  <div class="fld">
+    <div class="fld-head"><label for="lx-msg"><span lang="vi">Thông điệp gốc m (công khai)</span><span lang="en">Original message m (public)</span></label><span class="cnt" id="lx-msg-cnt"></span></div>
+    <textarea id="lx-msg" rows="1" spellcheck="false" autocomplete="off">user=frank&amp;amount=100</textarea>
+    <div class="tools" id="lx-msg-tools"></div>
+  </div>
+  <div class="fld">
+    <div class="fld-head"><label for="lx-ext"><span lang="vi">Phần kẻ tấn công muốn nối thêm</span><span lang="en">What the attacker wants to append</span></label><span class="cnt" id="lx-ext-cnt"></span></div>
+    <textarea id="lx-ext" rows="1" spellcheck="false" autocomplete="off">&amp;amount=1000000</textarea>
+    <div class="tools" id="lx-ext-tools"></div>
+  </div>
+  <div class="row"><button class="btn" id="lx-go" type="button"><span lang="vi">Giả mạo</span><span lang="en">Forge</span></button></div>
+  <div class="result info" id="lx-result" role="status" aria-live="polite"></div>
+</div>
+
+<!-- ================================================================ 3 -->
+<h2><span lang="vi">3. FIPS 180-4: bảy hàm, hai cỗ máy</span><span lang="en">3. FIPS 180-4: seven functions, two engines</span></h2>
+<p lang="vi">FIPS 180-4 (Secure Hash Standard) định nghĩa SHA-1 và sáu hàm SHA-2. Nhìn kỹ thì chỉ có hai cỗ máy: một cỗ
+máy từ 32 bit (khối 512 bit, 64 bước) và một cỗ máy từ 64 bit (khối 1&#8239;024 bit, 80 bước). Các hàm cùng cỗ máy chỉ khác
+nhau ở <em>giá trị khởi đầu</em> (IV) và ở số bit được giữ lại ở cuối.</p>
+<p lang="en">FIPS 180-4 (the Secure Hash Standard) defines SHA-1 and six SHA-2 functions. Look closely and there are only
+two engines: one with 32-bit words (512-bit blocks, 64 steps) and one with 64-bit words (1,024-bit blocks, 80 steps).
+Functions on the same engine differ only in their <em>initial value</em> (IV) and in how many bits are kept at the end.</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Hàm</span><span lang="en">Function</span></th>
+  <th><span lang="vi">Từ</span><span lang="en">Word</span></th>
+  <th><span lang="vi">Bước</span><span lang="en">Steps</span></th>
+  <th><span lang="vi">Khối</span><span lang="en">Block</span></th>
+  <th><span lang="vi">Ô độ dài</span><span lang="en">Length field</span></th>
+  <th>Digest</th>
+  <th><span lang="vi">IV lấy từ</span><span lang="en">IV comes from</span></th>
+</tr></thead>
+<tbody>
+  <tr><td>SHA-1 <span class="tag"><span lang="vi">cũ</span><span lang="en">legacy</span></span></td><td class="num">32</td><td class="num">80</td><td class="num">512</td><td class="num">64</td><td class="num">160</td>
+      <td><span lang="vi">cho sẵn trong chuẩn</span><span lang="en">listed in the standard</span></td></tr>
+  <tr><td data-i18n="neutral">SHA-224</td><td class="num">32</td><td class="num">64</td><td class="num">512</td><td class="num">64</td><td class="num">224</td>
+      <td><span lang="vi">32 bit thấp của IV SHA-384</span><span lang="en">the low 32 bits of SHA-384's IV</span></td></tr>
+  <tr><td data-i18n="neutral">SHA-256</td><td class="num">32</td><td class="num">64</td><td class="num">512</td><td class="num">64</td><td class="num">256</td>
+      <td><span lang="vi">√ của 8 số nguyên tố đầu</span><span lang="en">√ of the first 8 primes</span></td></tr>
+  <tr><td data-i18n="neutral">SHA-384</td><td class="num">64</td><td class="num">80</td><td class="num">1024</td><td class="num">128</td><td class="num">384</td>
+      <td><span lang="vi">√ của số nguyên tố thứ 9–16</span><span lang="en">√ of the 9th–16th primes</span></td></tr>
+  <tr><td data-i18n="neutral">SHA-512</td><td class="num">64</td><td class="num">80</td><td class="num">1024</td><td class="num">128</td><td class="num">512</td>
+      <td><span lang="vi">√ của 8 số nguyên tố đầu</span><span lang="en">√ of the first 8 primes</span></td></tr>
+  <tr><td data-i18n="neutral">SHA-512/224</td><td class="num">64</td><td class="num">80</td><td class="num">1024</td><td class="num">128</td><td class="num">224</td>
+      <td><span lang="vi">sinh bằng chính SHA-512</span><span lang="en">generated by SHA-512 itself</span></td></tr>
+  <tr><td data-i18n="neutral">SHA-512/256</td><td class="num">64</td><td class="num">80</td><td class="num">1024</td><td class="num">128</td><td class="num">256</td>
+      <td><span lang="vi">sinh bằng chính SHA-512</span><span lang="en">generated by SHA-512 itself</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Kích thước tính bằng bit. "√ của số nguyên tố" nghĩa là các bit đầu của <em>phần lẻ</em> căn bậc hai: √2 =
+1,6a09e667… (hệ 16), nên từ đầu tiên của IV SHA-256 là <code>6a09e667</code>. 64 hằng số vòng K của SHA-256 là 32 bit đầu
+phần lẻ của căn bậc <em>ba</em> 64 số nguyên tố đầu (K<sub>0</sub> = <code>428a2f98</code> từ ∛2), 80 hằng số của SHA-512 là
+64 bit đầu phần lẻ của căn bậc ba 80 số nguyên tố đầu. Bốn hằng số của SHA-1 bằng ⌊2<sup>30</sup>·√2⌋, ⌊2<sup>30</sup>·√3⌋, ⌊2<sup>30</sup>·√5⌋,
+⌊2<sup>30</sup>·√10⌋ = <code>5a827999 6ed9eba1 8f1bbcdc ca62c1d6</code>. Trang này không chép bảng nào: nó tính tất cả lúc
+nạp, bằng căn nguyên của số nguyên lớn, rồi phần tự kiểm so lại với đáp án.</p>
+<p lang="en">Sizes in bits. "√ of primes" means the leading bits of the <em>fractional part</em> of the square root: √2 =
+1.6a09e667… (hexadecimal), so the first word of SHA-256's IV is <code>6a09e667</code>. SHA-256's 64 round constants K are the
+first 32 bits of the fractional parts of the <em>cube</em> roots of the first 64 primes (K<sub>0</sub> = <code>428a2f98</code>
+from ∛2); SHA-512's 80 constants are the first 64 bits of the fractional parts of the cube roots of the first 80 primes. SHA-1's four constants equal ⌊2<sup>30</sup>·√2⌋,
+⌊2<sup>30</sup>·√3⌋, ⌊2<sup>30</sup>·√5⌋, ⌊2<sup>30</sup>·√10⌋ = <code>5a827999 6ed9eba1 8f1bbcdc ca62c1d6</code>. This page
+copies no table: it computes them all at load time with integer roots of big numbers, and the self-test checks them.</p>
+
+<h3><span lang="vi">Một bước của SHA-256</span><span lang="en">One step of SHA-256</span></h3>
+<pre data-i18n="neutral"><code>W[t] = M[t]                                               t = 0..15
+W[t] = σ1(W[t-2]) + W[t-7] + σ0(W[t-15]) + W[t-16]        t = 16..63
+
+T1 = h + Σ1(e) + Ch(e, f, g) + K[t] + W[t]
+T2 = Σ0(a) + Maj(a, b, c)
+h ← g   g ← f   f ← e   e ← d + T1   d ← c   c ← b   b ← a   a ← T1 + T2
+
+Σ0(a) = ROTR²(a) ⊕ ROTR¹³(a) ⊕ ROTR²²(a)      σ0(x) = ROTR⁷(x) ⊕ ROTR¹⁸(x) ⊕ SHR³(x)
+Σ1(e) = ROTR⁶(e) ⊕ ROTR¹¹(e) ⊕ ROTR²⁵(e)      σ1(x) = ROTR¹⁷(x) ⊕ ROTR¹⁹(x) ⊕ SHR¹⁰(x)
+Ch(e,f,g)  = (e ∧ f) ⊕ (¬e ∧ g)
+Maj(a,b,c) = (a ∧ b) ⊕ (a ∧ c) ⊕ (b ∧ c)</code></pre>
+<ul lang="vi">
+  <li><strong>a … h</strong> — tám thanh ghi 32 bit giữ trạng thái; mỗi bước chỉ tạo ra hai giá trị mới (a và e), sáu
+      thanh ghi kia chỉ dịch chỗ.</li>
+  <li><strong>W[t]</strong> — lịch thông điệp: 16 từ của khối, mở rộng thành 64 từ.</li>
+  <li><strong>K[t]</strong> — hằng số của bước t (căn bậc ba ở trên).</li>
+  <li><strong>Ch</strong> — "chọn": bit của e quyết định lấy bit của f hay của g. <strong>Maj</strong> — "đa số" của ba bit.</li>
+  <li><strong>ROTR / SHR</strong> — xoay phải / dịch phải; <strong>+</strong> là cộng mod 2<sup>32</sup>.</li>
+  <li>Hết 64 bước, cộng trạng thái lúc vào khối vào kết quả (feed-forward) — chính phép cộng này làm hàm nén không đi
+      ngược được.</li>
+</ul>
+<ul lang="en">
+  <li><strong>a … h</strong> — eight 32-bit registers holding the state; each step makes only two new values (a and e),
+      the other six just shift along.</li>
+  <li><strong>W[t]</strong> — the message schedule: the block's 16 words expanded into 64.</li>
+  <li><strong>K[t]</strong> — step t's constant (the cube roots above).</li>
+  <li><strong>Ch</strong> — "choose": each bit of e picks the bit of f or of g. <strong>Maj</strong> — the majority of
+      three bits.</li>
+  <li><strong>ROTR / SHR</strong> — rotate right / shift right; <strong>+</strong> is addition mod 2<sup>32</sup>.</li>
+  <li>After the 64 steps, the state that entered the block is added back (the feed-forward) — that addition is what
+      makes the compression function impossible to run backwards.</li>
+</ul>
+<p lang="vi">SHA-512 có cùng hình dạng, với từ 64 bit, 80 bước, và bộ độ xoay riêng (Σ0: 28, 34, 39; Σ1: 14, 18, 41; σ0:
+1, 8, dịch 7; σ1: 19, 61, dịch 6). SHA-1 thì gọn hơn: năm thanh ghi, 80 bước, và lịch thông điệp <em>tuyến tính</em> —
+W[t] = ROTL¹(W[t−3] ⊕ W[t−8] ⊕ W[t−14] ⊕ W[t−16]), chỉ có XOR — chính là điểm yếu mà các tấn công va chạm khai thác.</p>
+<p lang="en">SHA-512 has the same shape, with 64-bit words, 80 steps and its own rotation amounts (Σ0: 28, 34, 39; Σ1: 14,
+18, 41; σ0: 1, 8, shift 7; σ1: 19, 61, shift 6). SHA-1 is leaner: five registers, 80 steps and a <em>linear</em> message
+schedule — W[t] = ROTL¹(W[t−3] ⊕ W[t−8] ⊕ W[t−14] ⊕ W[t−16]), XOR only — which is exactly the weakness the collision
+attacks exploit.</p>
+
+<h3><span lang="vi">"SHA-384 là SHA-512 cắt ngắn" — chỉ đúng một nửa</span><span lang="en">"SHA-384 is truncated SHA-512" — only half true</span></h3>
+<p lang="vi">Cùng cỗ máy, nhưng IV khác, nên kết quả khác hoàn toàn. Với thông điệp <code>The quick brown fox</code>:</p>
+<p lang="en">Same engine, but a different IV, so the result is completely different. For the message
+<code>The quick brown fox</code>:</p>
+<pre data-i18n="neutral"><code>SHA-384                   = 2e45933dd1a1e6a6928a732d58abeb180c225e5e7b99c64e
+                            b6f233a7b99ee4635c17f44ca544cf620cf4289deb4c08cf
+SHA-512, first 48 bytes   = 015e6d23e760f612cca616c54f110cb12dd54213f1e046c7
+                            607081372402eff4936b379296ed549236020afb37bd3e72</code></pre>
+<p lang="vi">IV riêng tách hai hàm thành hai "miền": biết SHA-384(m) không cho biết gì về SHA-512(m). SHA-512/t đi xa hơn:
+IV của nó do chính SHA-512 sinh ra (FIPS 180-4, mục 5.3.6) — lấy IV của SHA-512, XOR mỗi từ với
+<code>a5a5a5a5a5a5a5a5</code>, rồi băm chuỗi ASCII <code>SHA-512/256</code> (hay <code>SHA-512/224</code>); tám từ kết quả
+là IV mới. Bấm nút dưới đây để trang chạy đúng các bước đó.</p>
+<p lang="en">The separate IV puts the two functions in two "domains": knowing SHA-384(m) tells you nothing about SHA-512(m).
+SHA-512/t goes further: its IV is generated by SHA-512 itself (FIPS 180-4, section 5.3.6) — take SHA-512's IV, XOR every
+word with <code>a5a5a5a5a5a5a5a5</code>, then hash the ASCII string <code>SHA-512/256</code> (or <code>SHA-512/224</code>);
+the eight resulting words are the new IV. Press the button below to have the page run exactly those steps.</p>
+<div class="mini" id="iv-box">
+  <div class="row">
+    <div class="chips" role="radiogroup" aria-labelledby="iv-t-l">
+      <span class="chips-l" id="iv-t-l">t</span>
+      <label class="chip"><input type="radio" name="iv-t" value="256" checked/><span>SHA-512/256</span></label>
+      <label class="chip"><input type="radio" name="iv-t" value="224"/><span>SHA-512/224</span></label>
+    </div>
+    <button class="btn sm" id="iv-go" type="button"><span lang="vi">Sinh IV</span><span lang="en">Generate the IV</span></button>
+  </div>
+  <div id="iv-out" class="hexbox" hidden></div>
+  <div class="result info" id="iv-result" role="status" aria-live="polite"></div>
+</div>
+<p lang="vi">Vì sao lại có SHA-512/256? Trên CPU 64 bit, cỗ máy 64 bit xử lý 1&#8239;024 bit mỗi 80 bước (12,8 bit mỗi bước) so
+với 512 bit mỗi 64 bước (8 bit mỗi bước) của SHA-256, nên trên CPU không có lệnh SHA-256 chuyên dụng, SHA-512/256 thường nhanh hơn SHA-256 — lại
+không bị mở rộng độ dài. Trong phần cứng, bài toán đánh đổi lại khác (bộ cộng 64 bit dài hơn, trạng thái rộng gấp đôi); xem mục 6.</p>
+<p lang="en">Why SHA-512/256 at all? On a 64-bit CPU the 64-bit engine handles 1,024 bits per 80 steps (12.8 bits per step)
+against SHA-256's 512 bits per 64 steps (8 bits per step), so on CPUs without dedicated SHA-256 instructions SHA-512/256 is often faster than SHA-256 in
+software — and it resists length extension. In hardware the trade-off is different (longer 64-bit adders, twice the state); see section 6.</p>
+
+<!-- ================================================================ 4 -->
+<h2><span lang="vi">4. Keccak và SHA-3: một hoán vị 1&#8239;600 bit</span><span lang="en">4. Keccak and SHA-3: one 1,600-bit permutation</span></h2>
+<p lang="vi">Keccak thắng cuộc thi SHA-3 của NIST năm 2012; FIPS 202 ban hành năm 2015. Trạng thái 1&#8239;600 bit được xếp
+thành 5 × 5 <em>lane</em>, mỗi lane 64 bit; lane (x, y) với x, y = 0..4. Trong luồng byte, lane thứ x + 5y chiếm 8 byte, byte
+thấp trước. Một vòng gồm năm bước, lặp 24 lần (Keccak-p[1&#8239;600, 24]):</p>
+<p lang="en">Keccak won NIST's SHA-3 competition in 2012; FIPS 202 was published in 2015. The 1,600-bit state is arranged
+as 5 × 5 <em>lanes</em> of 64 bits each; lane (x, y) with x, y = 0..4. In the byte stream, lane number x + 5y takes 8 bytes,
+low byte first. One round has five steps, repeated 24 times (Keccak-p[1600, 24]):</p>
+<pre data-i18n="neutral"><code>θ:  C[x] = A[x,0] ⊕ A[x,1] ⊕ A[x,2] ⊕ A[x,3] ⊕ A[x,4]
+    D[x] = C[x−1] ⊕ ROT(C[x+1], 1)            A[x,y] ← A[x,y] ⊕ D[x]
+ρ:  A[x,y] ← ROT(A[x,y], r[x,y])
+π:  A[x,y] ← A[(x + 3y) mod 5, x]
+χ:  A[x,y] ← A[x,y] ⊕ (¬A[x+1,y] ∧ A[x+2,y])
+ι:  A[0,0] ← A[0,0] ⊕ RC[i]                    i = 0..23</code></pre>
+<ul lang="vi">
+  <li><strong>θ</strong> (theta) — mỗi bit nhận thêm chẵn lẻ của hai cột bên cạnh: khuếch tán nhanh.</li>
+  <li><strong>ρ</strong> (rho) — xoay mỗi lane một lượng cố định; 25 lượng xoay được sinh bằng một đường đi
+      (x, y) → (y, 2x + 3y) bắt đầu từ (1, 0), lượng thứ t là (t + 1)(t + 2)/2 mod 64 (FIPS 202, thuật toán 2).</li>
+  <li><strong>π</strong> (pi) — đổi chỗ 25 lane. ρ và π trong phần cứng chỉ là dây nối.</li>
+  <li><strong>χ</strong> (chi) — bước <em>phi tuyến</em> duy nhất, bậc 2: một NOT, một AND, một XOR cho mỗi bit.</li>
+  <li><strong>ι</strong> (iota) — XOR hằng số vòng vào lane (0, 0) để các vòng khác nhau; RC sinh từ một thanh ghi
+      LFSR 8 bit (thuật toán 5), RC[0] = <code>0000000000000001</code>, RC[23] = <code>8000000080008008</code>.</li>
+</ul>
+<ul lang="en">
+  <li><strong>θ</strong> (theta) — every bit gets the parity of two neighbouring columns: fast diffusion.</li>
+  <li><strong>ρ</strong> (rho) — rotate each lane by a fixed amount; the 25 amounts come from a walk (x, y) → (y, 2x + 3y)
+      starting at (1, 0), amount number t being (t + 1)(t + 2)/2 mod 64 (FIPS 202, algorithm 2).</li>
+  <li><strong>π</strong> (pi) — move the 25 lanes around. In hardware, ρ and π are just wiring.</li>
+  <li><strong>χ</strong> (chi) — the <em>only nonlinear</em> step, of degree 2: one NOT, one AND, one XOR per bit.</li>
+  <li><strong>ι</strong> (iota) — XOR a round constant into lane (0, 0) so the rounds differ; RC comes from an 8-bit
+      LFSR (algorithm 5), RC[0] = <code>0000000000000001</code>, RC[23] = <code>8000000080008008</code>.</li>
+</ul>
+
+<h3><span lang="vi">Tốc độ, dung lượng, và sáu hàm của FIPS 202</span><span lang="en">Rate, capacity, and the six functions of FIPS 202</span></h3>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Hàm</span><span lang="en">Function</span></th>
+  <th><span lang="vi">r (bit / byte)</span><span lang="en">r (bits / bytes)</span></th>
+  <th>c</th>
+  <th><span lang="vi">Đầu ra</span><span lang="en">Output</span></th>
+  <th><span lang="vi">An ninh va chạm / tiền ảnh</span><span lang="en">Collision / preimage security</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">SHA3-224</td><td class="num">1152 / 144</td><td class="num">448</td><td class="num">224</td><td class="num">112 / 224</td></tr>
+  <tr><td data-i18n="neutral">SHA3-256</td><td class="num">1088 / 136</td><td class="num">512</td><td class="num">256</td><td class="num">128 / 256</td></tr>
+  <tr><td data-i18n="neutral">SHA3-384</td><td class="num">832 / 104</td><td class="num">768</td><td class="num">384</td><td class="num">192 / 384</td></tr>
+  <tr><td data-i18n="neutral">SHA3-512</td><td class="num">576 / 72</td><td class="num">1024</td><td class="num">512</td><td class="num">256 / 512</td></tr>
+  <tr><td data-i18n="neutral">SHAKE128</td><td class="num">1344 / 168</td><td class="num">256</td><td class="num">d</td><td class="num" data-i18n="neutral">min(d/2, 128) / min(d, 128)</td></tr>
+  <tr><td data-i18n="neutral">SHAKE256</td><td class="num">1088 / 136</td><td class="num">512</td><td class="num">d</td><td class="num" data-i18n="neutral">min(d/2, 256) / min(d, 256)</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Luôn có r + c = 1&#8239;600 và c = 2 × độ dài digest với SHA3-*: muốn an toàn hơn thì giảm r, tức băm chậm hơn trên
+cùng một hoán vị. d là số bit đầu ra bạn yêu cầu từ SHAKE.</p>
+<p lang="en">Always r + c = 1,600, and c = 2 × the digest length for SHA3-*: more security means a smaller r, that is slower
+hashing on the same permutation. d is the number of output bits you ask SHAKE for.</p>
+
+<h3><span lang="vi">Hậu tố miền và pad10*1, tới từng byte</span><span lang="en">Domain suffix and pad10*1, down to the byte</span></h3>
+<p lang="vi">Trước khi đệm, FIPS 202 nối vào thông điệp vài bit "hậu tố miền" để cùng một hoán vị cho ra các hàm khác
+nhau: SHA3 nối <code>01</code>, SHAKE nối <code>1111</code>, cSHAKE (SP 800-185) nối <code>00</code>. Sau đó là pad10*1: một
+bit 1, các bit 0, và một bit 1 ở bit cuối cùng của khối. Vì Keccak đánh số bit từ bit <em>thấp</em> của mỗi byte, khi thông
+điệp là các byte trọn vẹn thì hậu tố cộng bit 1 đầu tiên gộp thành một byte, và bit 1 cuối là <code>0x80</code> ở byte cuối
+khối:</p>
+<p lang="en">Before padding, FIPS 202 appends a few "domain suffix" bits so that the same permutation yields different
+functions: SHA3 appends <code>01</code>, SHAKE appends <code>1111</code>, cSHAKE (SP 800-185) appends <code>00</code>. Then
+comes pad10*1: a 1 bit, zero bits, and a 1 bit as the very last bit of the block. Because Keccak numbers bits from the
+<em>low</em> end of each byte, for whole-byte messages the suffix plus the first 1 bit merge into one byte, and the final 1
+bit is <code>0x80</code> in the block's last byte:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Họ</span><span lang="en">Family</span></th>
+  <th><span lang="vi">Hậu tố</span><span lang="en">Suffix</span></th>
+  <th><span lang="vi">Byte đầu của phần đệm</span><span lang="en">First padding byte</span></th>
+  <th><span lang="vi">Còn đúng một byte trong khối</span><span lang="en">Exactly one byte left in the block</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">SHA3-*</td><td data-i18n="neutral"><code>01</code></td><td data-i18n="neutral"><code>06</code> … <code>80</code></td><td data-i18n="neutral"><code>86</code></td></tr>
+  <tr><td data-i18n="neutral">SHAKE*</td><td data-i18n="neutral"><code>1111</code></td><td data-i18n="neutral"><code>1F</code> … <code>80</code></td><td data-i18n="neutral"><code>9F</code></td></tr>
+  <tr><td data-i18n="neutral">cSHAKE*</td><td data-i18n="neutral"><code>00</code></td><td data-i18n="neutral"><code>04</code> … <code>80</code></td><td data-i18n="neutral"><code>84</code></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Ba trường hợp biên cần nhớ, lấy SHA3-256 (r = 136 byte) làm ví dụ: 135 byte → hậu tố và bit cuối chung một byte
+<code>86</code>, một hoán vị; 136 byte → khối đầy, phần đệm chiếm trọn một khối mới <code>06 00 … 00 80</code>, hai hoán vị;
+273 byte = 2 × 136 + 1 → ba hoán vị. Phòng thí nghiệm vẽ đúng các byte đó trong "bản đồ đệm".</p>
+<p lang="en">Three boundary cases worth remembering, with SHA3-256 (r = 136 bytes) as the example: 135 bytes → suffix and
+final bit share one byte <code>86</code>, one permutation; 136 bytes → the block is full and the padding takes a whole new
+block <code>06 00 … 00 80</code>, two permutations; 273 bytes = 2 × 136 + 1 → three permutations. The lab draws exactly
+those bytes in its "padding map".</p>
+
+<h3><span lang="vi">XOF và tính chất tiền tố</span><span lang="en">XOFs and the prefix property</span></h3>
+<p lang="vi">SHAKE128 và SHAKE256 là <em>hàm đầu ra mở rộng</em> (XOF): bạn chọn số byte đầu ra. Nhưng đầu ra dài hơn
+không "khác" đầu ra ngắn: SHAKE128(M, 32 byte) đúng bằng 32 byte đầu của SHAKE128(M, 64 byte), vì bọt biển chỉ vắt thêm.
+Hệ quả thực tế: đừng lấy hai độ dài khác nhau của cùng một XOF làm hai khoá khác nhau — khoá ngắn là phần đầu của khoá dài.
+SHA3-256 và SHA3-512 thì không liên quan gì nhau: dung lượng và hậu tố khác. Thẻ 4 của phòng thí nghiệm cho thấy cả hai
+điều.</p>
+<p lang="en">SHAKE128 and SHAKE256 are <em>extendable-output functions</em> (XOFs): you choose the number of output bytes.
+But a longer output is not "different" from a shorter one: SHAKE128(M, 32 bytes) is exactly the first 32 bytes of
+SHAKE128(M, 64 bytes), because the sponge just keeps squeezing. In practice: never use two lengths of the same XOF output
+as two different keys — the short key is the start of the long one. SHA3-256 and SHA3-512, on the other hand, are
+unrelated: different capacity and different output. Tab 4 of the lab shows both.</p>
+
+<h3><span lang="vi">cSHAKE: SHAKE có tên và chuỗi tuỳ biến</span><span lang="en">cSHAKE: SHAKE with a name and a customisation string</span></h3>
+<p lang="vi">SP 800-185 định nghĩa cSHAKE(X, L, N, S): N là tên hàm (dành cho NIST, ví dụ "KMAC"), S là chuỗi tuỳ biến của
+người dùng. Trước thông điệp X là một tiền tố chiếm trọn số khối:
+<code>bytepad(encode_string(N) ‖ encode_string(S), r)</code>, trong đó <code>encode_string</code> ghi độ dài bit của chuỗi
+ở trước nó, và <code>bytepad</code> đệm 0 cho tròn khối. Nếu N và S đều rỗng thì cSHAKE <em>chính là</em> SHAKE. Mẫu số 1
+của NIST: cSHAKE128(<code>00010203</code>, 256 bit, N = "", S = "Email Signature") =
+<code>c1c36925…14d5aaf5</code> — phòng thí nghiệm kiểm lại cả bốn mẫu.</p>
+<p lang="en">SP 800-185 defines cSHAKE(X, L, N, S): N is a function name (reserved for NIST, e.g. "KMAC"), S is the user's
+customisation string. Before the message X comes a prefix that fills whole blocks:
+<code>bytepad(encode_string(N) ‖ encode_string(S), r)</code>, where <code>encode_string</code> puts the string's bit length
+in front of it and <code>bytepad</code> zero-fills to a whole block. If N and S are both empty, cSHAKE <em>is</em> SHAKE.
+NIST's sample 1: cSHAKE128(<code>00010203</code>, 256 bits, N = "", S = "Email Signature") = <code>c1c36925…14d5aaf5</code> —
+the lab re-checks all four samples.</p>
+
+<!-- ================================================================ 5 -->
+<h2><span lang="vi">5. Hàm băm trong mật mã hậu lượng tử, và hiện trạng (tính đến 11/2026)</span><span lang="en">5. Hashes inside post-quantum cryptography, and their status (as of 11/2026)</span></h2>
+<p lang="vi">Cả ba chuẩn hậu lượng tử đã ban hành đều đứng trên hàm băm của bài này — và chủ yếu là Keccak; hai thuật toán còn đang chờ chuẩn (FN-DSA, HQC) cũng dùng Keccak qua SHAKE256:</p>
+<p lang="en">All three published post-quantum standards stand on the hashes of this article — mostly on Keccak; the two algorithms still awaiting their standards (FN-DSA, HQC) use Keccak too, through SHAKE256:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Chuẩn</span><span lang="en">Standard</span></th>
+  <th><span lang="vi">Hàm băm dùng ở đâu</span><span lang="en">Which hash, where</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">FIPS 203 · ML-KEM</td>
+      <td><span lang="vi">G = SHA3-512 (tách hạt giống), H = SHA3-256, J = SHAKE256 (khoá của từ chối ngầm), PRF = SHAKE256
+        (nhiễu), XOF = SHAKE128 (sinh ma trận công khai <span data-i18n="neutral">Â</span> bằng lấy mẫu loại bỏ).</span><span lang="en">G = SHA3-512 (seed
+        splitting), H = SHA3-256, J = SHAKE256 (the implicit-rejection key), PRF = SHAKE256 (noise), XOF = SHAKE128
+        (the public matrix <span data-i18n="neutral">Â</span> by rejection sampling).</span></td></tr>
+  <tr><td data-i18n="neutral">FIPS 204 · ML-DSA</td>
+      <td><span lang="vi">H = SHAKE256 cho gần như mọi thứ (khoá, mặt nạ y, μ, thách thức c̃); G = SHAKE128 sinh ma trận <span data-i18n="neutral">Â</span>
+        (ExpandA).</span><span lang="en">H = SHAKE256 for almost everything (keys, the mask y, μ, the challenge c̃);
+        G = SHAKE128 generates the matrix <span data-i18n="neutral">Â</span> (ExpandA).</span></td></tr>
+  <tr><td data-i18n="neutral">FIPS 205 · SLH-DSA</td>
+      <td><span lang="vi">Các bộ SHAKE: mọi hàm bên trong là SHAKE256. Các bộ SHA2: SHA-256, cộng thêm SHA-512 ở mức an toàn 3
+        và 5 (FIPS 205, mục 11.2.2).</span><span lang="en">The SHAKE sets: every inner function is SHAKE256. The SHA2 sets:
+        SHA-256, plus SHA-512 at security categories 3 and 5 (FIPS 205, section 11.2.2).</span></td></tr>
+  <tr><td><span lang="vi">Pre-hash</span><span lang="en">Pre-hash</span></td>
+      <td><span lang="vi">HashML-DSA và HashSLH-DSA ký giá trị băm của thông điệp, chọn trong 12 hàm: sáu hàm SHA-2, bốn hàm
+        SHA3, SHAKE128 và SHAKE256.</span><span lang="en">HashML-DSA and HashSLH-DSA sign a digest of the message, chosen
+        from 12 functions: the six SHA-2 functions, the four SHA3 functions, SHAKE128 and SHAKE256.</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Bạn có thể thấy chúng làm việc trong <a href="pqc-calculator.html">máy tính ML-KEM / ML-DSA</a> và
+<a href="nist-205-206-207-calculator.html">máy tính SLH-DSA / FN-DSA / HQC-KEM</a> của trang này — hai trang đó dùng chung
+các file băm mà phòng thí nghiệm dưới đây đem ra đối chiếu. Trong một bộ tăng tốc phần cứng cho ML-KEM hay ML-DSA, lõi
+Keccak thường là khối bận rộn nhất.</p>
+<p lang="en">You can watch them at work in this site's <a href="pqc-calculator.html">ML-KEM / ML-DSA calculator</a> and
+<a href="nist-205-206-207-calculator.html">SLH-DSA / FN-DSA / HQC-KEM calculator</a> — those pages use the shared hash
+files that the lab below cross-checks against. In a hardware accelerator for ML-KEM or ML-DSA, the Keccak core is
+usually the busiest block.</p>
+
+<h3><span lang="vi">SHA-1: đã vỡ, đang nghỉ hưu</span><span lang="en">SHA-1: broken, being retired</span></h3>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th><span lang="vi">Năm</span><span lang="en">Year</span></th><th><span lang="vi">Chuyện gì xảy ra</span><span lang="en">What happened</span></th></tr></thead>
+<tbody>
+  <tr><td class="num">2005</td><td><span lang="vi">Wang, Yin và Yu chỉ ra va chạm SHA-1 trên lý thuyết, cỡ 2<sup>69</sup> phép (CRYPTO 2005).</span><span lang="en">Wang, Yin and Yu show a theoretical SHA-1 collision of about 2<sup>69</sup> operations (CRYPTO 2005).</span></td></tr>
+  <tr><td class="num">2017</td><td><span lang="vi"><em>SHAttered</em> (CWI Amsterdam và Google, 23/02/2017): va chạm SHA-1 thật đầu tiên — hai file PDF khác nhau, cùng digest — sau khoảng chín tỉ tỉ (9 · 10<sup>18</sup>) lần tính SHA-1.</span><span lang="en"><em>SHAttered</em> (CWI Amsterdam and Google, 23 Feb 2017): the first real SHA-1 collision — two different PDF files with one digest — after roughly nine quintillion (9 · 10<sup>18</sup>) SHA-1 computations.</span></td></tr>
+  <tr><td class="num">2020</td><td><span lang="vi"><em>SHA-1 is a Shambles</em> (Leurent và Peyrin): va chạm <em>tiền tố chọn trước</em> đầu tiên, 2<sup>63,4</sup> phép, dùng để giả một khoá trong mạng tin cậy PGP / GnuPG.</span><span lang="en"><em>SHA-1 is a Shambles</em> (Leurent and Peyrin): the first <em>chosen-prefix</em> collision, 2<sup>63.4</sup> operations, used to forge a key in the PGP / GnuPG web of trust.</span></td></tr>
+  <tr><td class="num">2022</td><td><span lang="vi">NIST (15/12/2022): SHA-1 cần được loại bỏ trước 31/12/2030; một bản FIPS 180-5 sẽ xoá đặc tả SHA-1.</span><span lang="en">NIST (15 Dec 2022): SHA-1 should be phased out by 31 Dec 2030; a FIPS 180-5 will remove the SHA-1 specification.</span></td></tr>
+  <tr><td class="num">2024</td><td><span lang="vi">SP 800-131A Rev. 3, bản dự thảo đầu (21/10/2024): đề xuất lịch nghỉ hưu cho SHA-1 và các hàm băm 224 bit, và chuyển từ mức an ninh 112 bit lên 128 bit.</span><span lang="en">SP 800-131A Rev. 3, initial public draft (21 Oct 2024): proposes a retirement schedule for SHA-1 and the 224-bit hash functions, and a move from 112-bit to 128-bit security strength.</span></td></tr>
+  <tr><td class="num">2026</td><td><span lang="vi">NIST IR 8547, bản chính thức (27/10/2026): SHA-1 đã không còn được khuyến nghị (deprecated) cho mọi ứng dụng kỹ thuật còn lại và sẽ bị cấm trong các module mật mã được FIPS công nhận sau năm 2030; các chuẩn đối xứng ở mức an toàn 112 bit sẽ bị cấm từ năm 2030 (mục 4.1.3), và bảng 8 của nó xếp SHA-224, SHA-512/224 và SHA3-224 đúng ở mức 112 bit an toàn va chạm.</span><span lang="en">NIST IR 8547, final (27 Oct 2026): SHA-1 is deprecated for all remaining technical applications and will be disallowed in FIPS-validated cryptographic modules after 2030; symmetric standards at the 112-bit security level will be disallowed in 2030 (section 4.1.3), and its table 8 puts SHA-224, SHA-512/224 and SHA3-224 at exactly 112 bits of collision security.</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Khi tôi kiểm trên csrc.nist.gov ngày 02/11/2026, cả bản FIPS 180-5 lẫn bản chính thức của SP 800-131A Rev. 3
+đều chưa có trang (địa chỉ trả về 404): FIPS 180-4 và SP 800-131A Rev. 2 vẫn là văn bản hiện hành. Trong phòng thí nghiệm,
+SHA-1 vẫn có mặt (để đọc dữ liệu và giao thức cũ, và để so sánh), nhưng được đánh dấu "cũ".</p>
+<p lang="en">When I checked csrc.nist.gov on 2 November 2026, neither a FIPS 180-5 nor the final SP 800-131A Rev. 3 had a
+page yet (the addresses answer 404): FIPS 180-4 and SP 800-131A Rev. 2 are still the documents in force. In the lab SHA-1
+is still there (for reading old data and protocols, and for comparison), but marked "legacy".</p>
+
+<h3><span lang="vi">SHA-2 và SHA-3: dùng cái nào</span><span lang="en">SHA-2 and SHA-3: which to use</span></h3>
+<p lang="vi">Cả hai họ đều được phê duyệt và chưa có tấn công thực tế nào trên số vòng đầy đủ: các tấn công tốt nhất chỉ
+chạm tới phiên bản rút gọn (ví dụ va chạm thực tế cho SHA-256 rút còn 31 trên 64 bước, EUROCRYPT 2024; cho Keccak rút còn
+5 trên 24 vòng, Guo và cộng sự, Journal of Cryptology). Với thiết kế mới: SHA-256, SHA-384, SHA-512, SHA-512/256, SHA3-256 trở lên,
+SHAKE256; tránh các hàm 224 bit (chỉ 112 bit an ninh va chạm — mức mà NIST IR 8547 nói sẽ bị cấm từ 2030); dùng HMAC hay KMAC chứ không tự
+ghép khoá với SHA-2.</p>
+<p lang="en">Both families are approved and no practical attack exists on the full number of rounds: the best attacks reach
+only reduced versions (for example a practical collision for SHA-256 cut to 31 of its 64 steps, EUROCRYPT 2024; for Keccak
+cut to 5 of 24 rounds, Guo et al., Journal of Cryptology). For new designs: SHA-256, SHA-384, SHA-512, SHA-512/256, SHA3-256 and
+up, SHAKE256; avoid the 224-bit functions (only 112 bits of collision security — the level NIST IR 8547 says will be disallowed in 2030);
+use HMAC or KMAC rather than gluing a key to SHA-2 yourself.</p>
+
+<h3><span lang="vi">Máy tính lượng tử làm gì với hàm băm</span><span lang="en">What a quantum computer does to a hash</span></h3>
+<p lang="vi">Ít hơn nhiều so với RSA hay đường cong elliptic. Thuật toán Grover tìm tiền ảnh của digest n bit bằng
+khoảng 2<sup>n/2</sup> lần tính hàm băm trên máy lượng tử — nhưng các lần tính đó phải chạy <em>nối tiếp</em> và chia nhỏ ra
+nhiều máy thì lợi thế mất dần. Thuật toán Brassard–Høyer–Tapp tìm va chạm bằng khoảng 2<sup>n/3</sup> lần tính, nhưng cần
+bộ nhớ lượng tử cỡ 2<sup>n/3</sup>; khi tính cả giá phần cứng, tìm va chạm cổ điển chạy song song vẫn rẻ ngang hoặc rẻ hơn.
+Chính NIST dùng "khó như tìm va chạm SHA-256" và "khó như tìm va chạm SHA-384" làm định nghĩa cho mức an toàn hậu lượng tử 2
+và 4; NIST IR 8547 (bảng 8) xếp va chạm của SHA-256 / SHA3-256 vào mức 2, của SHA-384 / SHA3-384 vào mức 4, của SHA-512 /
+SHA3-512 vào mức 5, còn va chạm của các hàm 224 bit nằm dưới mức 1. Kết luận thực tế: không cần thay SHA-2 hay SHA-3 vì máy tính lượng tử, chỉ cần digest đủ dài — 256 bit trở lên.</p>
+<p lang="en">Much less than to RSA or elliptic curves. Grover's algorithm finds a preimage of an n-bit digest with about
+2<sup>n/2</sup> hash evaluations on a quantum computer — but those evaluations must run <em>in sequence</em>, and splitting
+them over many machines erodes the gain. The Brassard–Høyer–Tapp algorithm finds collisions with about 2<sup>n/3</sup>
+evaluations but needs quantum memory of about 2<sup>n/3</sup>; once hardware cost is counted, a parallel classical
+collision search is as cheap or cheaper. NIST itself uses "as hard as a SHA-256 collision" and "as hard as a SHA-384
+collision" to define post-quantum security categories 2 and 4; NIST IR 8547 (table 8) places collisions of SHA-256 /
+SHA3-256 in category 2, of SHA-384 / SHA3-384 in category 4, of SHA-512 / SHA3-512 in category 5, and collisions of the
+224-bit functions below category 1. The practical conclusion: there is no need to replace
+SHA-2 or SHA-3 because of quantum computers, only to keep digests long enough — 256 bits and up.</p>
+
+<!-- ================================================================ 6 -->
+<h2><span lang="vi">6. Góc phần cứng</span><span lang="en">6. The hardware angle</span></h2>
+<p lang="vi">Phần này là góc nhìn chung của người làm SoC bảo mật: một lõi băm phải làm đúng những gì, chỗ nào hay vỡ, và
+kỹ sư kiểm chứng nên thử gì. Mọi con số dưới đây tính từ định nghĩa trong chuẩn.</p>
+<p lang="en">This is the general view of an SoC security engineer: what a hash core must get right, where it usually
+breaks, and what a verification engineer should try. Every number below is computed from the definitions in the
+standards.</p>
+<h3><span lang="vi">Một bước mỗi nhịp, và số bit nuốt được mỗi nhịp</span><span lang="en">One step per clock, and bits swallowed per clock</span></h3>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Lõi (một bước / một vòng mỗi nhịp)</span><span lang="en">Core (one step / one round per clock)</span></th>
+  <th><span lang="vi">Khối</span><span lang="en">Block</span></th>
+  <th><span lang="vi">Nhịp mỗi khối</span><span lang="en">Clocks per block</span></th>
+  <th><span lang="vi">Bit mỗi nhịp</span><span lang="en">Bits per clock</span></th>
+</tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">SHA-1</td><td class="num">512</td><td class="num">80</td><td class="num">6.4</td></tr>
+  <tr><td data-i18n="neutral">SHA-256</td><td class="num">512</td><td class="num">64</td><td class="num">8</td></tr>
+  <tr><td data-i18n="neutral">SHA-512</td><td class="num">1024</td><td class="num">80</td><td class="num">12.8</td></tr>
+  <tr><td data-i18n="neutral">SHA3-512</td><td class="num">576</td><td class="num">24</td><td class="num">24</td></tr>
+  <tr><td data-i18n="neutral">SHA3-256 · SHAKE256</td><td class="num">1088</td><td class="num">24</td><td class="num">45.33</td></tr>
+  <tr><td data-i18n="neutral">SHAKE128</td><td class="num">1344</td><td class="num">24</td><td class="num">56</td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Chưa tính nhịp nạp khối. Một lõi Keccak một vòng mỗi nhịp nuốt dữ liệu nhanh gấp 3 lần (SHA3-512) tới 7 lần (SHAKE128) một lõi
+SHA-256 cùng kiểu, dù trong phần mềm SHA-3 thường chậm hơn SHA-2.</p>
+<p lang="en">Not counting the clock that loads a block. A round-per-clock Keccak core swallows data 3 times (SHA3-512) to 7 times (SHAKE128) faster
+than a SHA-256 core of the same style, even though in software SHA-3 is usually slower than SHA-2.</p>
+
+<h3><span lang="vi">SHA-256: chuỗi cộng là đường găng</span><span lang="en">SHA-256: the adder chain is the critical path</span></h3>
+<p lang="vi">Viết gộp một bước: a mới = h + Σ1(e) + Ch(e, f, g) + K[t] + W[t] + Σ0(a) + Maj(a, b, c) — bảy toán hạng 32
+bit dồn vào một thanh ghi trong một nhịp; e mới = d + h + Σ1(e) + Ch + K[t] + W[t] — sáu toán hạng. Cả khối tốn 600 phép cộng
+32 bit: 7 mỗi bước (một phép với hằng số K) × 64, 3 mỗi từ lịch × 48, và 8 phép cộng feed-forward. SHA-512: 760 phép cộng 64
+bit (7 × 80 + 3 × 64 + 8). Các mẹo quen thuộc:</p>
+<p lang="en">Folded into one line: new a = h + Σ1(e) + Ch(e, f, g) + K[t] + W[t] + Σ0(a) + Maj(a, b, c) — seven 32-bit
+operands into one register in one clock; new e = d + h + Σ1(e) + Ch + K[t] + W[t] — six operands. A block costs 600 32-bit
+additions: 7 per step (one of them with the constant K) × 64, 3 per schedule word × 48, and 8 feed-forward additions.
+SHA-512: 760 64-bit additions (7 × 80 + 3 × 64 + 8). The usual tricks:</p>
+<ul lang="vi">
+  <li><strong>Tính trước K + W (và cả h)</strong> một nhịp sớm hơn: K[t] + W[t] không phụ thuộc trạng thái, còn h của nhịp
+      sau chính là g của nhịp này. Bớt hai, ba toán hạng khỏi đường găng.</li>
+  <li><strong>Bộ cộng lưu nhớ (carry-save)</strong>: nén các toán hạng bằng bộ đếm 3:2 (một bộ cộng đầy đủ dùng làm bộ nén 3 vào 2 ra) không có chuỗi nhớ, chỉ còn một bộ
+      cộng truyền nhớ 32 bit ở cuối. Bảy toán hạng qua bốn tầng 3:2 còn hai.</li>
+  <li><strong>Trải hai bước mỗi nhịp</strong> (unroll): nửa số nhịp, gần gấp đôi logic, đường găng dài hơn — đổi tần số lấy
+      thông lượng.</li>
+</ul>
+<ul lang="en">
+  <li><strong>Precompute K + W (and even h)</strong> one clock early: K[t] + W[t] does not depend on the state, and the next
+      clock's h is this clock's g. That takes two or three operands off the critical path.</li>
+  <li><strong>Carry-save adders</strong>: compress the operands with 3:2 counters (a full adder used as a three-in, two-out compressor) that have no carry chain, leaving one
+      32-bit carry-propagate adder at the end. Seven operands go through four 3:2 levels down to two.</li>
+  <li><strong>Unroll two steps per clock</strong>: half the clocks, almost twice the logic, a longer critical path —
+      frequency traded for throughput.</li>
+</ul>
+
+<h3><span lang="vi">Keccak: chỉ XOR, AND, NOT</span><span lang="en">Keccak: XOR, AND and NOT only</span></h3>
+<p lang="vi">Đếm cổng 2 ngõ vào cho một vòng, từ đúng các công thức ở mục 4:</p>
+<p lang="en">Counting 2-input gates for one round, straight from the formulas in section 4:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th><span lang="vi">Bước</span><span lang="en">Step</span></th><th><span lang="vi">Cổng</span><span lang="en">Gates</span></th><th><span lang="vi">Vì sao</span><span lang="en">Why</span></th></tr></thead>
+<tbody>
+  <tr><td data-i18n="neutral">θ</td><td data-i18n="neutral">3&#8239;200 XOR2</td><td><span lang="vi">chẵn lẻ cột 5 × 64 × 4 = 1&#8239;280, D 5 × 64 = 320, cộng D vào 1&#8239;600 bit</span><span lang="en">column parity 5 × 64 × 4 = 1,280, D 5 × 64 = 320, adding D to 1,600 bits</span></td></tr>
+  <tr><td data-i18n="neutral">ρ, π</td><td data-i18n="neutral">0</td><td><span lang="vi">dây nối</span><span lang="en">wiring</span></td></tr>
+  <tr><td data-i18n="neutral">χ</td><td data-i18n="neutral">1&#8239;600 NOT + 1&#8239;600 AND2 + 1&#8239;600 XOR2</td><td><span lang="vi">mỗi bit một bộ ba</span><span lang="en">one of each per bit</span></td></tr>
+  <tr><td data-i18n="neutral">ι</td><td data-i18n="neutral">≤ 7 XOR2</td><td><span lang="vi">RC chỉ bao giờ có bit 0, 1, 3, 7, 15, 31, 63</span><span lang="en">RC only ever sets bits 0, 1, 3, 7, 15, 31, 63</span></td></tr>
+</tbody>
+</table>
+</div>
+<p lang="vi">Một vòng: 4&#8239;800 XOR2 + 1&#8239;600 AND2 + 1&#8239;600 NOT (cộng tối đa 7 XOR2 cho ι); một hoán vị 24 vòng: 115&#8239;200 XOR2,
+38&#8239;400 AND2, 38&#8239;400 NOT. Không có bộ cộng, không có chuỗi nhớ: đường găng của một vòng chỉ khoảng nửa tá tầng cổng. Thứ
+quyết định diện tích là 1&#8239;600 flip-flop trạng thái, có mặt trong mọi kiến trúc:</p>
+<p lang="en">One round: 4,800 XOR2 + 1,600 AND2 + 1,600 NOT (plus at most 7 XOR2 for ι); one 24-round permutation: 115,200
+XOR2, 38,400 AND2, 38,400 NOT. No adder and no carry chain: a round's critical path is only about half a dozen gate
+levels. What sets the area is the 1,600 state flip-flops, present in every architecture:</p>
+<ul lang="vi">
+  <li><strong>Một vòng mỗi nhịp</strong>: 24 nhịp mỗi hoán vị, một mạch vòng — lựa chọn mặc định của bộ tăng tốc PQC.</li>
+  <li><strong>Trải k vòng</strong>: 24/k nhịp, k lần logic vòng, cùng 1&#8239;600 flip-flop.</li>
+  <li><strong>Theo lane hay theo lát</strong>: một đường dữ liệu hẹp đi qua từng phần của trạng thái, nhiều nhịp mỗi vòng;
+      nhỏ, chậm, cần thêm thanh ghi giữ chẵn lẻ cột cho θ.</li>
+</ul>
+<ul lang="en">
+  <li><strong>One round per clock</strong>: 24 clocks per permutation, one round circuit — the default choice of PQC
+      accelerators.</li>
+  <li><strong>k rounds unrolled</strong>: 24/k clocks, k times the round logic, the same 1,600 flip-flops.</li>
+  <li><strong>Lane- or slice-serial</strong>: a narrow datapath walks over parts of the state, many clocks per round;
+      small, slow, and it needs extra registers to hold the column parities for θ.</li>
+</ul>
+
+<h3><span lang="vi">Lõi băm thường vỡ ở đâu</span><span lang="en">Where a hash core usually breaks</span></h3>
+<p lang="vi">Hiếm khi ở bên trong một vòng — chỗ đó mô phỏng vài vector là lộ. Lỗi sống sót lâu nằm ở <em>biên khối</em> và
+ở <em>bắt tay</em> giữa phần cứng và phần mềm:</p>
+<p lang="en">Rarely inside a round — a few vectors expose that. The bugs that survive live at <em>block boundaries</em> and
+in the <em>handshake</em> between hardware and software:</p>
+<ul lang="vi">
+  <li><strong>Khối đệm thêm</strong>: SHA-256 với 56–63 byte trong khối cuối, SHA-512 với 112–127, SHA3-256 khi thông điệp
+      đúng bội của 136 byte — phần đệm không vừa và phải có thêm một khối chỉ gồm đệm. Bộ điều khiển phải tự sinh khối đó.</li>
+  <li><strong>Byte <code>86</code></strong>: khi chỉ còn một byte, hậu tố và bit cuối của pad10*1 cùng nằm một byte. Bộ đệm ghi
+      "byte hậu tố" và "byte cuối 0x80" như hai lần ghi riêng sẽ đè mất một trong hai nếu không OR.</li>
+  <li><strong>"Khối đã hút xong" và "khối kế đã được ghi"</strong>: phần mềm ghi khối kế tiếp trong lúc lõi còn bận, hay lõi
+      bắt đầu hoán vị trước khi khối được ghi đủ — sai lệch một nhịp làm hỏng trạng thái, hoặc treo mãi chờ một cờ đã qua.
+      Thông điệp nhiều khối, ghi liền nhau, với độ trễ ngẫu nhiên ở cả hai phía là cách duy nhất thấy được lỗi này.</li>
+  <li><strong>Bộ đếm độ dài</strong>: ô độ dài là 64 bit (SHA-256) hay 128 bit (SHA-512) tính bằng <em>bit</em>; một bộ đếm 32
+      bit tràn ở 512 MiB.</li>
+  <li><strong>Vắt qua biên tốc độ</strong>: SHAKE ra nhiều hơn r byte cần thêm hoán vị; lấy mẫu ma trận của ML-KEM vắt nhiều
+      khối liên tiếp.</li>
+  <li><strong>Trạng thái không được xoá</strong> giữa hai thông điệp: một bản băm đúng, bản thứ hai sai.</li>
+</ul>
+<ul lang="en">
+  <li><strong>The extra padding block</strong>: SHA-256 with 56–63 bytes in the last block, SHA-512 with 112–127, SHA3-256
+      when the message is an exact multiple of 136 bytes — the padding does not fit and one more block of padding only
+      is needed. The controller has to produce that block itself.</li>
+  <li><strong>The <code>86</code> byte</strong>: with one byte left, the suffix and the final pad10*1 bit share a byte. A padder
+      that writes "the suffix byte" and "0x80 in the last byte" as two separate writes overwrites one of them unless it ORs.</li>
+  <li><strong>"Block absorbed" versus "next block written"</strong>: software writes the next block while the core is still
+      busy, or the core starts permuting before the block is completely written — one clock of skew corrupts the state,
+      or hangs forever waiting for a flag that already went by. Multi-block messages written back to back, with random
+      stalls on both sides, are the only way to see it.</li>
+  <li><strong>The length counter</strong>: the length field is 64 bits (SHA-256) or 128 bits (SHA-512), counted in
+      <em>bits</em>; a 32-bit counter wraps at 512 MiB.</li>
+  <li><strong>Squeezing across the rate</strong>: SHAKE output longer than r bytes needs another permutation; ML-KEM's
+      matrix sampling squeezes several blocks in a row.</li>
+  <li><strong>State not cleared</strong> between two messages: the first hash is right, the second is wrong.</li>
+</ul>
+<p lang="vi">Vậy kỹ sư kiểm chứng nên thử: toàn bộ ShortMsg và LongMsg của NIST (mọi độ dài byte từ 0 tới một khối, rồi nhiều
+khối), các độ dài biên ở trên cho từng hàm (55 / 56 / 64 và 111 / 112 / 128 byte; r − 1, r, r + 1 và 2r + 1 byte cho SHA-3 và
+SHAKE), Monte Carlo (100&#8239;000 lần băm nối tiếp — bắt được trạng thái không được xoá), VariableOut cho độ dài vắt quanh r, cSHAKE
+với N / S dài hơn một khối, độ trễ ngẫu nhiên ở cả hai cái bắt tay, và reset giữa chừng một thông điệp. Thông điệp lẻ bit
+chỉ cần nếu lõi tuyên bố hỗ trợ. Bài kiểm "dữ liệu lớn" (LDT) của ACVP — 1 GiB tới 8 GiB — để dành cho FPGA hay máy giả lập.</p>
+<p lang="en">So a verification engineer should run: all of NIST's ShortMsg and LongMsg (every byte length from 0 to one
+block, then several blocks), the boundary lengths above for each function (55 / 56 / 64 and 111 / 112 / 128 bytes; r − 1, r,
+r + 1 and 2r + 1 bytes for SHA-3 and SHAKE), Monte Carlo (100,000 chained hashes — it catches state that is not cleared),
+VariableOut for squeeze lengths around r, cSHAKE with an N / S longer than one block, random stalls on both handshakes, and
+a reset in the middle of a message. Bit-length messages matter only if the core claims to support them. ACVP's "large
+data test" (LDT) — 1 GiB to 8 GiB — is for an FPGA or an emulator.</p>
+
+<!-- ================================================================ 7 LAB -->
+<h2 id="lab"><span lang="vi">7. Phòng thí nghiệm</span><span lang="en">7. The lab</span></h2>
+<p lang="vi"><strong>CAVP</strong> (Cryptographic Algorithm Validation Program) là chương trình của NIST kiểm định rằng một bản hiện thực tính đúng thuật toán. Nó có hai thế hệ bộ vector: <strong>CAVS</strong> - các tệp văn bản cũ (.rsp, .txt) ghi sẵn đầu vào và đáp án, đánh số bằng COUNT - và <strong>ACVP</strong> (Automated Cryptographic Validation Protocol) - vector dạng JSON trao đổi tự động, mỗi ca có số hiệu tcId. Trong các tệp ấy, <strong>IUT</strong> (implementation under test) là bản hiện thực đang được kiểm.</p>
+<p lang="en"><strong>CAVP</strong> (Cryptographic Algorithm Validation Program) is NIST's programme for validating that an implementation computes an algorithm correctly. It has two generations of test vectors: <strong>CAVS</strong> - the older text files (.rsp, .txt) listing inputs and answers, numbered by COUNT - and <strong>ACVP</strong> (Automated Cryptographic Validation Protocol) - JSON vectors exchanged automatically, each case numbered by a tcId. In those files the <strong>IUT</strong> (implementation under test) is the implementation being checked.</p>
+<p class="lab-intro" lang="vi">Năm thẻ, theo đúng các loại bài kiểm của NIST. Mọi digest được tính bằng mã có ghi vết của
+bài này (viết lại từ FIPS 180-4, FIPS 202 và SP 800-185) và tính lần thứ hai bằng các file băm dùng chung của trang (với
+SHA-1: bằng hàm băm có sẵn của trình duyệt); dấu "hai cách tính khớp" chỉ hiện khi hai kết quả trùng từng byte.</p>
+<p class="lab-intro" lang="en">Five tabs, following NIST's test types. Every digest is computed by this article's
+traced code (rewritten from FIPS 180-4, FIPS 202 and SP 800-185) and a second time by the site's shared hash files (for
+SHA-1: by the browser's built-in hash); the "both computations agree" mark appears only when the two match byte for
+byte.</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab" id="tab-hash" type="button" role="tab" aria-selected="true" aria-controls="panel-hash">
+    <span lang="vi">Băm &amp; vết</span><span lang="en">Hash &amp; trace</span></button>
+  <button class="tab" id="tab-nist" type="button" role="tab" aria-selected="false" aria-controls="panel-nist">
+    <span lang="vi">NIST: ShortMsg / LongMsg</span><span lang="en">NIST: ShortMsg / LongMsg</span></button>
+  <button class="tab" id="tab-mct" type="button" role="tab" aria-selected="false" aria-controls="panel-mct">
+    <span lang="vi">Monte Carlo</span><span lang="en">Monte Carlo</span></button>
+  <button class="tab" id="tab-xof" type="button" role="tab" aria-selected="false" aria-controls="panel-xof">
+    <span lang="vi">SHAKE: độ dài ra</span><span lang="en">SHAKE: output length</span></button>
+  <button class="tab" id="tab-aval" type="button" role="tab" aria-selected="false" aria-controls="panel-aval">
+    <span lang="vi">Tuyết lở &amp; biên khối</span><span lang="en">Avalanche &amp; boundaries</span></button>
+</div>
+
+<!-- ---------------------------------------------------------------- 1 hash + trace -->
+<section class="panel" id="panel-hash" role="tabpanel" aria-labelledby="tab-hash">
+  <div class="grp" role="radiogroup" aria-labelledby="h1-g1">
+    <span class="chips-l" id="h1-g1">SHA-1</span>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA-1"/><span>SHA-1 <span class="tag"><span lang="vi">cũ</span><span lang="en">legacy</span></span></span></label>
+  </div>
+  <div class="grp" role="radiogroup" aria-labelledby="h1-g2">
+    <span class="chips-l" id="h1-g2">SHA-2</span>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA-224"/><span>SHA-224</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA-256" checked/><span>SHA-256</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA-384"/><span>SHA-384</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA-512"/><span>SHA-512</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA-512/224"/><span>SHA-512/224</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA-512/256"/><span>SHA-512/256</span></label>
+  </div>
+  <div class="grp" role="radiogroup" aria-labelledby="h1-g3">
+    <span class="chips-l" id="h1-g3">SHA-3</span>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA3-224"/><span>SHA3-224</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA3-256"/><span>SHA3-256</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA3-384"/><span>SHA3-384</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHA3-512"/><span>SHA3-512</span></label>
+  </div>
+  <div class="grp" role="radiogroup" aria-labelledby="h1-g4">
+    <span class="chips-l" id="h1-g4">XOF</span>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHAKE128"/><span>SHAKE128</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="SHAKE256"/><span>SHAKE256</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="cSHAKE128"/><span>cSHAKE128</span></label>
+    <label class="chip"><input type="radio" name="h1-fn" value="cSHAKE256"/><span>cSHAKE256</span></label>
+  </div>
+  <p class="hint" id="h1-name"></p>
+  <div class="row" id="h1-xo" hidden>
+    <label class="lbl-in"><span lang="vi">Độ dài đầu ra (byte)</span><span lang="en">Output length (bytes)</span>
+      <input class="num-in" type="number" id="h1-outlen" min="1" max="65536" value="32"/></label>
+  </div>
+  <div id="h1-cs" hidden>
+    <div class="fld">
+      <div class="fld-head"><label for="h1-n"><span lang="vi">N — tên hàm (thường để trống)</span><span lang="en">N — function name (usually empty)</span></label><span class="cnt" id="h1-n-cnt"></span></div>
+      <textarea id="h1-n" rows="1" spellcheck="false" autocomplete="off"></textarea>
+      <div class="tools" id="h1-n-tools"></div>
+    </div>
+    <div class="fld">
+      <div class="fld-head"><label for="h1-s"><span lang="vi">S — chuỗi tuỳ biến</span><span lang="en">S — customisation string</span></label><span class="cnt" id="h1-s-cnt"></span></div>
+      <textarea id="h1-s" rows="1" spellcheck="false" autocomplete="off">Email Signature</textarea>
+      <div class="tools" id="h1-s-tools"></div>
+    </div>
+  </div>
+  <div class="fld">
+    <div class="fld-head"><label for="h1-msg"><span lang="vi">Thông điệp (tối đa 1 MB)</span><span lang="en">Message (up to 1 MB)</span></label><span class="cnt" id="h1-msg-cnt"></span></div>
+    <textarea id="h1-msg" rows="2" spellcheck="false" autocomplete="off">abc</textarea>
+    <div class="tools" id="h1-msg-tools"></div>
+  </div>
+  <div class="row">
+    <button class="btn" id="h1-go" type="button"><span lang="vi">Băm</span><span lang="en">Hash</span></button>
+    <button class="btn ghost sm" id="h1-nist" type="button"><span lang="vi">Nạp ví dụ NIST ở biên khối</span><span lang="en">Load a NIST example at a block boundary</span></button>
+    <label class="chk"><input type="checkbox" id="h1-rnd"/><span lang="vi">thông điệp ngẫu nhiên dài</span><span lang="en">random message of</span></label>
+    <input class="num-in" type="number" id="h1-rlen" min="0" max="1048576" value="56" aria-label="bytes"/>
+    <span class="hint" style="margin:0"><span lang="vi">byte</span><span lang="en">bytes</span></span>
+  </div>
+  <div class="result info" id="h1-result" role="status" aria-live="polite"></div>
+  <div class="result info" id="h1-nres" role="status" aria-live="polite" hidden></div>
+  <div class="fld">
+    <div class="fld-head"><label for="h1-out">Digest</label><span class="cnt" id="h1-out-cnt"></span></div>
+    <textarea id="h1-out" rows="2" spellcheck="false" readonly></textarea>
+    <div class="tools" id="h1-out-tools"></div>
+  </div>
+  <h3><span lang="vi">Bản đồ đệm của khối cuối</span><span lang="en">Padding map of the last block(s)</span></h3>
+  <p class="hint" id="h1-blocks"></p>
+  <div class="legend" id="h1-legend"></div>
+  <div class="pmap" id="h1-pad"></div>
+  <h3><span lang="vi">Vết từng bước</span><span lang="en">Step-by-step trace</span></h3>
+  <div id="h1-tr-md">
+    <div class="row">
+      <button class="btn ghost sm" id="h1-bprev" type="button"><span lang="vi">← khối trước</span><span lang="en">← previous block</span></button>
+      <label class="lbl-in"><span lang="vi">Khối số</span><span lang="en">Block no.</span><input class="num-in" type="number" id="h1-blk" min="0" value="0"/></label>
+      <button class="btn ghost sm" id="h1-bnext" type="button"><span lang="vi">khối sau →</span><span lang="en">next block →</span></button>
+    </div>
+    <p class="hint" id="h1-binfo"></p>
+    <div class="trace-wrap" id="h1-tbl"></div>
+  </div>
+  <div id="h1-tr-kc" hidden>
+    <p class="hint"><span lang="vi">Các lần chạy hoán vị (bấm để chọn):</span><span lang="en">Permutation calls (click to choose):</span></p>
+    <div class="plist" id="h1-perms"></div>
+    <div class="row">
+      <button class="btn ghost sm" id="h1-rprev" type="button"><span lang="vi">← vòng trước</span><span lang="en">← previous round</span></button>
+      <label class="lbl-in"><span lang="vi">Vòng</span><span lang="en">Round</span><input class="num-in" type="number" id="h1-round" min="0" max="23" value="0"/></label>
+      <button class="btn ghost sm" id="h1-rnext" type="button"><span lang="vi">vòng sau →</span><span lang="en">next round →</span></button>
+    </div>
+    <div class="chips" role="radiogroup" aria-labelledby="h1-step-l">
+      <span class="chips-l" id="h1-step-l"><span lang="vi">Sau bước</span><span lang="en">After step</span></span>
+      <label class="chip"><input type="radio" name="h1-step" value="in"/><span><span lang="vi">vào vòng</span><span lang="en">round input</span></span></label>
+      <label class="chip"><input type="radio" name="h1-step" value="theta"/><span>θ</span></label>
+      <label class="chip"><input type="radio" name="h1-step" value="rho"/><span>ρ</span></label>
+      <label class="chip"><input type="radio" name="h1-step" value="pi"/><span>π</span></label>
+      <label class="chip"><input type="radio" name="h1-step" value="chi" checked/><span>χ</span></label>
+      <label class="chip"><input type="radio" name="h1-step" value="iota"/><span>ι</span></label>
+    </div>
+    <p class="hint" id="h1-kinfo"></p>
+    <div class="lanes" id="h1-lanes"></div>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------------- 2 NIST AFT -->
+<section class="panel" id="panel-nist" role="tabpanel" aria-labelledby="tab-nist" hidden>
+  <div class="chips" role="radiogroup" aria-labelledby="h2-fn-l">
+    <span class="chips-l" id="h2-fn-l"><span lang="vi">Hàm</span><span lang="en">Function</span></span>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA-1"/><span>SHA-1</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA-224"/><span>SHA-224</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA-256" checked/><span>SHA-256</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA-384"/><span>SHA-384</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA-512"/><span>SHA-512</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA-512/224"/><span>SHA-512/224</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA-512/256"/><span>SHA-512/256</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA3-224"/><span>SHA3-224</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA3-256"/><span>SHA3-256</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA3-384"/><span>SHA3-384</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHA3-512"/><span>SHA3-512</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHAKE128"/><span>SHAKE128</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="SHAKE256"/><span>SHAKE256</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="cSHAKE128"/><span>cSHAKE128</span></label>
+    <label class="chip"><input type="radio" name="h2-fn" value="cSHAKE256"/><span>cSHAKE256</span></label>
+  </div>
+  <p class="hint" lang="vi">Đây là một <strong>tập con nhỏ</strong> chọn ở các độ dài biên, lấy nguyên văn từ file của NIST: CAVP
+    (SHAVS cho SHA-1 / SHA-2, SHA3VS cho SHA-3 / SHAKE; ShortMsg đi từ 0 tới một khối, LongMsg là nhiều khối) và ACVP (nhóm
+    AFT). Bản đầy đủ có hàng nghìn trường hợp. Các file đó có cả thông điệp <em>lẻ bit</em> (độ dài không chia hết cho 8): mã
+    của trang xử lý được, và một vài trường hợp như thế có trong danh sách, đánh dấu "bit". Lưu ý quy ước: SHA-1 / SHA-2 và
+    ACVP ghi các bit lẻ ở bit <em>cao</em> của byte cuối, còn file CAVP của SHA-3 ghi ở bit <em>thấp</em> (FIPS 202, phụ lục
+    B.1); trang đổi về đúng quy ước trước khi băm.</p>
+  <p class="hint" lang="en">This is a <strong>small subset</strong> chosen at the boundary lengths, copied verbatim from NIST's
+    files: CAVP (SHAVS for SHA-1 / SHA-2, SHA3VS for SHA-3 / SHAKE; ShortMsg runs from 0 to one block, LongMsg is several
+    blocks) and ACVP (the AFT groups). The full files hold thousands of cases. They also contain <em>bit-oriented</em>
+    messages (lengths not divisible by 8): the page's code handles them, and a few such cases are in the list, marked
+    "bit". Mind the convention: SHA-1 / SHA-2 and ACVP put the odd bits in the <em>high</em> bits of the last byte, while
+    the CAVP SHA-3 files put them in the <em>low</em> bits (FIPS 202, appendix B.1); the page converts before hashing.</p>
+  <div class="tbl-wrap">
+    <table class="cases">
+      <thead><tr>
+        <th><span lang="vi">Nguồn (tên của NIST)</span><span lang="en">Source (NIST's name)</span></th>
+        <th><span lang="vi">Độ dài (bit)</span><span lang="en">Length (bits)</span></th>
+        <th><span lang="vi">Đầu ra (bit)</span><span lang="en">Output (bits)</span></th>
+        <th></th><th></th>
+      </tr></thead>
+      <tbody id="h2-rows"></tbody>
+    </table>
+  </div>
+  <div class="row">
+    <button class="btn" id="h2-all" type="button"><span lang="vi">Chạy hết tập đi kèm (mọi hàm)</span><span lang="en">Run all shipped cases (every function)</span></button>
+    <button class="btn ghost sm" id="h2-open" type="button" disabled><span lang="vi">Mở trường hợp này ở thẻ "Băm &amp; vết"</span><span lang="en">Open this case in the "Hash &amp; trace" tab</span></button>
+  </div>
+  <div class="result info" id="h2-result" role="status" aria-live="polite"></div>
+  <p class="hint" id="h2-info"></p>
+  <div class="fld">
+    <div class="fld-head"><label for="h2-msg"><span lang="vi">Thông điệp (hex, như trong file)</span><span lang="en">Message (hex, as in the file)</span></label><span class="cnt" id="h2-msg-cnt"></span></div>
+    <textarea id="h2-msg" rows="2" spellcheck="false" readonly></textarea>
+    <div class="tools" id="h2-msg-tools"></div>
+  </div>
+  <div class="fld">
+    <div class="fld-head"><label for="h2-exp"><span lang="vi">Đáp án của NIST</span><span lang="en">NIST's expected value</span></label><span class="cnt" id="h2-exp-cnt"></span></div>
+    <textarea id="h2-exp" rows="2" spellcheck="false" readonly></textarea>
+    <div class="tools" id="h2-exp-tools"></div>
+  </div>
+  <div class="fld">
+    <div class="fld-head"><label for="h2-got"><span lang="vi">Trang tính ra</span><span lang="en">Computed by the page</span></label><span class="cnt" id="h2-got-cnt"></span></div>
+    <textarea id="h2-got" rows="2" spellcheck="false" readonly></textarea>
+    <div class="tools" id="h2-got-tools"></div>
+  </div>
+  <div id="h2-sum"></div>
+</section>
+
+<!-- ---------------------------------------------------------------- 3 Monte Carlo -->
+<section class="panel" id="panel-mct" role="tabpanel" aria-labelledby="tab-mct" hidden>
+  <div class="chips" role="radiogroup" aria-labelledby="h3-l" id="h3-chips">
+    <span class="chips-l" id="h3-l"><span lang="vi">File</span><span lang="en">File</span></span>
+    <label class="chip"><input type="radio" name="h3-mct" value="0"/><span>SHA-1</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="1"/><span>SHA-224</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="2" checked/><span>SHA-256</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="3"/><span>SHA-384</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="4"/><span>SHA-512</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="5"/><span>SHA-512/224</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="6"/><span>SHA-512/256</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="7"/><span>SHA3-224</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="8"/><span>SHA3-256</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="9"/><span>SHA3-384</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="10"/><span>SHA3-512</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="11"/><span>SHAKE128</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="12"/><span>SHAKE256</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="13"/><span>SHA-256 · ACVP</span></label>
+    <label class="chip"><input type="radio" name="h3-mct" value="14"/><span>SHA-512 · ACVP</span></label>
+  </div>
+  <p class="hint" id="h3-why"></p>
+  <pre class="code-pane" data-i18n="neutral"><code id="h3-code"></code></pre>
+  <div class="fld">
+    <div class="fld-head"><label for="h3-seed"><span lang="vi">Seed (từ file của NIST)</span><span lang="en">Seed (from NIST's file)</span></label><span class="cnt" id="h3-seed-cnt"></span></div>
+    <textarea id="h3-seed" rows="2" spellcheck="false" readonly></textarea>
+    <div class="tools" id="h3-seed-tools"></div>
+  </div>
+  <div class="row">
+    <label class="lbl-in">k <input class="num-in" type="number" id="h3-k" min="1" max="100" value="5"/></label>
+    <button class="btn" id="h3-run" type="button"><span lang="vi">Chạy k checkpoint đầu</span><span lang="en">Run the first k checkpoints</span></button>
+    <button class="btn" id="h3-all" type="button"><span lang="vi">Chạy đủ 100</span><span lang="en">Run all 100</span></button>
+    <button class="btn ghost sm" id="h3-stop" type="button" disabled><span lang="vi">Dừng</span><span lang="en">Stop</span></button>
+  </div>
+  <div class="prog" aria-hidden="true"><div id="h3-prog"></div></div>
+  <div class="result info" id="h3-result" role="status" aria-live="polite"></div>
+  <div class="trace-wrap" id="h3-tbl"></div>
+</section>
+
+<!-- ---------------------------------------------------------------- 4 SHAKE output length -->
+<section class="panel" id="panel-xof" role="tabpanel" aria-labelledby="tab-xof" hidden>
+  <div class="chips" role="radiogroup" aria-labelledby="h4-l">
+    <span class="chips-l" id="h4-l">XOF</span>
+    <label class="chip"><input type="radio" name="h4-fn" value="SHAKE128" checked/><span>SHAKE128</span></label>
+    <label class="chip"><input type="radio" name="h4-fn" value="SHAKE256"/><span>SHAKE256</span></label>
+  </div>
+  <div class="fld" style="margin-top:10px">
+    <div class="fld-head"><label for="h4-msg"><span lang="vi">Thông điệp</span><span lang="en">Message</span></label><span class="cnt" id="h4-msg-cnt"></span></div>
+    <textarea id="h4-msg" rows="1" spellcheck="false" autocomplete="off">abc</textarea>
+    <div class="tools" id="h4-msg-tools"></div>
+  </div>
+  <div class="row">
+    <label class="lbl-in">L1 <input class="num-in" type="number" id="h4-l1" min="1" max="65536" value="32"/></label>
+    <label class="lbl-in">L2 <input class="num-in" type="number" id="h4-l2" min="1" max="65536" value="200"/></label>
+    <span class="hint" style="margin:0"><span lang="vi">byte</span><span lang="en">bytes</span></span>
+    <button class="btn" id="h4-go" type="button"><span lang="vi">Vắt hai độ dài</span><span lang="en">Squeeze both lengths</span></button>
+  </div>
+  <div class="fld">
+    <div class="fld-head"><label for="h4-o1"><span lang="vi">Đầu ra L1</span><span lang="en">Output L1</span></label><span class="cnt" id="h4-o1-cnt"></span></div>
+    <textarea id="h4-o1" rows="2" spellcheck="false" readonly></textarea>
+    <div class="tools" id="h4-o1-tools"></div>
+  </div>
+  <div class="fld">
+    <div class="fld-head"><label for="h4-o2"><span lang="vi">Đầu ra L2</span><span lang="en">Output L2</span></label><span class="cnt" id="h4-o2-cnt"></span></div>
+    <textarea id="h4-o2" rows="3" spellcheck="false" readonly></textarea>
+    <div class="tools" id="h4-o2-tools"></div>
+  </div>
+  <div class="result info" id="h4-result" role="status" aria-live="polite"></div>
+  <h3><span lang="vi">Ví dụ VariableOut của NIST</span><span lang="en">NIST's VariableOut examples</span></h3>
+  <p class="hint"><span lang="vi">CAVP SHA3VS "VariableOut": cùng thông điệp 128 bit, độ dài ra thay đổi. Bấm một ví dụ để nạp, chạy và so.</span><span lang="en">CAVP SHA3VS "VariableOut": a 128-bit message, varying output lengths. Click an example to load, run and compare.</span></p>
+  <div class="plist" id="h4-ex"></div>
+  <div class="result info" id="h4-nres" role="status" aria-live="polite"></div>
+</section>
+
+<!-- ---------------------------------------------------------------- 5 avalanche + boundaries -->
+<section class="panel" id="panel-aval" role="tabpanel" aria-labelledby="tab-aval" hidden>
+  <div class="chips" role="radiogroup" aria-labelledby="h5-l">
+    <span class="chips-l" id="h5-l"><span lang="vi">Hàm</span><span lang="en">Function</span></span>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA-1"/><span>SHA-1</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA-224"/><span>SHA-224</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA-256" checked/><span>SHA-256</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA-384"/><span>SHA-384</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA-512"/><span>SHA-512</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA-512/256"/><span>SHA-512/256</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA3-224"/><span>SHA3-224</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA3-256"/><span>SHA3-256</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA3-384"/><span>SHA3-384</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHA3-512"/><span>SHA3-512</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHAKE128"/><span>SHAKE128</span></label>
+    <label class="chip"><input type="radio" name="h5-fn" value="SHAKE256"/><span>SHAKE256</span></label>
+  </div>
+  <h3><span lang="vi">Lật một bit</span><span lang="en">Flip one bit</span></h3>
+  <div class="fld">
+    <div class="fld-head"><label for="h5-msg"><span lang="vi">Thông điệp</span><span lang="en">Message</span></label><span class="cnt" id="h5-msg-cnt"></span></div>
+    <textarea id="h5-msg" rows="1" spellcheck="false" autocomplete="off">The quick brown fox</textarea>
+    <div class="tools" id="h5-msg-tools"></div>
+  </div>
+  <div class="row">
+    <label class="lbl-in"><span lang="vi">Bit số</span><span lang="en">Bit no.</span><input class="num-in" type="number" id="h5-bit" min="0" value="77"/></label>
+    <label class="chk"><input type="checkbox" id="h5-bit-rnd"/><span lang="vi">bit ngẫu nhiên</span><span lang="en">random bit</span></label>
+    <button class="btn" id="h5-flip" type="button"><span lang="vi">Lật</span><span lang="en">Flip</span></button>
+    <button class="btn ghost sm" id="h5-300" type="button"><span lang="vi">Lật 300 lần, lấy trung bình</span><span lang="en">Flip 300 times, average</span></button>
+  </div>
+  <div class="result info" id="h5-result" role="status" aria-live="polite"></div>
+  <div class="bits" id="h5-bits" data-i18n="neutral"></div>
+  <h3><span lang="vi">Độ dài thông điệp và số khối</span><span lang="en">Message length and block count</span></h3>
+  <input type="range" id="h5-len" min="0" max="300" value="55" aria-label="length"/>
+  <div class="lenbar" id="h5-bar" aria-hidden="true"></div>
+  <p class="hint" id="h5-binfo"></p>
+  <h3><span lang="vi">Ngày sinh trên một digest bị cắt ngắn</span><span lang="en">Birthdays on a truncated digest</span></h3>
+  <div class="row">
+    <div class="chips" role="radiogroup" aria-labelledby="h5-bd-l">
+      <span class="chips-l" id="h5-bd-l"><span lang="vi">Giữ</span><span lang="en">Keep</span></span>
+      <label class="chip"><input type="radio" name="h5-bd" value="16"/><span>16 bit</span></label>
+      <label class="chip"><input type="radio" name="h5-bd" value="24" checked/><span>24 bit</span></label>
+    </div>
+    <button class="btn" id="h5-bday" type="button"><span lang="vi">Tìm va chạm</span><span lang="en">Find a collision</span></button>
+  </div>
+  <p class="hint"><span lang="vi">Băm <code>msg-0</code>, <code>msg-1</code>, … bằng SHA-256, chỉ giữ vài byte đầu, dừng ở lần trùng đầu tiên.</span><span lang="en">Hashes <code>msg-0</code>, <code>msg-1</code>, … with SHA-256, keeps only the first bytes, stops at the first match.</span></p>
+  <div class="result info" id="h5-bres" role="status" aria-live="polite"></div>
+</section>
+
+<!-- ================================================================ 8 -->
+<h2><span lang="vi">8. Các bài kiểm của NIST kiểm gì</span><span lang="en">8. What NIST's tests check</span></h2>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th><span lang="vi">Thẻ</span><span lang="en">Tab</span></th>
+  <th><span lang="vi">Bài kiểm của NIST</span><span lang="en">NIST test</span></th>
+  <th><span lang="vi">Qua được chứng minh</span><span lang="en">A pass proves</span></th>
+  <th><span lang="vi">Không chứng minh</span><span lang="en">It does not prove</span></th>
+</tr></thead>
+<tbody>
+  <tr><td><span lang="vi">Băm &amp; vết</span><span lang="en">Hash &amp; trace</span></td>
+      <td><span lang="vi">— (ví dụ của chuẩn: "abc", mẫu cSHAKE của SP 800-185)</span><span lang="en">— (the standards' examples: "abc", the SP 800-185 cSHAKE samples)</span></td>
+      <td><span lang="vi">Digest đúng cho đúng thông điệp đó, và hai bộ mã độc lập ra cùng kết quả.</span><span lang="en">The digest is right for that very message, and two independent code bases agree.</span></td>
+      <td><span lang="vi">Bất cứ độ dài nào khác.</span><span lang="en">Any other length.</span></td></tr>
+  <tr><td><span lang="vi">NIST: ShortMsg / LongMsg</span><span lang="en">NIST: ShortMsg / LongMsg</span></td>
+      <td><span lang="vi">CAVP SHAVS / SHA3VS "ShortMsg", "LongMsg" (byte và bit); ACVP "AFT" (Algorithm Functional Test)</span><span lang="en">CAVP SHAVS / SHA3VS "ShortMsg", "LongMsg" (byte and bit); ACVP "AFT" (Algorithm Functional Test)</span></td>
+      <td><span lang="vi">Đệm, ô độ dài và hàm nén / hoán vị đúng ở mọi độ dài có trong file.</span><span lang="en">Padding, the length field and the compression function / permutation are right at every length in the file.</span></td>
+      <td><span lang="vi">Độ dài vắng mặt (file ShortMsg của SHA-3 dừng ở một khối r; trường hợp 2r + 1 byte không có trong tập NIST ở đây — trang kiểm nó bằng hai nguồn độc lập), cách giao tiếp, luồng nhiều khối có độ trễ, thời gian chạy.</span><span lang="en">Lengths that are absent (the SHA-3 ShortMsg files stop at one r block; the 2r + 1-byte case is not in the NIST set used here — the page checks it against two independent sources), the interface, multi-block streaming with stalls, timing.</span></td></tr>
+  <tr><td><span lang="vi">Monte Carlo</span><span lang="en">Monte Carlo</span></td>
+      <td><span lang="vi">CAVP "Monte" (SHAVS: MD<sub>i</sub> = H(MD<sub>i−3</sub> ‖ MD<sub>i−2</sub> ‖ MD<sub>i−1</sub>); SHA3VS: MD<sub>i</sub> = H(MD<sub>i−1</sub>)); ACVP "MCT" (thêm biến thể alternate)</span><span lang="en">CAVP "Monte" (SHAVS: MD<sub>i</sub> = H(MD<sub>i−3</sub> ‖ MD<sub>i−2</sub> ‖ MD<sub>i−1</sub>); SHA3VS: MD<sub>i</sub> = H(MD<sub>i−1</sub>)); ACVP "MCT" (adds the alternate variant)</span></td>
+      <td><span lang="vi">100&#8239;000 lần băm nối tiếp đều đúng: lõi đúng trên rất nhiều đầu vào ngẫu nhiên, và trạng thái được làm mới giữa các thông điệp.</span><span lang="en">100,000 chained hashes are all right: the core is right on very many random inputs, and the state is renewed between messages.</span></td>
+      <td><span lang="vi">Độ dài khác: mọi thông điệp Monte Carlo cùng một độ dài (trừ SHAKE, nơi độ dài <em>ra</em> thay đổi).</span><span lang="en">Other lengths: every Monte Carlo message has the same length (except SHAKE, where the <em>output</em> length varies).</span></td></tr>
+  <tr><td><span lang="vi">SHAKE: độ dài ra</span><span lang="en">SHAKE: output length</span></td>
+      <td><span lang="vi">CAVP SHA3VS "VariableOut"; ACVP SHAKE "AFT" với outLen thay đổi (cả độ dài lẻ bit)</span><span lang="en">CAVP SHA3VS "VariableOut"; ACVP SHAKE "AFT" with varying outLen (odd bit lengths too)</span></td>
+      <td><span lang="vi">Pha vắt đúng ở nhiều độ dài, kể cả khi cần thêm hoán vị.</span><span lang="en">The squeeze is right at many lengths, including those that need extra permutations.</span></td>
+      <td><span lang="vi">Vắt nhiều lần nối tiếp qua một giao diện thật.</span><span lang="en">Repeated squeezes through a real interface.</span></td></tr>
+  <tr><td><span lang="vi">Tuyết lở &amp; biên khối</span><span lang="en">Avalanche &amp; boundaries</span></td>
+      <td><span lang="vi">— (không có bài kiểm NIST tương ứng; bài "dữ liệu lớn" LDT 1–8 GiB của ACVP không chạy trong trình duyệt)</span><span lang="en">— (no corresponding NIST test; ACVP's 1–8 GiB "large data test" (LDT) does not run in a browser)</span></td>
+      <td><span lang="vi">Tính chất thống kê (khoảng một nửa số bit đổi) và chỗ số khối nhảy bậc — tức chỗ phải đặt testcase.</span><span lang="en">A statistical property (about half the bits change) and where the block count jumps — that is, where testcases belong.</span></td>
+      <td><span lang="vi">Tính đúng: một hàm sai vẫn có thể "tuyết lở" rất đẹp.</span><span lang="en">Correctness: a wrong function can still avalanche beautifully.</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ================================================================ 9 -->
+<h2><span lang="vi">9. Mã này có đáng tin không</span><span lang="en">9. Can this code be trusted</span></h2>
+<p lang="vi">Mã băm của trang là JavaScript tôi tự viết từ FIPS 180-4, FIPS 202 và SP 800-185, không dùng thư viện ngoài.
+Tôi làm bốn việc để chứng minh nó:</p>
+<p lang="en">The page's hash code is JavaScript I wrote myself from FIPS 180-4, FIPS 202 and SP 800-185, with no external
+library. I did four things to prove it:</p>
+<ul lang="vi">
+  <li>Một "trọng tài" độc lập: một mô hình Python viết từ cùng các chuẩn, đối chiếu với thư viện OpenSSL và với file của
+      NIST. Từ đó: <span data-i18n="neutral">14&#8239;363</span> phép so, gồm <span data-i18n="neutral">12&#8239;913</span>
+      trường hợp AFT của NIST (<span data-i18n="neutral">6&#8239;872</span> trong số đó lẻ bit) và cả
+      <span data-i18n="neutral">23</span> bài Monte Carlo chạy đủ 100 checkpoint — tất cả khớp. Mỗi digest còn được tính
+      lại bằng các file băm dùng chung của trang và bằng thư viện của Node.</li>
+  <li>Cho một trình duyệt giả lập bấm qua mọi thẻ — <span data-i18n="neutral">447</span> phép kiểm — và sau mỗi cú bấm
+      soát xem có câu nào chỉ có một ngôn ngữ không; cố tình cài một đáp án sai vào tập vector và đòi trang phải báo đúng chỗ
+      sai.</li>
+  <li>Cố tình làm hỏng mã <span data-i18n="neutral">45</span> lần (ô độ dài của phần đệm, hàm sinh IV của SHA-512/t,
+      một hằng số xoay, độ dịch ρ, hằng số vòng, byte hậu tố, trường hợp còn một byte của pad10*1, cách nối chuỗi Monte
+      Carlo, dây nối giao diện…) và đòi phép kiểm phải đỏ: <span data-i18n="neutral">45</span> lần đỏ.</li>
+  <li>Nút "Chạy kiểm chứng" ở đầu trang lặp lại một phần các phép so đó ngay trong máy bạn.</li>
+</ul>
+<ul lang="en">
+  <li>An independent referee: a Python model written from the same standards, checked against the OpenSSL library and
+      against NIST's files. From it: <span data-i18n="neutral">14,363</span> comparisons, including
+      <span data-i18n="neutral">12,913</span> NIST AFT cases (<span data-i18n="neutral">6,872</span> of them
+      bit-oriented) and all <span data-i18n="neutral">23</span> Monte Carlo tests run to the full 100 checkpoints — all
+      matching. Every digest is also recomputed by the site's shared hash files and by Node's library.</li>
+  <li>Had a simulated browser click through every tab — <span data-i18n="neutral">447</span> checks — and, after every
+      click, look for any sentence present in one language only; planted a wrong expected value in the vector set and
+      required the page to report exactly that mismatch.</li>
+  <li>Broke the code on purpose <span data-i18n="neutral">45</span> times (the padding's length field, the SHA-512/t IV
+      generator, a rotation constant, a ρ offset, a round constant, the suffix byte, pad10*1's one-byte case, the Monte Carlo
+      chaining, the UI wiring…) and required the tests to go red: <span data-i18n="neutral">45</span> went red.</li>
+  <li>The self-test button at the top repeats part of those comparisons on your machine.</li>
+</ul>
+<div class="callout">
+  <span lang="vi"><strong>Đừng dùng mã này để bảo vệ thứ gì thật.</strong> Nó viết cho việc học: không chống tấn công kênh
+  bên, thời gian chạy phụ thuộc dữ liệu, và mọi thứ bạn gõ vào nằm trong bộ nhớ JavaScript. Mọi phép tính chạy trong máy bạn,
+  không gửi đi đâu.</span>
+  <span lang="en"><strong>Do not protect anything real with this code.</strong> It is written for learning: no side-channel
+  protection, data-dependent timing, and everything you type lives in JavaScript memory. Every computation runs on your own
+  machine; nothing is sent anywhere.</span>
+</div>
+
+<!-- ================================================================ 10 -->
+<h2><span lang="vi">10. Đọc thêm</span><span lang="en">10. Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://csrc.nist.gov/pubs/fips/180-4/upd1/final" target="_blank" rel="noopener" data-i18n="neutral">NIST FIPS 180-4, Secure Hash Standard (SHS)</a> — 08/2015.</li>
+  <li><a href="https://csrc.nist.gov/pubs/fips/202/final" target="_blank" rel="noopener" data-i18n="neutral">NIST FIPS 202, SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions</a> — 08/2015.</li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/185/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-185, SHA-3 Derived Functions: cSHAKE, KMAC, TupleHash and ParallelHash</a> — 12/2016.</li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/131/a/r2/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-131A Rev. 2</a> ·
+      <a href="https://csrc.nist.gov/pubs/sp/800/131/a/r3/ipd" target="_blank" rel="noopener" data-i18n="neutral">Rev. 3 (initial public draft)</a>
+      — <span lang="vi">chuyển tiếp thuật toán và độ dài khoá.</span><span lang="en">transitioning algorithms and key lengths.</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/ir/8547/final" target="_blank" rel="noopener" data-i18n="neutral">NIST IR 8547, Transition to Post-Quantum Cryptography Standards</a> — 10/2026.</li>
+  <li><a href="https://www.nist.gov/news-events/news/2022/12/nist-retires-sha-1-cryptographic-algorithm" target="_blank" rel="noopener" data-i18n="neutral">NIST Retires SHA-1 Cryptographic Algorithm</a> — 15/12/2022.</li>
+  <li><a href="https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/secure-hashing" target="_blank" rel="noopener" data-i18n="neutral">NIST CAVP — Secure Hashing (SHAVS / SHA3VS test vectors)</a> ·
+      <a href="https://pages.nist.gov/ACVP/" target="_blank" rel="noopener" data-i18n="neutral">ACVP</a></li>
+  <li><a href="https://shattered.io/" target="_blank" rel="noopener" data-i18n="neutral">SHAttered</a> ·
+      <a href="https://sha-mbles.github.io/" target="_blank" rel="noopener" data-i18n="neutral">SHA-1 is a Shambles</a></li>
+  <li><a href="https://keccak.team/keccak.html" target="_blank" rel="noopener" data-i18n="neutral">Keccak team</a> —
+      <span lang="vi">tài liệu và mã tham chiếu của tác giả.</span><span lang="en">the designers' documents and reference code.</span></li>
+  <li><a href="md5-rfc1321.html" data-i18n="neutral">MD5 (RFC 1321)</a> —
+      <span lang="vi">phần một của loạt bài hàm băm.</span><span lang="en">part one of this hash series.</span></li>
+  <li><a href="pqc-calculator.html" data-i18n="neutral">ML-KEM &amp; ML-DSA</a> · <a href="nist-205-206-207-calculator.html" data-i18n="neutral">SLH-DSA, FN-DSA &amp; HQC-KEM</a>
+      — <span lang="vi">các máy tính hậu lượng tử dùng những hàm băm này.</span><span lang="en">the post-quantum calculators that use these hashes.</span></li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">← PQC, AI &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<script src="assets/pqc-mlkem.js"></script>
+<script src="assets/pqc-sha2.js"></script>
+<script src="assets/hash-trace.js"></script>
+<script src="assets/hash-vectors.js"></script>
+<script src="assets/hash-ui.js"></script>
+
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

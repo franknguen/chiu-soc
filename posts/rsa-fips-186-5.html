@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="RSA theo FIPS 186-5: từ p = 61, q = 53 tới khoá 4096 bit — ChiU·SoC"
+      data-title-en="RSA under FIPS 186-5: from p = 61, q = 53 to 4096-bit keys — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RSA theo FIPS 186-5: từ p = 61, q = 53 tới khoá 4096 bit — ChiU·SoC</title>
+<meta name="description" content="RSA giải thích từ ví dụ tính tay p = 61, q = 53 tới khoá 4096 bit theo FIPS 186-5, SP 800-56B r2 và RFC 8017, kèm phòng thí nghiệm chạy trong trình duyệt: sinh khoá có từng bước kiểm tra, RSAEP và OAEP, RSADP với CRT, làm mù và tấn công Bellcore, ký và xác minh PKCS#1 v1.5 / PSS, đối chiếu vector CAVP / ACVP của NIST, và góc nhìn phần cứng."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(920px, calc(100vw - 32px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 0 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+@media(max-width:640px){ article{ padding:22px 16px; } }
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:34px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:22px 0 7px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+a{ color:var(--accent); }
+
+.toc-wrap{ background:rgba(20,83,143,.05); border:1px solid rgba(20,83,143,.14); border-radius:14px; padding:12px 18px; margin:0 0 22px; font-size:.92em; }
+.toc-wrap ol{ margin:6px 0 0; }
+.toc-wrap li{ margin-bottom:2px; }
+
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.7;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px; overflow-wrap:anywhere;
+}
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:420px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:7px 11px; text-align:left; vertical-align:top; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.note{ font-size:.86em; color:var(--muted); }
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+
+/* ===== phòng thí nghiệm ===== */
+.selftest{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  margin:16px 0 10px; padding:16px 18px; border-radius:14px;
+  background:rgba(42,157,143,.07); border:1px solid rgba(42,157,143,.28);
+}
+.st-note{ flex:1 1 260px; font-size:.84em; color:var(--muted); line-height:1.6; }
+.btn{
+  font:inherit; font-size:.88em; font-weight:700; cursor:pointer;
+  color:#fff; border:0; padding:9px 18px; border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.btn:disabled{ opacity:.5; cursor:default; }
+.btn.ghost{ background:none; color:var(--accent); border:1px solid rgba(20,83,143,.3); }
+.btn.sm{ font-size:.78em; padding:5px 12px; }
+.hexbox{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.78em; line-height:1.6; white-space:pre-wrap; word-break:break-all;
+  background:#0f1b2d; color:#9fd0c8; border-radius:10px;
+  padding:10px 12px; margin:8px 0 0; max-height:260px; overflow:auto;
+}
+.pill{ display:inline-block; font-size:.78em; font-weight:700; padding:3px 11px; border-radius:999px; }
+.pill.ok{ background:rgba(42,157,143,.16); color:#15695f; }
+.pill.bad{ background:rgba(190,30,45,.12); color:#9b1d28; }
+.pill.wait{ background:rgba(234,179,8,.16); color:#8a6100; }
+.nojs{ background:rgba(234,179,8,.12); border:1px solid rgba(234,179,8,.35); padding:12px 16px; border-radius:12px; font-size:.9em; }
+
+.card{
+  min-width:0; background:#fff; border:1px solid rgba(20,83,143,.15); border-radius:14px;
+  padding:14px 16px 6px; margin:0 0 14px; border-left:4px solid var(--accent);
+}
+.card h4{ display:flex; align-items:center; gap:10px; margin:0 0 10px; font-size:.98rem; flex-wrap:wrap; }
+.tabs{ display:flex; gap:8px; margin:22px 0 0; flex-wrap:wrap; }
+.tab{
+  font:inherit; font-size:.9em; font-weight:700; cursor:pointer;
+  background:#fff; color:var(--muted); border:1px solid rgba(20,83,143,.2);
+  padding:10px 16px; border-radius:12px 12px 0 0; border-bottom:0;
+}
+.tab[aria-selected="true"]{ color:var(--accent); box-shadow:inset 0 3px 0 var(--accent2); }
+.panel{
+  border:1px solid rgba(20,83,143,.2); border-radius:0 14px 14px 14px;
+  padding:18px 18px 14px; background:#fbfcfe; margin-bottom:26px;
+}
+.panel[hidden]{ display:none; }
+.bar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; margin:0 0 12px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:0 0 10px; }
+.chips-l{ font-size:.74rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:6px; }
+.chip{ position:relative; display:inline-flex; }
+.chip input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+.chip > span{
+  font-size:.8em; font-weight:700; padding:5px 12px; border-radius:999px;
+  border:1px solid rgba(20,83,143,.25); color:var(--accent); background:#fff; white-space:nowrap;
+}
+.chip input:checked + span{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input:focus-visible + span{ outline:2px solid rgba(42,157,143,.6); outline-offset:2px; }
+.chip input:disabled{ cursor:not-allowed; }
+.chip input:disabled + span{ color:#9aa4b1; background:#f3f5f8; border-style:dashed; }
+.chip .tonly{ font-weight:600; font-size:.86em; color:#9b1d28; margin-left:4px; }
+.chip input:checked + span .tonly{ color:#ffd7db; }
+.row{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin:0 0 12px; }
+.chk{ display:inline-flex; gap:7px; align-items:center; font-size:.84em; font-weight:600; color:var(--muted); cursor:pointer; }
+.chk input{ accent-color:var(--accent2); width:16px; height:16px; }
+.numin{ width:5.5em; font:inherit; font-size:.85em; padding:3px 8px; border:1px solid rgba(20,83,143,.25); border-radius:8px; }
+.hint{ font-size:.82em; color:var(--muted); margin:0 0 10px; line-height:1.6; }
+.hint.warn{ color:#9b1d28; }
+.ex{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:4px 0 12px; padding:8px 10px; border-radius:12px; background:rgba(20,83,143,.04); }
+.ex .lbl{ font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:4px; }
+.grid2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; }
+@media(max-width:640px){ .grid2{ grid-template-columns:1fr; } }
+
+.fld{ margin:0 0 10px; }
+.fld-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:3px; }
+.fld-head label{ font-size:.8em; font-weight:700; color:var(--muted); }
+.cnt{ font-size:.72em; font-weight:700; font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap; }
+.cnt.ok{ color:#15695f; }
+.cnt.warn{ color:#8a6100; }
+.cnt.bad{ color:#9b1d28; }
+.fld textarea{
+  display:block; width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.74em; line-height:1.55; color:#27323f; background:#fbfcfe;
+  border:1px solid rgba(20,83,143,.22); border-radius:10px; padding:7px 10px;
+  resize:vertical; word-break:break-all; max-height:8.4em;
+}
+.fld.big textarea{ max-height:none; min-height:16em; }
+.fld textarea[readonly]{ background:#f1f4f8; color:#55606d; }
+.fld textarea:focus{ outline:2px solid rgba(42,157,143,.45); outline-offset:1px; }
+.tools{ display:flex; flex-wrap:wrap; gap:4px 6px; align-items:center; margin-top:4px; }
+.tools:empty{ display:none; }
+.tools button{
+  font:inherit; font-size:.7em; font-weight:700; cursor:pointer; padding:2px 9px;
+  border-radius:7px; border:1px solid rgba(20,83,143,.18); background:#fff; color:var(--accent);
+}
+.tools button:hover{ background:rgba(20,83,143,.07); }
+.tools button[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.tools .gap{ flex:1 1 8px; }
+.tools .flash{ font-size:.72em; font-weight:700; color:#15695f; }
+
+.result{
+  margin:8px 0 4px; padding:11px 14px; border-radius:12px;
+  font-size:.9em; line-height:1.6; background:#fff; border:1px solid rgba(20,83,143,.16);
+}
+.result:empty{ display:none; }
+.result.ok{ background:rgba(42,157,143,.1); border-color:rgba(42,157,143,.38); color:#11574f; }
+.result.bad{ background:rgba(190,30,45,.06); border-color:rgba(190,30,45,.3); color:#8c1a24; }
+.result.info{ color:#2d3748; }
+.result .sub{ display:block; font-size:.9em; color:var(--muted); margin-top:2px; }
+.keyline{ font-size:.84em; margin:2px 0 10px; padding:8px 12px; border-radius:10px; background:#f6f8fb; }
+.keyline:empty{ display:none; }
+.keyline.ok{ background:rgba(42,157,143,.09); color:#11574f; }
+.keyline.bad{ background:rgba(190,30,45,.06); color:#8c1a24; }
+
+.trace{
+  font-size:.82em; line-height:1.55; background:#fff; border:1px solid rgba(20,83,143,.15);
+  border-radius:12px; padding:8px 12px; margin:10px 0 6px; max-height:560px; overflow:auto;
+}
+.trace:empty{ display:none; }
+.trace h5{ margin:10px 0 4px; font-size:.84rem; color:var(--accent); }
+.trace h5:first-child{ margin-top:2px; }
+.tl{ display:flex; gap:8px; align-items:baseline; padding:3px 0; border-bottom:1px dashed rgba(31,41,55,.08); }
+.tl > .ic{ flex:none; width:1.2em; font-weight:800; text-align:center; }
+.tl > .tx{ flex:1 1 auto; min-width:0; }
+.tl.ok > .ic{ color:#15695f; }
+.tl.bad > .ic{ color:#9b1d28; }
+.tl.info > .ic{ color:var(--muted); }
+.tl code{ font-size:.92em; word-break:break-all; }
+.trace table{ min-width:0; font-size:.95em; margin:4px 0 6px; }
+.trace td, .trace th{ padding:4px 8px; }
+.trace .why{ display:block; color:var(--muted); font-size:.92em; }
+/* ==== house-format v1 — bilingual-personal-site skill, scripts/house-format.css. Prose is justified on every page.
+     Do not edit this block in a page: edit the skill's copy, re-run apply_format.py; check_site.py fails a page whose
+     block differs. ==== */
+main p, main li, main blockquote, main dd, main .art-desc, main .art-quote{ text-align:justify; text-justify:inter-word; hyphens:auto; }
+main .refs li, main .art-links li, main .songlist li, main .toc-wrap li, main .listen p, main .pair li, main .result li, main table p, main table li{ text-align:left; hyphens:manual; }
+main .poem-credit, main .video-cap, main figcaption p, main figcaption li{ text-align:center; hyphens:manual; }
+main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
+/* ==== /house-format ==== */
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+
+<h1><span lang="vi">RSA theo FIPS 186-5: từ p = 61, q = 53 tới khoá 4096 bit</span><span lang="en">RSA under FIPS 186-5: from p = 61, q = 53 to 4096-bit keys</span></h1>
+<div class="meta"><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi · 02/11/2026 · Frank Nguyen</span><span lang="en">PQC, AI &amp; ECC · 2 Nov 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">RSA là một trong những thuật toán khoá công khai lâu đời nhất vẫn còn được dùng hằng ngày: nó ký firmware, chứng
+chỉ TLS và thẻ thông minh, và ở nhiều hệ thống cũ vẫn bọc khoá phiên. Bài này đi từ ví dụ nhỏ nhất làm được bằng tay
+— <em>p = 61, q = 53</em> — tới khoá 4096 bit đúng theo <strong>FIPS 186-5</strong>, <strong>SP 800-56B r2</strong> và
+<strong>RFC 8017</strong>, rồi cho bạn tự chạy bốn loại phép thử mà NIST dùng để kiểm một bộ RSA — sinh khoá, mã hoá,
+giải mã, ký / xác minh — ngay trong trình duyệt, <a href="#lab">ở phòng thí nghiệm bên dưới</a>. Ai làm phần cứng sẽ
+thấy thêm một mục riêng: Montgomery, thang lũy thừa, làm mù và tấn công tiêm lỗi.</p>
+<p class="lede" lang="en">RSA is one of the oldest public-key algorithms still in daily use: it signs firmware, TLS
+certificates and smart cards, and in many older systems it still wraps session keys. This article goes from the
+smallest example you can do by hand — <em>p = 61, q = 53</em> — to 4096-bit keys exactly as <strong>FIPS 186-5</strong>,
+<strong>SP 800-56B r2</strong> and <strong>RFC 8017</strong> define them, and then lets you run the four kinds of test
+NIST uses to check an RSA implementation — key generation, encryption, decryption, signing / verification — in your
+browser, <a href="#lab">in the lab below</a>. Hardware readers get a section of their own: Montgomery, exponentiation
+ladders, blinding and fault attacks.</p>
+
+<noscript>
+  <p class="nojs"><span lang="vi">Phòng thí nghiệm cần JavaScript. Phần giải thích vẫn đọc được bình thường.</span><span lang="en">The lab needs JavaScript. The explanations read fine without it.</span></p>
+</noscript>
+
+<nav class="toc-wrap" aria-label="Mục lục / Contents">
+  <strong><span lang="vi">Trong bài</span><span lang="en">In this article</span></strong>
+  <ol>
+    <li><a href="#y-tuong"><span lang="vi">Một ý tưởng: cửa sập một chiều</span><span lang="en">One idea: a one-way trapdoor</span></a></li>
+    <li><a href="#toan"><span lang="vi">Toán, từng ký hiệu một</span><span lang="en">The math, one symbol at a time</span></a></li>
+    <li><a href="#tho"><span lang="vi">Vì sao RSA "thô" chưa phải là mã hoá</span><span lang="en">Why raw RSA is not yet an encryption scheme</span></a></li>
+    <li><a href="#co-khoa"><span lang="vi">Cỡ khoá, độ mạnh, hiện trạng và máy tính lượng tử</span><span lang="en">Key sizes, strength, status and quantum computers</span></a></li>
+    <li><a href="#phan-cung"><span lang="vi">Góc phần cứng</span><span lang="en">The hardware angle</span></a></li>
+    <li><a href="#lab"><span lang="vi">Phòng thí nghiệm</span><span lang="en">The lab</span></a></li>
+    <li><a href="#nist"><span lang="vi">Các trường hợp NIST kiểm</span><span lang="en">What NIST's tests check</span></a></li>
+    <li><a href="#tin-cay"><span lang="vi">Mã này có đáng tin không</span><span lang="en">Can this code be trusted</span></a></li>
+    <li><a href="#doc-them"><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></a></li>
+  </ol>
+</nav>
+
+<!-- ================================================================ 1 -->
+<h2 id="y-tuong"><span lang="vi">Một ý tưởng: cửa sập một chiều</span><span lang="en">One idea: a one-way trapdoor</span></h2>
+<p lang="vi">Nhân hai số nguyên tố thì dễ; từ tích của chúng tìm lại hai số ấy thì — khi các số đủ lớn — không ai làm
+được trong thời gian hợp lý. RSA (Rivest, Shamir và Adleman, 1977) biến sự bất đối xứng đó thành một <em>cửa sập</em>:
+ai cũng "khoá" được bằng khoá công khai <code>(n, e)</code> — mã hoá một số, hay kiểm một chữ ký — nhưng chỉ người biết
+hai thừa số nguyên tố của <code>n</code> mới tính được số mũ bí mật <code>d</code> để "mở". Toàn bộ thuật toán gói gọn
+trong một ví dụ bạn làm được bằng máy tính bỏ túi:</p>
+<p lang="en">Multiplying two primes is easy; recovering them from their product is — once they are large enough — beyond
+anyone in any reasonable time. RSA (Rivest, Shamir and Adleman, 1977) turns that asymmetry into a <em>trapdoor</em>:
+anyone can "lock" with the public key <code>(n, e)</code> — encrypt a number, or check a signature — but only whoever
+knows the two prime factors of <code>n</code> can compute the secret exponent <code>d</code> that "unlocks". The whole
+algorithm fits into one example you can do on a pocket calculator:</p>
+
+<div class="tbl-wrap"><table>
+  <thead><tr><th>#</th><th><span lang="vi">Bước</span><span lang="en">Step</span></th><th><span lang="vi">Phép tính</span><span lang="en">Computation</span></th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td><span lang="vi">Chọn hai số nguyên tố</span><span lang="en">Pick two primes</span></td><td><code>p = 61, q = 53</code></td></tr>
+    <tr><td class="num">2</td><td><span lang="vi">Mô-đun, công khai</span><span lang="en">Modulus, public</span></td><td><code>n = p·q = <span data-k="textbook.n">3233</span></code></td></tr>
+    <tr><td class="num">3</td><td><span lang="vi">Hai "chu kỳ" của nhóm số mod n</span><span lang="en">Two "periods" of the numbers mod n</span></td><td><code>φ(n) = 60·52 = <span data-k="textbook.phi">3120</span></code>, <code>λ(n) = lcm(60, 52) = <span data-k="textbook.lam">780</span></code></td></tr>
+    <tr><td class="num">4</td><td><span lang="vi">Số mũ công khai</span><span lang="en">Public exponent</span></td><td><code>e = 17</code> <span lang="vi">(gcd(17, 780) = 1)</span><span lang="en">(gcd(17, 780) = 1)</span></td></tr>
+    <tr><td class="num">5</td><td><span lang="vi">Số mũ bí mật</span><span lang="en">Private exponent</span></td><td><code>d = 17⁻¹ mod 780 = <span data-k="textbook.d">413</span></code> <span lang="vi">vì 17·413 = 7021 = 9·780 + 1</span><span lang="en">because 17·413 = 7021 = 9·780 + 1</span></td></tr>
+    <tr><td class="num">6</td><td><span lang="vi">Mã hoá m = 65</span><span lang="en">Encrypt m = 65</span></td><td><code>c = 65¹⁷ mod 3233 = <span data-k="textbook.c">2790</span></code></td></tr>
+    <tr><td class="num">7</td><td><span lang="vi">Giải mã</span><span lang="en">Decrypt</span></td><td><code>2790⁴¹³ mod 3233 = <span data-k="textbook.back">65</span></code></td></tr>
+  </tbody>
+</table></div>
+<p lang="vi">Vì sao bước 7 trả lại đúng 65? Với mọi <code>m</code>, lũy thừa <code>m<sup>λ(n)</sup></code> "quay về" 1 theo mod
+<code>n</code> (khi m nguyên tố cùng nhau với n; trường hợp còn lại cũng đúng nhờ định lý số dư Trung Hoa), nên
+<code>m<sup>e·d</sup> = m<sup>1 + 9·λ(n)</sup> = m</code>. Muốn tính <code>d</code> phải biết <code>λ(n)</code>, mà muốn biết
+<code>λ(n)</code> phải phân tích được <code>n</code>. Sách giáo khoa hay dùng <code>φ(n)</code> và ra
+<code>d = <span data-k="textbook.d_phi">2753</span></code>; số này cũng giải mã đúng
+(<code>2790²⁷⁵³ mod 3233 = <span data-k="textbook.back_phi">65</span></code>) — mục sau giải thích vì sao FIPS 186-5 chọn
+<code>λ</code>.</p>
+<p lang="en">Why does step 7 give back exactly 65? For every <code>m</code>, the power <code>m<sup>λ(n)</sup></code> "comes back"
+to 1 modulo <code>n</code> (when m is coprime to n; the remaining cases also work, by the Chinese remainder theorem),
+so <code>m<sup>e·d</sup> = m<sup>1 + 9·λ(n)</sup> = m</code>. Computing <code>d</code> needs <code>λ(n)</code>, and
+<code>λ(n)</code> needs the factors of <code>n</code>. Textbooks often use <code>φ(n)</code> instead and get
+<code>d = <span data-k="textbook.d_phi">2753</span></code>; that also decrypts correctly
+(<code>2790²⁷⁵³ mod 3233 = <span data-k="textbook.back_phi">65</span></code>) — the next section explains why FIPS 186-5
+picks <code>λ</code>.</p>
+<p><button class="btn ghost sm" id="tb-load" type="button"><span lang="vi">Nạp ví dụ này vào phòng thí nghiệm</span><span lang="en">Load this example into the lab</span></button></p>
+
+<!-- ================================================================ 2 -->
+<h2 id="toan"><span lang="vi">Toán, từng ký hiệu một</span><span lang="en">The math, one symbol at a time</span></h2>
+<ul lang="vi">
+  <li><code>p, q</code> — hai số nguyên tố khác nhau, mỗi số dài đúng <code>nlen/2</code> bit. FIPS 186-5 (Phụ lục A.1.1)
+      đòi <code>√2·2<sup>nlen/2 − 1</sup> ≤ p, q ≤ 2<sup>nlen/2</sup> − 1</code>: cận dưới bảo đảm tích có đúng
+      <code>nlen</code> bit, và <code>|p − q| &gt; 2<sup>nlen/2 − 100</sup></code> để hai số không quá gần nhau (nếu gần,
+      phương pháp Fermat tìm ra chúng ngay).</li>
+  <li><code>n = p·q</code> — mô-đun, công khai. <code>nlen</code> = số bit của <code>n</code> = "cỡ khoá".</li>
+  <li><code>e</code> — số mũ công khai: lẻ, <code>2<sup>16</sup> &lt; e &lt; 2<sup>256</sup></code> (FIPS 186-5, mục 5.4(e)),
+      và <code>gcd(p − 1, e) = gcd(q − 1, e) = 1</code>. Gần như ai cũng dùng <code>e = 65537 = 2<sup>16</sup> + 1</code>.</li>
+  <li><code>λ(n) = lcm(p − 1, q − 1)</code> — hàm Carmichael: số mũ nhỏ nhất làm <code>x<sup>λ</sup> ≡ 1 (mod n)</code> với
+      mọi <code>x</code> nguyên tố cùng nhau với <code>n</code>.</li>
+  <li><code>d = e<sup>−1</sup> mod λ(n)</code> — số mũ bí mật; FIPS 186-5 còn đòi <code>2<sup>nlen/2</sup> &lt; d &lt; λ(n)</code>
+      (một <code>d</code> nhỏ bất thường bị tấn công Wiener lấy ra từ khoá công khai).</li>
+  <li><code>dP = d mod (p − 1)</code>, <code>dQ = d mod (q − 1)</code>, <code>qInv = q<sup>−1</sup> mod p</code> — dạng "CRT"
+      của khoá riêng (RFC 8017, mục 3.2), dùng để giải mã nhanh gấp khoảng bốn lần.</li>
+</ul>
+<ul lang="en">
+  <li><code>p, q</code> — two distinct primes, each exactly <code>nlen/2</code> bits long. FIPS 186-5 (Appendix A.1.1)
+      requires <code>√2·2<sup>nlen/2 − 1</sup> ≤ p, q ≤ 2<sup>nlen/2</sup> − 1</code>: the lower bound makes the product exactly
+      <code>nlen</code> bits, and <code>|p − q| &gt; 2<sup>nlen/2 − 100</sup></code> keeps the two apart (if they are close,
+      Fermat's method finds them at once).</li>
+  <li><code>n = p·q</code> — the modulus, public. <code>nlen</code> = the bit length of <code>n</code> = the "key size".</li>
+  <li><code>e</code> — the public exponent: odd, <code>2<sup>16</sup> &lt; e &lt; 2<sup>256</sup></code> (FIPS 186-5,
+      section 5.4(e)), and <code>gcd(p − 1, e) = gcd(q − 1, e) = 1</code>. Almost everyone uses
+      <code>e = 65537 = 2<sup>16</sup> + 1</code>.</li>
+  <li><code>λ(n) = lcm(p − 1, q − 1)</code> — the Carmichael function: the smallest exponent with
+      <code>x<sup>λ</sup> ≡ 1 (mod n)</code> for every <code>x</code> coprime to <code>n</code>.</li>
+  <li><code>d = e<sup>−1</sup> mod λ(n)</code> — the private exponent; FIPS 186-5 also requires
+      <code>2<sup>nlen/2</sup> &lt; d &lt; λ(n)</code> (an unusually small <code>d</code> falls to Wiener's attack straight
+      from the public key).</li>
+  <li><code>dP = d mod (p − 1)</code>, <code>dQ = d mod (q − 1)</code>, <code>qInv = q<sup>−1</sup> mod p</code> — the "CRT"
+      form of the private key (RFC 8017, section 3.2), used to decrypt about four times faster.</li>
+</ul>
+
+<h3><span lang="vi">Vì sao FIPS 186-5 dùng λ(n) chứ không dùng φ(n)</span><span lang="en">Why FIPS 186-5 uses λ(n) rather than φ(n)</span></h3>
+<p lang="vi"><code>φ(n) = (p − 1)(q − 1) = λ(n)·gcd(p − 1, q − 1)</code>, nên mọi số mũ "chạy được" theo <code>φ</code> cũng chạy
+được theo <code>λ</code>, và hai kết quả chỉ khác nhau một bội của <code>λ</code>: ở ví dụ trên <code>gcd(60, 52) = 4</code>,
+<code>2753 = 413 + 3·780</code>. Có vô số số mũ giải mã đúng; FIPS 186-5 (A.1.1, điều kiện 3) chốt lấy đúng một —
+<code>d = e<sup>−1</sup> mod λ(n)</code>, số dương nhỏ nhất — để một khoá có một <code>d</code> xác định, kiểm tra được,
+và ngắn hơn (phép lũy thừa bí mật ngắn hơn). Phòng thí nghiệm in cả hai giá trị cho mọi khoá nó sinh ra.</p>
+<p lang="en"><code>φ(n) = (p − 1)(q − 1) = λ(n)·gcd(p − 1, q − 1)</code>, so every exponent that "works" modulo <code>φ</code> also
+works modulo <code>λ</code>, and the two answers differ by a multiple of <code>λ</code>: above, <code>gcd(60, 52) = 4</code> and
+<code>2753 = 413 + 3·780</code>. Infinitely many exponents decrypt correctly; FIPS 186-5 (A.1.1, condition 3) pins down
+one — <code>d = e<sup>−1</sup> mod λ(n)</code>, the smallest positive one — so a key has one well-defined, checkable
+<code>d</code>, and a shorter one (a shorter secret exponentiation). The lab prints both values for every key it
+generates.</p>
+
+<h3><span lang="vi">Lũy thừa bằng "bình phương rồi nhân"</span><span lang="en">Exponentiation by "square and multiply"</span></h3>
+<p lang="vi">Không ai tính <code>65¹⁷</code> rồi mới chia lấy dư: số đó đã có 31 chữ số, còn <code>m<sup>d</sup></code> của một
+khoá 2048 bit nhiều chữ số đến mức riêng việc ghi ra nó có bao nhiêu chữ số đã cần hơn 600 chữ số. Ta đi qua các bit của số mũ từ trái sang phải; mỗi bit
+<em>bình phương</em> kết quả, gặp bit 1 thì <em>nhân</em> thêm cơ số, và rút gọn theo mod <code>n</code> sau mỗi phép.
+Với <code>e = 17 = 10001₂</code>:</p>
+<p lang="en">Nobody computes <code>65¹⁷</code> and only then reduces: that number already has 31 digits, and
+<code>m<sup>d</sup></code> for a 2048-bit key has so many digits that just writing down how many takes more than 600 digits. We walk the
+bits of the exponent from left to right; every bit <em>squares</em> the result, a 1 bit also <em>multiplies</em> by the
+base, and everything is reduced modulo <code>n</code> after each step. With <code>e = 17 = 10001₂</code>:</p>
+<div class="tbl-wrap"><table>
+  <thead><tr><th><span lang="vi">bit của e</span><span lang="en">bit of e</span></th><th><span lang="vi">phép tính</span><span lang="en">operation</span></th><th><span lang="vi">kết quả mod 3233</span><span lang="en">result mod 3233</span></th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><span lang="vi">bắt đầu bằng cơ số</span><span lang="en">start with the base</span></td><td class="num">65</td></tr>
+    <tr><td>0</td><td><span lang="vi">bình phương</span><span lang="en">square</span></td><td class="num"><span data-k="textbook.steps.0.2">992</span></td></tr>
+    <tr><td>0</td><td><span lang="vi">bình phương</span><span lang="en">square</span></td><td class="num"><span data-k="textbook.steps.1.2">1232</span></td></tr>
+    <tr><td>0</td><td><span lang="vi">bình phương</span><span lang="en">square</span></td><td class="num"><span data-k="textbook.steps.2.2">1547</span></td></tr>
+    <tr><td>1</td><td><span lang="vi">bình phương rồi nhân 65</span><span lang="en">square, then multiply by 65</span></td><td class="num"><span data-k="textbook.steps.3.1">789</span> → <span data-k="textbook.steps.3.2">2790</span></td></tr>
+  </tbody>
+</table></div>
+<p lang="vi">Tổng cộng 4 lần bình phương và 1 lần nhân: số lần bình phương = số bit của <code>e</code> trừ 1, số lần nhân =
+số bit 1 trừ 1. Với <code>e = 65537 = 2<sup>16</sup> + 1</code> là <span data-k="tables.e_ops.10001.0">16</span> lần bình
+phương và <span data-k="tables.e_ops.10001.1">1</span> lần nhân, bất kể khoá dài bao nhiêu — vì vậy mã hoá và kiểm chữ
+ký RSA rất nhanh, còn giải mã và ký (số mũ <code>d</code> dài cỡ <code>n</code>) chậm hơn hàng trăm lần.</p>
+<p lang="en">That is 4 squarings and 1 multiplication: the number of squarings is the bit length of <code>e</code> minus 1,
+the number of multiplications is the number of 1 bits minus 1. For <code>e = 65537 = 2<sup>16</sup> + 1</code> that is
+<span data-k="tables.e_ops.10001.0">16</span> squarings and <span data-k="tables.e_ops.10001.1">1</span> multiplication,
+whatever the key size — which is why RSA encryption and signature checks are fast, while decryption and signing (with
+an exponent <code>d</code> as long as <code>n</code>) are hundreds of times slower.</p>
+
+<h3><span lang="vi">CRT và công thức Garner: giải mã nhanh gấp bốn</span><span lang="en">CRT and Garner's formula: four times faster decryption</span></h3>
+<p lang="vi">Thay vì một phép lũy thừa <code>nlen</code> bit theo mod <code>n</code>, ta làm hai phép lũy thừa nửa cỡ theo mod
+<code>p</code> và mod <code>q</code> (số mũ ngắn bằng nửa, mỗi phép nhân rẻ bằng một phần tư) rồi ghép lại
+(RFC 8017, mục 5.1.2, bước 2.b):</p>
+<p lang="en">Instead of one <code>nlen</code>-bit exponentiation modulo <code>n</code>, do two half-size ones modulo <code>p</code>
+and modulo <code>q</code> (half the exponent length, each multiplication a quarter of the cost) and recombine them
+(RFC 8017, section 5.1.2, step 2.b):</p>
+<pre><code>m1 = c^dP mod p        m2 = c^dQ mod q
+h  = qInv · (m1 − m2) mod p
+m  = m2 + q · h</code></pre>
+<p lang="vi">Với <code>c = 2790</code>: <code>c mod 61 = <span data-k="textbook.cp">45</span></code>, <code>dP = <span data-k="textbook.dP">53</span></code>,
+<code>m1 = 45⁵³ mod 61 = <span data-k="textbook.m1">4</span></code>; <code>c mod 53 = <span data-k="textbook.cq">34</span></code>,
+<code>dQ = <span data-k="textbook.dQ">49</span></code>, <code>m2 = 34⁴⁹ mod 53 = <span data-k="textbook.m2">12</span></code>;
+<code>qInv = 53⁻¹ mod 61 = <span data-k="textbook.qInv">38</span></code>, <code>h = 38·(4 − 12) mod 61 = <span data-k="textbook.h">1</span></code>,
+và <code>m = 12 + 53·1 = <span data-k="textbook.crt_m">65</span></code>. Cách ghép này là của Garner (1959); mục phần cứng
+bên dưới cho thấy vì sao chính nó lại là chỗ dễ bị tấn công nhất.</p>
+<p lang="en">With <code>c = 2790</code>: <code>c mod 61 = <span data-k="textbook.cp">45</span></code>, <code>dP = <span data-k="textbook.dP">53</span></code>,
+<code>m1 = 45⁵³ mod 61 = <span data-k="textbook.m1">4</span></code>; <code>c mod 53 = <span data-k="textbook.cq">34</span></code>,
+<code>dQ = <span data-k="textbook.dQ">49</span></code>, <code>m2 = 34⁴⁹ mod 53 = <span data-k="textbook.m2">12</span></code>;
+<code>qInv = 53⁻¹ mod 61 = <span data-k="textbook.qInv">38</span></code>, <code>h = 38·(4 − 12) mod 61 = <span data-k="textbook.h">1</span></code>,
+and <code>m = 12 + 53·1 = <span data-k="textbook.crt_m">65</span></code>. The recombination is Garner's (1959); the
+hardware section below shows why it is also the most attackable step.</p>
+
+<!-- ================================================================ 3 -->
+<h2 id="tho"><span lang="vi">Vì sao RSA "thô" chưa phải là mã hoá</span><span lang="en">Why raw RSA is not yet an encryption scheme</span></h2>
+<p lang="vi"><code>c = m<sup>e</sup> mod n</code> là một <em>nguyên thuỷ</em> (RFC 8017 gọi là RSAEP), chưa phải một cách mã hoá
+an toàn. Ba tính chất của nó đủ để thấy vì sao:</p>
+<p lang="en"><code>c = m<sup>e</sup> mod n</code> is a <em>primitive</em> (RFC 8017 calls it RSAEP), not yet a secure way to encrypt.
+Three of its properties show why:</p>
+<ul lang="vi">
+  <li><strong>Tất định</strong>: cùng <code>m</code> luôn cho cùng <code>c</code>, nên ai đoán được bản rõ chỉ cần mã hoá thử
+      rồi so.</li>
+  <li><strong>Dễ uốn</strong>: tích hai bản mã là bản mã của tích. Với khoá ví dụ: <code>2¹⁷ mod 3233 = <span data-k="textbook.mall.c2">1752</span></code>,
+      <code>3¹⁷ mod 3233 = <span data-k="textbook.mall.c3">1211</span></code>, và <code>1752·1211 mod 3233 = <span data-k="textbook.mall.prod">824</span></code>
+      đúng bằng <code>6¹⁷ mod 3233 = <span data-k="textbook.mall.c6">824</span></code> — kẻ tấn công sửa được bản rõ mà
+      không cần biết nó.</li>
+  <li><strong>Điểm bất động</strong>: ít nhất <code>0</code>, <code>1</code> và <code>n − 1</code> mã hoá thành chính nó
+      (<code>3232¹⁷ mod 3233 = <span data-k="textbook.fixed.2">3232</span></code>); thật ra luôn có ít nhất 9 điểm như vậy, với khoá ví dụ là 25. Vì thế SP 800-56B r2 (mục 7.1) chỉ nhận
+      <code>1 &lt; m &lt; n − 1</code>, chặt hơn RFC 8017 (<code>0 ≤ m &lt; n</code>); phòng thí nghiệm cho bạn chọn quy tắc.</li>
+</ul>
+<ul lang="en">
+  <li><strong>Deterministic</strong>: the same <code>m</code> always gives the same <code>c</code>, so anyone who can guess
+      the plaintext just encrypts the guess and compares.</li>
+  <li><strong>Malleable</strong>: the product of two ciphertexts is the ciphertext of the product. With the example key:
+      <code>2¹⁷ mod 3233 = <span data-k="textbook.mall.c2">1752</span></code>, <code>3¹⁷ mod 3233 = <span data-k="textbook.mall.c3">1211</span></code>,
+      and <code>1752·1211 mod 3233 = <span data-k="textbook.mall.prod">824</span></code> is exactly
+      <code>6¹⁷ mod 3233 = <span data-k="textbook.mall.c6">824</span></code> — an attacker can change the plaintext
+      without knowing it.</li>
+  <li><strong>Fixed points</strong>: at least <code>0</code>, <code>1</code> and <code>n − 1</code> encrypt to themselves
+      (<code>3232¹⁷ mod 3233 = <span data-k="textbook.fixed.2">3232</span></code>); in fact there are always at least 9 such points, 25 for the example key. That is why SP 800-56B r2 (section 7.1)
+      accepts only <code>1 &lt; m &lt; n − 1</code>, stricter than RFC 8017 (<code>0 ≤ m &lt; n</code>); the lab lets you pick
+      the rule.</li>
+</ul>
+<p lang="vi">Cách chữa là <strong>đệm</strong> (padding) có ngẫu nhiên và có cấu trúc kiểm được. Để mã hoá: <strong>RSAES-OAEP</strong>
+(RFC 8017, mục 7.1) trộn thông điệp với một <em>seed</em> ngẫu nhiên qua hai lớp mặt nạ băm (MGF1), nên mỗi lần mã hoá
+cho một bản mã khác và mọi sửa đổi đều bị phát hiện khi giải mã. Để ký: <strong>RSASSA-PSS</strong> (mục 8.1, có
+<em>salt</em> ngẫu nhiên) hoặc <strong>RSASSA-PKCS1-v1_5</strong> (mục 8.2, tất định) — FIPS 186-5 (mục 5.4) chấp nhận cả
+hai. Đệm PKCS#1 v1.5 <em>cho mã hoá</em> thì từ năm 1998 đã bị tấn công Bleichenbacher (dò lỗi đệm) và các biến thể sau
+này, nên phòng thí nghiệm không đưa vào.</p>
+<p lang="en">The cure is <strong>padding</strong> with randomness and a checkable structure. For encryption:
+<strong>RSAES-OAEP</strong> (RFC 8017, section 7.1) mixes the message with a random <em>seed</em> through two layers of
+hash-based masks (MGF1), so every encryption gives a different ciphertext and any modification is detected on
+decryption. For signatures: <strong>RSASSA-PSS</strong> (section 8.1, with a random <em>salt</em>) or
+<strong>RSASSA-PKCS1-v1_5</strong> (section 8.2, deterministic) — FIPS 186-5 (section 5.4) approves both. PKCS#1 v1.5
+padding <em>for encryption</em> has fallen to Bleichenbacher's padding-oracle attack since 1998 and to its later
+variants, so the lab leaves it out.</p>
+
+<!-- ================================================================ 4 -->
+<h2 id="co-khoa"><span lang="vi">Cỡ khoá, độ mạnh, hiện trạng và máy tính lượng tử</span><span lang="en">Key sizes, strength, status and quantum computers</span></h2>
+<p lang="vi">"Độ mạnh" là số bit của khoá đối xứng tương đương: khoá RSA 2048 bit khó phá cỡ một khoá đối xứng 112 bit. Cột
+<em>E</em> tính bằng công thức ở SP 800-56B r2, Phụ lục D (ước lượng chi phí của sàng trường số tổng quát), <em>ES</em> là
+bội số của 8 gần nhất — khớp Bảng 2 của chính văn bản đó. Cột Miller–Rabin là số vòng thử cho mỗi số nguyên tố
+<code>p, q</code> mà phòng thí nghiệm dùng: lấy từ Bảng B.1 của FIPS 186-5 với xác suất lỗi khớp độ mạnh; hai cỡ chỉ-để-thử
+không có trong bảng nên tính bằng công thức của Phụ lục C.1 với xác suất 2<sup>−100</sup> (chính công thức ấy, chạy trong
+trang, cho lại đủ sáu ô của Bảng B.1).</p>
+<p lang="en">"Strength" is the size of an equivalent symmetric key: a 2048-bit RSA key is about as hard to break as a
+112-bit symmetric key. Column <em>E</em> is the formula of SP 800-56B r2, Appendix D (an estimate of the general number
+field sieve's cost), <em>ES</em> its nearest multiple of 8 — matching that document's own Table 2. The Miller–Rabin
+column is the number of rounds per prime <code>p, q</code> the lab uses: from Table B.1 of FIPS 186-5 with an error
+probability matching the strength; the two test-only sizes are not in the table, so they come from the formula of
+Appendix C.1 with probability 2<sup>−100</sup> (that same formula, run in the page, reproduces all six cells of
+Table B.1).</p>
+<div class="tbl-wrap"><table>
+  <thead><tr><th>nlen</th><th>E</th><th>ES</th><th><span lang="vi">Miller–Rabin cho p, q</span><span lang="en">Miller–Rabin for p, q</span></th><th><span lang="vi">Hiện trạng (11/2026)</span><span lang="en">Status (as of 11/2026)</span></th></tr></thead>
+  <tbody>
+    <tr><td class="num">512</td><td class="num" data-k="tables.strength.512.0">57.16</td><td class="num" data-k="tables.strength.512.1">56</td><td><span data-k="tables.rounds.512">16</span> (C.1, 2<sup>−100</sup>)</td>
+      <td><span lang="vi">Đã bị phân tích công khai từ năm 1999 (RSA-155). Chỉ để thử.</span><span lang="en">Publicly factored in 1999 (RSA-155). Test only.</span></td></tr>
+    <tr><td class="num">1024</td><td class="num" data-k="tables.strength.1024.0">80.0</td><td class="num" data-k="tables.strength.1024.1">80</td><td><span data-k="tables.rounds.1024">7</span> (C.1, 2<sup>−100</sup>)</td>
+      <td><span lang="vi">Khoảng 80 bit. SP 800-131A cấm dùng độ mạnh dưới 112 bit để tạo chữ ký từ sau năm 2013; chỉ còn được kiểm chữ ký cũ. Chỉ để thử.</span><span lang="en">About 80 bits. SP 800-131A has disallowed less than 112 bits of strength for generating signatures since the end of 2013; only checking old signatures remains allowed. Test only.</span></td></tr>
+    <tr><td class="num">2048</td><td class="num" data-k="tables.strength.2048.0">110.12</td><td class="num" data-k="tables.strength.2048.1">112</td><td><span data-k="tables.rounds.2048">5</span> (B.1, 2<sup>−112</sup>)</td>
+      <td><span lang="vi">Mức tối thiểu hiện hành. NIST IR 8547 (10/2026): không còn được khuyến nghị sau 2030, bị cấm sau 2035.</span><span lang="en">The current minimum. NIST IR 8547 (10/2026): deprecated after 2030, disallowed after 2035.</span></td></tr>
+    <tr><td class="num">3072</td><td class="num" data-k="tables.strength.3072.0">131.97</td><td class="num" data-k="tables.strength.3072.1">128</td><td><span data-k="tables.rounds.3072">4</span> (B.1, 2<sup>−128</sup>)</td>
+      <td><span lang="vi">Chấp nhận được hiện nay; như mọi cỡ RSA: không còn được khuyến nghị sau 2030, bị cấm sau 2035 (IR 8547).</span><span lang="en">Acceptable today; like every RSA size: deprecated after 2030, disallowed after 2035 (IR 8547).</span></td></tr>
+    <tr><td class="num">4096</td><td class="num" data-k="tables.strength.4096.0">149.73</td><td class="num" data-k="tables.strength.4096.1">152</td><td><span data-k="tables.rounds.4096">4</span> (B.1, 2<sup>−144</sup>)</td>
+      <td><span lang="vi">Như 3072 bit.</span><span lang="en">Same as 3072 bits.</span></td></tr>
+  </tbody>
+</table></div>
+<p lang="vi">Kỷ lục phân tích thừa số công khai mà tôi kiểm được là RSA-250 (829 bit, tháng 2/2020); chưa ai công bố phân
+tích một khoá 1024 bit, nhưng cỡ đó đã nằm trong tầm của những dàn máy lớn. Mối đe doạ thật sự đến từ chỗ khác: thuật
+toán của <strong>Shor</strong> (1994) phân tích <code>n</code> trong thời gian đa thức trên một máy tính lượng tử đủ lớn,
+và phá RSA ở mọi cỡ khoá — tăng lên 4096 bit chỉ làm máy ấy cần lớn hơn một chút. Ước lượng gần đây nhất (Gidney,
+5/2025, bản thảo) là dưới một triệu qubit vật lý có nhiễu, chạy dưới một tuần, cho RSA-2048. Vì vậy NIST IR 8547 (bản cuối,
+27/10/2026) quy định: mọi thuật toán khoá công khai dễ tổn thương trước máy lượng tử — RSA ở mọi cỡ từ 112 bit trở lên —
+không còn được khuyến nghị (deprecated) sau 2030 và bị cấm (disallowed) theo các chuẩn của NIST sau 2035; các hệ thống liên bang quan
+trọng nhất còn phải chuyển sớm hơn (trao đổi khoá trước 31/12/2030, chữ ký trước 31/12/2031). Bản thảo 11/2024 từng để RSA
+3072 / 4096 bit còn chấp nhận được tới 2035; bản cuối đã bỏ khác biệt đó. Phần thay thế đã có chuẩn: xem
+<a href="pqc-calculator.html">máy tính ML-KEM / ML-DSA</a> (FIPS 203, 204) và
+<a href="nist-205-206-207-calculator.html">máy tính SLH-DSA, FN-DSA, HQC-KEM</a> trên trang này.</p>
+<p lang="en">The public factoring record I could verify is RSA-250 (829 bits, February 2020); nobody has published the
+factoring of a 1024-bit key, but that size is within reach of large installations. The real threat comes from
+elsewhere: <strong>Shor's</strong> algorithm (1994) factors <code>n</code> in polynomial time on a large enough quantum
+computer, and breaks RSA at every key size — going to 4096 bits only makes that machine somewhat bigger. The most recent
+estimate (Gidney, May 2025, preprint) is under a million noisy physical qubits running for under a week for RSA-2048.
+Hence NIST IR 8547 (final, 27 October 2026) rules that all quantum-vulnerable public-key algorithms — RSA at every size of
+112 bits and up — are deprecated after 2030 and disallowed under NIST standards after 2035; the most sensitive federal
+systems must move earlier (key establishment by 31 December 2030, signatures by 31 December 2031). The November 2024
+draft had kept 3072- / 4096-bit RSA acceptable until 2035; the final version dropped that distinction. The replacements
+are already standardised: see the <a href="pqc-calculator.html">ML-KEM / ML-DSA
+calculator</a> (FIPS 203, 204) and the <a href="nist-205-206-207-calculator.html">SLH-DSA, FN-DSA, HQC-KEM calculator</a>
+on this site.</p>
+<div class="callout">
+  <span lang="vi"><strong>Đánh số phụ lục.</strong> FIPS 186-5 (2/2023) đánh số lại so với FIPS 186-4: sinh khoá RSA nay ở
+  Phụ lục A.1 (số nguyên tố xác suất ngẫu nhiên: A.1.3), Miller–Rabin ở B.3.1, bảng số vòng là Bảng B.1. Tài liệu cũ — và
+  cả SP 800-56B r2, mục 6.3, lẫn chính FIPS 186-5, mục 5.4(a) — vẫn còn viết "Phụ lục B.3" theo cách đánh số của
+  FIPS 186-4. Trang này dùng số của FIPS 186-5.</span>
+  <span lang="en"><strong>Appendix numbering.</strong> FIPS 186-5 (Feb 2023) renumbered FIPS 186-4: RSA key generation is now
+  Appendix A.1 (random probable primes: A.1.3), Miller–Rabin is B.3.1, the round table is Table B.1. Older documents — and
+  even SP 800-56B r2, section 6.3, and FIPS 186-5's own section 5.4(a) — still say "Appendix B.3" in FIPS 186-4's
+  numbering. This page uses the FIPS 186-5 numbers.</span>
+</div>
+
+<!-- ================================================================ 5 -->
+<h2 id="phan-cung"><span lang="vi">Góc phần cứng</span><span lang="en">The hardware angle</span></h2>
+<p lang="vi">Một bộ tăng tốc RSA trong SoC bảo mật về bản chất là một máy nhân mô-đun rất rộng cộng một bộ điều khiển
+lũy thừa. Ba thứ quyết định nó tốt hay dở: cách rút gọn mô-đun, việc thời gian và công suất có lộ số mũ bí mật hay không,
+và phản ứng của nó khi bị tiêm lỗi. Phần dưới viết cho người thiết kế và người kiểm chứng; mọi con số đều tính từ ví dụ
+<code>n = 3233</code>.</p>
+<p lang="en">An RSA accelerator in a security SoC is at heart a very wide modular multiplier plus an exponentiation
+controller. Three things make it good or bad: how it reduces modulo <code>n</code>, whether its timing and power reveal the
+secret exponent, and how it reacts to an injected fault. What follows is for designers and verification engineers; every
+number is computed from the <code>n = 3233</code> example.</p>
+
+<h3><span lang="vi">Nhân Montgomery: đổi phép chia lấy phép dịch</span><span lang="en">Montgomery multiplication: trade a division for a shift</span></h3>
+<p lang="vi">Rút gọn "mod n" cần phép chia, thứ phần cứng ghét nhất. Montgomery (1985) chọn <code>R = 2<sup>k</sup> &gt; n</code>
+và làm việc với <code>ā = a·R mod n</code>; phép rút gọn REDC chỉ cần nhân, cộng và <em>dịch phải k bit</em>:</p>
+<p lang="en">Reducing "mod n" needs a division, the thing hardware hates most. Montgomery (1985) picks
+<code>R = 2<sup>k</sup> &gt; n</code> and works with <code>ā = a·R mod n</code>; the REDC reduction needs only multiplications,
+an addition and a <em>right shift by k bits</em>:</p>
+<pre><code>n' = −n⁻¹ mod R                      (precomputed once per modulus)
+REDC(T):  m = (T mod R)·n' mod R;  u = (T + m·n) / R;  if u ≥ n: u = u − n
+MonPro(ā, b̄) = REDC(ā·b̄) = a·b·R mod n</code></pre>
+<p lang="vi">Với <code>n = 3233</code> và <code>R = <span data-k="textbook.R">4096</span></code>:
+<code>n' = <span data-k="textbook.nprime">2207</span></code> (vì <code>3233·2207 ≡ −1 mod 4096</code>), hằng số để đưa một số vào
+miền Montgomery là <code>R² mod n = <span data-k="textbook.R2">1179</span></code>. Nhân <code>65·2790</code>:
+<code>ā = <span data-k="textbook.redc.abar">1134</span></code>, <code>b̄ = <span data-k="textbook.redc.bbar">2418</span></code>,
+<code>T = <span data-k="textbook.redc.T">2742012</span></code>, <code>m = <span data-k="textbook.redc.m">1668</span></code>,
+<code>u = <span data-k="textbook.redc.u">1986</span></code> (không cần trừ), và <code>REDC(1986) = <span data-k="textbook.redc.back">302</span> = 65·2790 mod 3233</code>.
+Trong một chuỗi lũy thừa, mọi giá trị ở lại miền Montgomery; chỉ đầu vào (một phép nhân với <code>R² mod n</code>) và đầu
+ra (một REDC) phải chuyển. Một mạch thật dùng <code>R = 2<sup>w·s</sup></code> với <code>s</code> từ <code>w</code> bit, và chỉ
+cần <code>n0' = −n⁻¹ mod 2<sup>w</sup></code> — một từ — thay cho cả <code>n'</code>.</p>
+<p lang="en">With <code>n = 3233</code> and <code>R = <span data-k="textbook.R">4096</span></code>:
+<code>n' = <span data-k="textbook.nprime">2207</span></code> (because <code>3233·2207 ≡ −1 mod 4096</code>), and the constant that
+brings a number into the Montgomery domain is <code>R² mod n = <span data-k="textbook.R2">1179</span></code>. Multiplying
+<code>65·2790</code>: <code>ā = <span data-k="textbook.redc.abar">1134</span></code>, <code>b̄ = <span data-k="textbook.redc.bbar">2418</span></code>,
+<code>T = <span data-k="textbook.redc.T">2742012</span></code>, <code>m = <span data-k="textbook.redc.m">1668</span></code>,
+<code>u = <span data-k="textbook.redc.u">1986</span></code> (no subtraction needed), and <code>REDC(1986) = <span data-k="textbook.redc.back">302</span> = 65·2790 mod 3233</code>.
+Inside an exponentiation every value stays in the Montgomery domain; only the input (one multiplication by
+<code>R² mod n</code>) and the output (one REDC) are converted. A real circuit uses <code>R = 2<sup>w·s</sup></code> for
+<code>s</code> words of <code>w</code> bits, and needs only <code>n0' = −n⁻¹ mod 2<sup>w</sup></code> — one word — instead of the
+whole <code>n'</code>.</p>
+<p lang="vi"><strong>CIOS, từng từ một.</strong> Dạng CIOS (Koç, Acar và Kaliski, 1996) xen kẽ nhân và rút gọn: với mỗi từ
+<code>b<sub>i</sub></code> của toán hạng thứ hai, cộng dồn <code>a·b<sub>i</sub></code> vào một thanh ghi <code>s + 2</code> từ,
+tính <code>m<sub>i</sub> = t<sub>0</sub>·n0' mod 2<sup>w</sup></code> chỉ từ từ thấp nhất, cộng <code>m<sub>i</sub>·n</code> để từ thấp
+nhất thành 0, rồi dịch đi một từ. Tổng cộng <code>2s² + s</code> phép nhân <code>w × w</code> bit trên đúng một bộ nhân và
+một bộ cộng, bộ nhớ tạm chỉ <code>s + 3</code> từ (bảng của Koç, Acar và Kaliski), và một phép trừ có điều kiện ở cuối — phép trừ mà nếu chỉ làm khi cần thì
+thành một kênh rò thời gian (phải làm luôn, hoặc chọn kết quả bằng mặt nạ). Phòng thí nghiệm in <code>n0'</code> (với
+<code>w = 32</code>) và <code>R² mod n</code> của khoá đang dùng, và tính lại bản mã bằng chuỗi REDC để so.</p>
+<p lang="en"><strong>CIOS, one word at a time.</strong> The CIOS form (Koç, Acar and Kaliski, 1996) interleaves
+multiplication and reduction: for each word <code>b<sub>i</sub></code> of the second operand, accumulate
+<code>a·b<sub>i</sub></code> into an <code>s + 2</code>-word register, compute <code>m<sub>i</sub> = t<sub>0</sub>·n0' mod 2<sup>w</sup></code>
+from the lowest word alone, add <code>m<sub>i</sub>·n</code> so that the lowest word becomes 0, and shift by one word. That
+is <code>2s² + s</code> multiplications of <code>w × w</code> bits on exactly one multiplier and one adder, only
+<code>s + 3</code> words of temporary storage (Koç, Acar and Kaliski's table), and one conditional subtraction at the end — a subtraction that becomes a timing leak
+if it is done only when needed (do it always, or select the result with a mask). The lab prints <code>n0'</code> (with
+<code>w = 32</code>) and <code>R² mod n</code> for the current key, and recomputes the ciphertext through a REDC chain to
+compare.</p>
+
+<h3><span lang="vi">Bình phương-và-nhân hay thang Montgomery</span><span lang="en">Square-and-multiply or the Montgomery ladder</span></h3>
+<p lang="vi">Bình phương-và-nhân chỉ nhân khi gặp bit 1, nên với số mũ <em>bí mật</em> <code>d</code>, chuỗi thao tác — thấy
+được qua thời gian hay vết công suất (phân tích công suất đơn giản, SPA) — đọc ra từng bit của <code>d</code>. Thang
+Montgomery (dạng của Joye và Yen, 2002) làm đúng một phép nhân và một phép bình phương cho <em>mọi</em> bit: với một
+<code>d</code> 2048 bit, bình phương-và-nhân làm 2047 bình phương cộng một số phép nhân phụ thuộc khoá (khoảng 1024), thang
+luôn làm 4096 phép. Thang chỉ là điều kiện cần: chọn thanh ghi theo bit vẫn rò qua nhánh, địa chỉ bộ nhớ hay công suất
+của bus, nên phải hoán đổi bằng mặt nạ. Tab Giải mã đếm cả hai cho khoá đang dùng.</p>
+<p lang="en">Square-and-multiply multiplies only on 1 bits, so with a <em>secret</em> exponent <code>d</code> the sequence of
+operations — visible in timing or in a power trace (simple power analysis, SPA) — spells out the bits of <code>d</code>.
+The Montgomery ladder (in Joye and Yen's 2002 form) does exactly one multiplication and one squaring for <em>every</em>
+bit: for a 2048-bit <code>d</code>, square-and-multiply does 2047 squarings plus a key-dependent number of
+multiplications (about 1024), the ladder always does 4096 operations. The ladder is necessary, not sufficient: choosing
+a register by the bit still leaks through a branch, a memory address or the bus power, so the swap must be done with a
+mask. The Decrypt tab counts both for the current key.</p>
+
+<h3><span lang="vi">Làm mù thông điệp và số mũ</span><span lang="en">Blinding the message and the exponent</span></h3>
+<p lang="vi">Phân tích công suất vi sai (DPA; Kocher, Jaffe và Jun, 1999) và tấn công thời gian của Kocher (1996) lấy trung bình nhiều lần chạy trên
+những đầu vào đã biết. Làm mù phá mối liên hệ ấy: <strong>làm mù thông điệp</strong> giải mã <code>c' = r<sup>e</sup>·c mod n</code>
+với <code>r</code> ngẫu nhiên mới mỗi lần, được <code>m·r</code>, rồi nhân với <code>r<sup>−1</sup></code>;
+<strong>làm mù số mũ</strong> dùng <code>d' = d + k·λ(n)</code> (hoặc <code>dP + k·(p − 1)</code>) với <code>k</code> ngẫu nhiên
+32–64 bit — kết quả không đổi vì <code>m<sup>λ(n)</sup> ≡ 1</code>. Cả hai cần một nguồn ngẫu nhiên tốt; một <code>r</code> từ
+LFSR đoán trước được thì không làm mù gì cả.</p>
+<p lang="en">Differential power analysis (DPA; Kocher, Jaffe and Jun, 1999) and Kocher's timing attack (1996) average many runs over known inputs.
+Blinding breaks that link: <strong>message blinding</strong> decrypts <code>c' = r<sup>e</sup>·c mod n</code> with a fresh random
+<code>r</code> every time, gets <code>m·r</code>, then multiplies by <code>r<sup>−1</sup></code>; <strong>exponent blinding</strong>
+uses <code>d' = d + k·λ(n)</code> (or <code>dP + k·(p − 1)</code>) with a random 32–64-bit <code>k</code> — the result is
+unchanged because <code>m<sup>λ(n)</sup> ≡ 1</code>. Both need a good random source; an <code>r</code> from a predictable LFSR
+blinds nothing.</p>
+
+<h3><span lang="vi">Tấn công Bellcore: một lỗi là đủ</span><span lang="en">The Bellcore attack: one fault is enough</span></h3>
+<p lang="vi">Boneh, DeMillo và Lipton (1997) chỉ ra rằng nếu một lỗi — một xung clock, một gai điện áp, một tia laser —
+làm sai <em>một</em> nửa của phép CRT, kết quả sai <code>m'</code> vẫn đúng theo mod <code>q</code> nhưng sai theo mod
+<code>p</code>, nên <code>gcd(m'<sup>e</sup> − c, n) = q</code>: khoá bị lộ hoàn toàn chỉ từ một lần chạy hỏng. Với ví dụ:
+lật bit 0 của <code>m1</code> (4 → <span data-k="textbook.m1f">5</span>) cho <code>h' = <span data-k="textbook.hf">39</span></code>,
+<code>m' = <span data-k="textbook.mf">2079</span></code>, và <code>gcd(2079¹⁷ − 2790, 3233) = <span data-k="textbook.fault_gcd">53</span> = q</code>.
+Cách chống rẻ nhất là <strong>kiểm trước khi trả kết quả</strong>: tính lại <code>m<sup>e</sup> mod n</code> và so với
+<code>c</code> — với <code>e = 65537</code> chỉ tốn 17 phép nhân so với khoảng 3000 của phép giải mã — và không bao giờ xuất
+ra một kết quả sai. Cùng với nó: kiểm tính toàn vẹn của <code>p, q, dP, dQ, qInv</code> trong thanh ghi (một lỗi trên khoá
+cũng làm hỏng y như vậy), cảm biến điện áp / clock / ánh sáng, và các phương pháp "lây lỗi" làm kết quả sai trở nên vô
+dụng. Tab Giải mã cho bạn tự tiêm lỗi và bật biện pháp chống.</p>
+<p lang="en">Boneh, DeMillo and Lipton (1997) showed that if a fault — a clock glitch, a voltage spike, a laser shot — corrupts
+<em>one</em> half of the CRT computation, the wrong result <code>m'</code> is still correct modulo <code>q</code> but wrong modulo
+<code>p</code>, so <code>gcd(m'<sup>e</sup> − c, n) = q</code>: the key is fully exposed by one bad run. With the example:
+flipping bit 0 of <code>m1</code> (4 → <span data-k="textbook.m1f">5</span>) gives <code>h' = <span data-k="textbook.hf">39</span></code>,
+<code>m' = <span data-k="textbook.mf">2079</span></code>, and <code>gcd(2079¹⁷ − 2790, 3233) = <span data-k="textbook.fault_gcd">53</span> = q</code>.
+The cheapest countermeasure is to <strong>verify before release</strong>: recompute <code>m<sup>e</sup> mod n</code> and compare
+it with <code>c</code> — with <code>e = 65537</code> that costs 17 multiplications against about 3000 for the decryption — and
+never output a wrong result. Alongside it: integrity checks on <code>p, q, dP, dQ, qInv</code> in their registers (a fault on
+the key breaks things just the same), voltage / clock / light sensors, and "infective" methods that make a faulty
+result useless. The Decrypt tab lets you inject the fault and switch the countermeasure on.</p>
+
+<h3><span lang="vi">Người kiểm chứng nên kiểm gì</span><span lang="en">What a verification engineer should test</span></h3>
+<ul lang="vi">
+  <li>Mọi trường hợp CAVP / ACVP của NIST cho <em>mọi</em> cỡ khoá bộ máy hỗ trợ — kể cả các ca phải bị từ chối
+      (<code>c</code> ngoài khoảng, chữ ký bị sửa, thông điệp bị sửa).</li>
+  <li>Giá trị biên: <code>m</code> hay <code>c</code> = <code>0, 1, n − 1</code> (điểm bất động), <code>c = n</code> và
+      <code>c &gt; n</code> phải bị từ chối, toán hạng toàn bit 1 ở các từ cao.</li>
+  <li>Số mũ: <code>e = 65537</code>, <code>e</code> lớn ngẫu nhiên (tệp RSADP của CAVS dùng <code>e</code> dài cỡ <code>n</code>),
+      <code>d</code> có chuỗi dài bit 0 hay bit 1.</li>
+  <li>CRT và không CRT phải ra cùng kết quả; khoá có <code>p &gt; q</code> và <code>p &lt; q</code> (ACVP có cả hai).</li>
+  <li>Tiêm lỗi vào một nửa CRT (ép tín hiệu trong mô phỏng) và đòi bộ máy từ chối xuất kết quả.</li>
+  <li>Số chu kỳ không phụ thuộc bit của <code>d</code> hay của đầu vào: đo trong mô phỏng RTL trên nhiều <code>d</code> ngẫu nhiên.</li>
+  <li>Nhánh trừ cuối của Montgomery được đi qua cả hai phía; <code>R² mod n</code> được tính lại khi đổi <code>n</code>.</li>
+  <li>Các giá trị trung gian được xoá sau mỗi phép (SP 800-56B r2, mục 7.1: phải huỷ mọi bản sao cục bộ).</li>
+</ul>
+<ul lang="en">
+  <li>Every NIST CAVP / ACVP case for <em>every</em> key size the engine supports — including the cases that must be
+      refused (<code>c</code> out of range, modified signature, modified message).</li>
+  <li>Edge values: <code>m</code> or <code>c</code> = <code>0, 1, n − 1</code> (fixed points), <code>c = n</code> and
+      <code>c &gt; n</code> must be refused, operands with all-ones top words.</li>
+  <li>Exponents: <code>e = 65537</code>, large random <code>e</code> (the CAVS RSADP file uses an <code>e</code> as long as
+      <code>n</code>), <code>d</code> with long runs of 0 or 1 bits.</li>
+  <li>CRT and non-CRT must agree; keys with <code>p &gt; q</code> and <code>p &lt; q</code> (ACVP has both).</li>
+  <li>Inject a fault into one CRT half (force a signal in simulation) and require the engine to refuse to output.</li>
+  <li>Cycle counts independent of the bits of <code>d</code> and of the input: measure in RTL simulation over many random
+      <code>d</code>.</li>
+  <li>The Montgomery final-subtraction branch exercised both ways; <code>R² mod n</code> recomputed when <code>n</code> changes.</li>
+  <li>Intermediate values wiped after each operation (SP 800-56B r2, section 7.1: local copies shall be destroyed).</li>
+</ul>
+
+<!-- ================================================================ LAB -->
+<h2 id="lab"><span lang="vi">Phòng thí nghiệm</span><span lang="en">The lab</span></h2>
+<p lang="vi"><strong>CAVP</strong> (Cryptographic Algorithm Validation Program) là chương trình của NIST kiểm định rằng một bản hiện thực tính đúng thuật toán. Nó có hai thế hệ bộ vector: <strong>CAVS</strong> - các tệp văn bản cũ (.rsp, .txt) ghi sẵn đầu vào và đáp án, đánh số bằng COUNT - và <strong>ACVP</strong> (Automated Cryptographic Validation Protocol) - vector dạng JSON trao đổi tự động, mỗi ca có số hiệu tcId. Trong các tệp ấy, <strong>IUT</strong> (implementation under test) là bản hiện thực đang được kiểm.</p>
+<p lang="en"><strong>CAVP</strong> (Cryptographic Algorithm Validation Program) is NIST's programme for validating that an implementation computes an algorithm correctly. It has two generations of test vectors: <strong>CAVS</strong> - the older text files (.rsp, .txt) listing inputs and answers, numbered by COUNT - and <strong>ACVP</strong> (Automated Cryptographic Validation Protocol) - JSON vectors exchanged automatically, each case numbered by a tcId. In those files the <strong>IUT</strong> (implementation under test) is the implementation being checked.</p>
+<p lang="vi">Một khoá dùng chung cho bốn thẻ; mỗi thẻ là một loại phép thử của NIST. Số nguyên viết ở hệ 16 (nút
+<em>Dec</em> đổi sang hệ 10), chuỗi byte viết ở hex hoặc văn bản. Mỗi thẻ có các nút "ví dụ NIST": nạp đúng một ca trong tệp
+vector công khai của NIST, chạy, rồi so từng giá trị với đáp án trong tệp (✓ hoặc ✕). Với các cỡ khoá mà tệp của NIST không
+có, mỗi cỡ có một "khoá mẫu riêng" cố định, sinh bằng đúng quy tắc của trang từ seed <code>chiusoc-rsa-&lt;nlen&gt;</code>.</p>
+<p lang="en">One key is shared by the four tabs; each tab is one kind of NIST test. Integers are written in hexadecimal
+(the <em>Dec</em> button switches to decimal), byte strings in hex or as text. Every tab has "NIST example" buttons:
+each loads exactly one case from NIST's public vector files, runs it, and compares every value with the file's answer
+(✓ or ✕). For key sizes NIST's files do not cover, each size has a fixed "own example" key, generated by the page's own
+rule from the seed <code>chiusoc-rsa-&lt;nlen&gt;</code>.</p>
+
+<section class="card" id="key-card" aria-labelledby="key-title">
+  <h4 id="key-title"><span lang="vi">Khoá đang dùng</span><span lang="en">Current key</span></h4>
+  <div class="chips" role="radiogroup" aria-labelledby="size-l">
+    <span class="chips-l" id="size-l"><span lang="vi">Cỡ khoá (nlen)</span><span lang="en">Key size (nlen)</span></span>
+    <label class="chip"><input type="radio" name="rsa-size" value="512"/><span>512<span class="tonly"><span lang="vi">chỉ để thử · không được phép</span><span lang="en">test only · not allowed</span></span></span></label>
+    <label class="chip"><input type="radio" name="rsa-size" value="1024"/><span>1024<span class="tonly"><span lang="vi">chỉ để thử · không được phép</span><span lang="en">test only · not allowed</span></span></span></label>
+    <label class="chip"><input type="radio" name="rsa-size" value="2048" checked/><span>2048</span></label>
+    <label class="chip"><input type="radio" name="rsa-size" value="3072"/><span>3072</span></label>
+    <label class="chip"><input type="radio" name="rsa-size" value="4096"/><span>4096</span></label>
+    <button class="btn ghost sm" id="key-clear" type="button"><span lang="vi">Xoá khoá</span><span lang="en">Clear key</span></button>
+  </div>
+  <p class="hint" id="size-note"></p>
+  <div class="grid2">
+    <div class="fld"><div class="fld-head"><label for="k-n"><span lang="vi">n — mô-đun</span><span lang="en">n — modulus</span></label><span class="cnt" id="k-n-cnt"></span></div>
+      <textarea id="k-n" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="k-n-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="k-e"><span lang="vi">e — số mũ công khai</span><span lang="en">e — public exponent</span></label><span class="cnt" id="k-e-cnt"></span></div>
+      <textarea id="k-e" rows="2" spellcheck="false" autocomplete="off">65537</textarea><div class="tools" id="k-e-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="k-p">p</label><span class="cnt" id="k-p-cnt"></span></div>
+      <textarea id="k-p" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="k-p-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="k-q">q</label><span class="cnt" id="k-q-cnt"></span></div>
+      <textarea id="k-q" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="k-q-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="k-d"><span lang="vi">d — số mũ bí mật</span><span lang="en">d — private exponent</span></label><span class="cnt" id="k-d-cnt"></span></div>
+      <textarea id="k-d" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="k-d-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="k-qInv">qInv = q⁻¹ mod p</label><span class="cnt" id="k-qInv-cnt"></span></div>
+      <textarea id="k-qInv" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="k-qInv-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="k-dP">dP = d mod (p − 1)</label><span class="cnt" id="k-dP-cnt"></span></div>
+      <textarea id="k-dP" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="k-dP-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="k-dQ">dQ = d mod (q − 1)</label><span class="cnt" id="k-dQ-cnt"></span></div>
+      <textarea id="k-dQ" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="k-dQ-tools"></div></div>
+  </div>
+  <div class="keyline" id="key-status" role="status"></div>
+</section>
+
+<div class="tabs" role="tablist">
+  <button class="tab" id="tab-kg" type="button" role="tab" aria-selected="true" aria-controls="panel-kg">
+    <span lang="vi">1 · Sinh khoá</span><span lang="en">1 · KeyGen</span></button>
+  <button class="tab" id="tab-enc" type="button" role="tab" aria-selected="false" aria-controls="panel-enc">
+    <span lang="vi">2 · Mã hoá</span><span lang="en">2 · Encrypt</span></button>
+  <button class="tab" id="tab-dec" type="button" role="tab" aria-selected="false" aria-controls="panel-dec">
+    <span lang="vi">3 · Giải mã</span><span lang="en">3 · Decrypt</span></button>
+  <button class="tab" id="tab-sig" type="button" role="tab" aria-selected="false" aria-controls="panel-sig">
+    <span lang="vi">4 · Ký / Xác minh</span><span lang="en">4 · Sign / Verify</span></button>
+</div>
+
+<!-- ---------------------------------------------------------------- KeyGen -->
+<section class="panel" id="panel-kg" role="tabpanel" aria-labelledby="tab-kg">
+  <p class="hint"><span lang="vi">FIPS 186-5, Phụ lục A.1.3 (số nguyên tố xác suất ngẫu nhiên) với Miller–Rabin của B.3.1.
+  Bit ngẫu nhiên lấy từ <code>SHAKE256(seed ‖ bộ đếm 4 byte)</code>: cùng seed cho cùng khoá, nên bạn tái tạo được mọi khoá
+  ở đây. Chuẩn đòi một DRBG được phê duyệt (SP 800-90A) — bộ sinh này chỉ để học.</span><span lang="en">FIPS 186-5,
+  Appendix A.1.3 (random probable primes) with the Miller–Rabin test of B.3.1. Random bits come from
+  <code>SHAKE256(seed ‖ 4-byte counter)</code>: the same seed gives the same key, so you can reproduce every key made here.
+  The standard requires an approved DRBG (SP 800-90A) — this generator is for learning only.</span></p>
+  <div class="row">
+    <button class="btn" id="kg-gen" type="button"><span lang="vi">Sinh cặp khoá</span><span lang="en">Generate key pair</span></button>
+    <label class="chk"><input type="checkbox" id="kg-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label>
+    <button class="btn ghost" id="kg-frompq" type="button"><span lang="vi">Tính khoá từ p, q, e</span><span lang="en">Compute the key from p, q, e</span></button>
+    <button class="btn ghost" id="kg-check" type="button"><span lang="vi">Kiểm tra cặp khoá</span><span lang="en">Check the key pair</span></button>
+  </div>
+  <div class="fld"><div class="fld-head"><label for="kg-seed"><span lang="vi">Seed của bộ sinh tất định</span><span lang="en">Seed of the deterministic generator</span></label><span class="cnt" id="kg-seed-cnt"></span></div>
+    <textarea id="kg-seed" rows="1" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="kg-seed-tools"></div></div>
+  <div class="ex">
+    <span class="lbl"><span lang="vi">Ví dụ</span><span lang="en">Examples</span></span>
+    <button class="btn ghost sm" id="kg-own" type="button"><span lang="vi">Khoá mẫu riêng của cỡ này</span><span lang="en">Own example key for this size</span></button>
+    <button class="btn ghost sm" id="kg-acvp" type="button"><span lang="vi">NIST: ACVP RSA-KeyGen-FIPS186-5</span><span lang="en">NIST: ACVP RSA-KeyGen-FIPS186-5</span></button>
+  </div>
+  <div class="result" id="kg-result" role="status" aria-live="polite"></div>
+  <div class="trace" id="kg-trace"></div>
+</section>
+
+<!-- ---------------------------------------------------------------- Encrypt -->
+<section class="panel" id="panel-enc" role="tabpanel" aria-labelledby="tab-enc" hidden>
+  <div class="chips" role="radiogroup" aria-labelledby="enc-mode-l">
+    <span class="chips-l" id="enc-mode-l"><span lang="vi">Cách mã hoá</span><span lang="en">Scheme</span></span>
+    <label class="chip"><input type="radio" name="enc-mode" value="raw" checked/><span><span lang="vi">RSAEP — thô</span><span lang="en">RSAEP — raw</span></span></label>
+    <label class="chip"><input type="radio" name="enc-mode" value="oaep"/><span>RSAES-OAEP · SHA-256</span></label>
+  </div>
+  <div id="enc-raw">
+    <div class="chips" role="radiogroup" aria-labelledby="enc-rule-l">
+      <span class="chips-l" id="enc-rule-l"><span lang="vi">Khoảng hợp lệ của m</span><span lang="en">Valid range of m</span></span>
+      <label class="chip"><input type="radio" name="enc-rule" value="sp56b" checked/><span>SP 800-56B r2: 1 &lt; m &lt; n − 1</span></label>
+      <label class="chip"><input type="radio" name="enc-rule" value="rfc"/><span>RFC 8017: 0 ≤ m &lt; n</span></label>
+    </div>
+    <div class="fld"><div class="fld-head"><label for="enc-m"><span lang="vi">m — số nguyên đại diện bản rõ</span><span lang="en">m — the plaintext representative</span></label><span class="cnt" id="enc-m-cnt"></span></div>
+      <textarea id="enc-m" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="enc-m-tools"></div></div>
+    <div class="row">
+      <span class="chips-l"><span lang="vi">Giá trị biên</span><span lang="en">Edge values</span></span>
+      <button class="btn ghost sm" id="enc-m0" type="button">m = 0</button>
+      <button class="btn ghost sm" id="enc-m1" type="button">m = 1</button>
+      <button class="btn ghost sm" id="enc-mn1" type="button">m = n − 1</button>
+      <button class="btn ghost sm" id="enc-mn" type="button">m = n</button>
+      <button class="btn ghost sm" id="enc-mrnd" type="button"><span lang="vi">m ngẫu nhiên</span><span lang="en">random m</span></button>
+    </div>
+  </div>
+  <div id="enc-oaep" hidden>
+    <div class="fld"><div class="fld-head"><label for="enc-msg"><span lang="vi">M — thông điệp</span><span lang="en">M — message</span></label><span class="cnt" id="enc-msg-cnt"></span></div>
+      <textarea id="enc-msg" rows="2" spellcheck="false" autocomplete="off">Hello RSA-OAEP</textarea><div class="tools" id="enc-msg-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="enc-label"><span lang="vi">L — nhãn, tuỳ chọn</span><span lang="en">L — label, optional</span></label><span class="cnt" id="enc-label-cnt"></span></div>
+      <textarea id="enc-label" rows="1" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="enc-label-tools"></div></div>
+    <div class="fld"><div class="fld-head"><label for="enc-seed"><span lang="vi">seed của OAEP — hLen = 32 byte</span><span lang="en">OAEP seed — hLen = 32 bytes</span></label><span class="cnt" id="enc-seed-cnt"></span></div>
+      <textarea id="enc-seed" rows="1" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="enc-seed-tools"></div></div>
+    <div class="row"><label class="chk"><input type="checkbox" id="enc-seed-rnd" checked/><span lang="vi">seed ngẫu nhiên</span><span lang="en">random seed</span></label></div>
+  </div>
+  <div class="row">
+    <button class="btn" id="enc-go" type="button"><span lang="vi">Mã hoá</span><span lang="en">Encrypt</span></button>
+    <button class="btn ghost" id="enc-to-dec" type="button"><span lang="vi">Đưa c sang thẻ Giải mã →</span><span lang="en">Send c to the Decrypt tab →</span></button>
+  </div>
+  <div class="fld"><div class="fld-head"><label for="enc-c"><span lang="vi">c — bản mã</span><span lang="en">c — ciphertext</span></label><span class="cnt" id="enc-c-cnt"></span></div>
+    <textarea id="enc-c" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="enc-c-tools"></div></div>
+  <div class="ex">
+    <span class="lbl"><span lang="vi">Ví dụ</span><span lang="en">Examples</span></span>
+    <button class="btn ghost sm" data-ex="cavs" type="button">CAVS RSADPComponent800_56B · k → c</button>
+    <button class="btn ghost sm" data-ex="acvp" type="button">ACVP RSA-DecryptionPrimitive · pt → ct</button>
+    <button class="btn ghost sm" data-ex="oaep" type="button"><span lang="vi">OAEP: ví dụ riêng của cỡ này</span><span lang="en">OAEP: own example for this size</span></button>
+  </div>
+  <div class="result" id="enc-result" role="status" aria-live="polite"></div>
+  <div class="trace" id="enc-trace"></div>
+</section>
+
+<!-- ---------------------------------------------------------------- Decrypt -->
+<section class="panel" id="panel-dec" role="tabpanel" aria-labelledby="tab-dec" hidden>
+  <div class="chips" role="radiogroup" aria-labelledby="dec-mode-l">
+    <span class="chips-l" id="dec-mode-l"><span lang="vi">Cách giải mã</span><span lang="en">Scheme</span></span>
+    <label class="chip"><input type="radio" name="dec-mode" value="raw" checked/><span><span lang="vi">RSADP — thô</span><span lang="en">RSADP — raw</span></span></label>
+    <label class="chip"><input type="radio" name="dec-mode" value="oaep"/><span>RSAES-OAEP · SHA-256</span></label>
+  </div>
+  <div class="chips" role="radiogroup" aria-labelledby="dec-rule-l">
+    <span class="chips-l" id="dec-rule-l"><span lang="vi">Khoảng hợp lệ của c</span><span lang="en">Valid range of c</span></span>
+    <label class="chip"><input type="radio" name="dec-rule" value="sp56b" checked/><span>SP 800-56B r2: 1 &lt; c &lt; n − 1</span></label>
+    <label class="chip"><input type="radio" name="dec-rule" value="rfc"/><span>RFC 8017: 0 ≤ c &lt; n</span></label>
+  </div>
+  <div class="fld"><div class="fld-head"><label for="dec-c"><span lang="vi">c — bản mã</span><span lang="en">c — ciphertext</span></label><span class="cnt" id="dec-c-cnt"></span></div>
+    <textarea id="dec-c" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="dec-c-tools"></div></div>
+  <div id="dec-oaep" hidden>
+    <div class="fld"><div class="fld-head"><label for="dec-label"><span lang="vi">L — nhãn, phải giống lúc mã hoá</span><span lang="en">L — label, must match the encryption</span></label><span class="cnt" id="dec-label-cnt"></span></div>
+      <textarea id="dec-label" rows="1" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="dec-label-tools"></div></div>
+  </div>
+  <div class="row">
+    <label class="chk"><input type="checkbox" id="dec-blind"/><span lang="vi">làm mù thông điệp: giải mã r<sup>e</sup>·c</span><span lang="en">message blinding: decrypt r<sup>e</sup>·c</span></label>
+    <label class="chk"><input type="checkbox" id="dec-r-rnd" checked/><span lang="vi">r ngẫu nhiên</span><span lang="en">random r</span></label>
+  </div>
+  <div class="fld"><div class="fld-head"><label for="dec-r"><span lang="vi">r — số làm mù</span><span lang="en">r — blinding value</span></label><span class="cnt" id="dec-r-cnt"></span></div>
+    <textarea id="dec-r" rows="1" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="dec-r-tools"></div></div>
+  <div class="row">
+    <button class="btn" id="dec-go" type="button"><span lang="vi">Giải mã</span><span lang="en">Decrypt</span></button>
+    <button class="btn ghost" id="dec-fault" type="button"><span lang="vi">Tiêm lỗi: lật một bit của m1</span><span lang="en">Inject a fault: flip one bit of m1</span></button>
+    <label class="chk"><span lang="vi">bit số</span><span lang="en">bit no.</span> <input class="numin" type="number" id="dec-bit" min="0" max="2047" value="0"/></label>
+    <label class="chk"><input type="checkbox" id="dec-verify"/><span lang="vi">kiểm trước khi trả kết quả (chống Bellcore)</span><span lang="en">verify before release (Bellcore countermeasure)</span></label>
+  </div>
+  <div class="fld"><div class="fld-head"><label for="dec-m"><span lang="vi">m — kết quả</span><span lang="en">m — result</span></label><span class="cnt" id="dec-m-cnt"></span></div>
+    <textarea id="dec-m" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="dec-m-tools"></div></div>
+  <div id="dec-oaep-out" hidden>
+    <div class="fld"><div class="fld-head"><label for="dec-M"><span lang="vi">M — thông điệp lấy lại</span><span lang="en">M — recovered message</span></label><span class="cnt" id="dec-M-cnt"></span></div>
+      <textarea id="dec-M" rows="2" spellcheck="false" autocomplete="off" readonly></textarea><div class="tools" id="dec-M-tools"></div></div>
+  </div>
+  <div class="ex">
+    <span class="lbl"><span lang="vi">Ví dụ NIST</span><span lang="en">NIST examples</span></span>
+    <button class="btn ghost sm" data-ex="acvp1" type="button">ACVP DecryptionPrimitive · tcId 1</button>
+    <button class="btn ghost sm" data-ex="acvp47" type="button">tcId 47 · CRT</button>
+    <button class="btn ghost sm" data-ex="acvp16" type="button">tcId 16 · 3072</button>
+    <button class="btn ghost sm" data-ex="acvp76" type="button">tcId 76 · 4096 CRT</button>
+    <button class="btn ghost sm" data-ex="acvp2" type="button">tcId 2 · c = n − 1</button>
+    <button class="btn ghost sm" data-ex="acvp7" type="button">tcId 7 · c ≤ 1</button>
+    <button class="btn ghost sm" data-ex="acvp15" type="button">tcId 15 · c ≥ n</button>
+    <button class="btn ghost sm" data-ex="cavs0" type="button">CAVS RSADPComponent800_56B · COUNT 0</button>
+    <button class="btn ghost sm" data-ex="cavs2" type="button">COUNT 2 · Fail</button>
+  </div>
+  <div class="result" id="dec-result" role="status" aria-live="polite"></div>
+  <div class="trace" id="dec-trace"></div>
+</section>
+
+<!-- ---------------------------------------------------------------- Sign / Verify -->
+<section class="panel" id="panel-sig" role="tabpanel" aria-labelledby="tab-sig" hidden>
+  <div class="chips" role="radiogroup" aria-labelledby="sig-scheme-l">
+    <span class="chips-l" id="sig-scheme-l"><span lang="vi">Lược đồ</span><span lang="en">Scheme</span></span>
+    <label class="chip"><input type="radio" name="sig-scheme" value="v15" checked/><span>RSASSA-PKCS1-v1_5</span></label>
+    <label class="chip"><input type="radio" name="sig-scheme" value="pss"/><span>RSASSA-PSS · MGF1</span></label>
+    <label class="chip"><input type="radio" name="sig-scheme" value="prim"/><span><span lang="vi">RSASP1 — nguyên thuỷ</span><span lang="en">RSASP1 — primitive</span></span></label>
+  </div>
+  <div class="chips" role="radiogroup" aria-labelledby="sig-hash-l" id="sig-hash-row">
+    <span class="chips-l" id="sig-hash-l"><span lang="vi">Hàm băm</span><span lang="en">Hash</span></span>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA2-224"/><span>SHA-224</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA2-256" checked/><span>SHA-256</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA2-384"/><span>SHA-384</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA2-512"/><span>SHA-512</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA2-512/224"/><span>SHA-512/224</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA2-512/256"/><span>SHA-512/256</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA3-224"/><span>SHA3-224</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA3-256"/><span>SHA3-256</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA3-384"/><span>SHA3-384</span></label>
+    <label class="chip"><input type="radio" name="sig-hash" value="SHA3-512"/><span>SHA3-512</span></label>
+  </div>
+  <p class="hint"><span lang="vi">Không có SHA-1: SP 800-131A cấm dùng nó để tạo chữ ký, nên phòng thí nghiệm bỏ qua mọi ca
+  SHA-1 trong tệp của NIST. Không có SHAKE: FIPS 186-5 cho phép SHAKE128 / SHAKE256 trong PSS, nhưng trang này chỉ hiện thực
+  MGF1.</span><span lang="en">No SHA-1: SP 800-131A disallows it for generating signatures, so the lab skips every SHA-1
+  case in NIST's files. No SHAKE: FIPS 186-5 allows SHAKE128 / SHAKE256 in PSS, but this page implements MGF1 only.</span></p>
+  <div id="sig-msgwrap">
+    <div class="fld"><div class="fld-head"><label for="sig-msg"><span lang="vi">M — thông điệp</span><span lang="en">M — message</span></label><span class="cnt" id="sig-msg-cnt"></span></div>
+      <textarea id="sig-msg" rows="2" spellcheck="false" autocomplete="off">Hello RSA signatures</textarea><div class="tools" id="sig-msg-tools"></div></div>
+  </div>
+  <div id="sig-primwrap" hidden>
+    <div class="fld"><div class="fld-head"><label for="sig-em"><span lang="vi">m — thông điệp đã mã hoá (EM) dạng số nguyên</span><span lang="en">m — the encoded message (EM) as an integer</span></label><span class="cnt" id="sig-em-cnt"></span></div>
+      <textarea id="sig-em" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sig-em-tools"></div></div>
+  </div>
+  <div id="sig-pss" hidden>
+    <div class="row">
+      <label class="chk"><span lang="vi">độ dài salt sLen (byte)</span><span lang="en">salt length sLen (bytes)</span> <input class="numin" type="number" id="sig-slen" min="0" max="64" value="32"/></label>
+      <label class="chk"><input type="checkbox" id="sig-salt-rnd" checked/><span lang="vi">salt ngẫu nhiên</span><span lang="en">random salt</span></label>
+    </div>
+    <div class="fld"><div class="fld-head"><label for="sig-salt">salt</label><span class="cnt" id="sig-salt-cnt"></span></div>
+      <textarea id="sig-salt" rows="1" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sig-salt-tools"></div></div>
+  </div>
+  <div class="row">
+    <button class="btn" id="sig-sign" type="button"><span lang="vi">Ký</span><span lang="en">Sign</span></button>
+    <button class="btn" id="sig-verify" type="button"><span lang="vi">Xác minh</span><span lang="en">Verify</span></button>
+    <button class="btn ghost sm" id="sig-flip" type="button"><span lang="vi">Lật 1 bit của chữ ký</span><span lang="en">Flip one signature bit</span></button>
+  </div>
+  <div class="fld"><div class="fld-head"><label for="sig-S"><span lang="vi">S — chữ ký</span><span lang="en">S — signature</span></label><span class="cnt" id="sig-S-cnt"></span></div>
+    <textarea id="sig-S" rows="2" spellcheck="false" autocomplete="off"></textarea><div class="tools" id="sig-S-tools"></div></div>
+  <div class="ex">
+    <span class="lbl"><span lang="vi">Ví dụ NIST</span><span lang="en">NIST examples</span></span>
+    <button class="btn ghost sm" data-ex="siggen15" type="button">CAVS SigGen15_186-3 · 2048</button>
+    <button class="btn ghost sm" data-ex="siggen15b" type="button">SigGen15_186-3 · 3072 SHA-512</button>
+    <button class="btn ghost sm" data-ex="sigver15" type="button"><span lang="vi">CAVS SigVer15_186-3 · 18 ca P / F</span><span lang="en">CAVS SigVer15_186-3 · 18 P / F cases</span></button>
+    <button class="btn ghost sm" data-ex="rsasp1-0" type="button">CAVS RSASP1.fax · COUNT 0</button>
+    <button class="btn ghost sm" data-ex="rsasp1-1" type="button">RSASP1.fax · COUNT 1 · EM ≥ n</button>
+    <button class="btn ghost sm" data-ex="sigprim7" type="button">ACVP RSA-SignaturePrimitive · tcId 7</button>
+    <button class="btn ghost sm" data-ex="siggen-v15" type="button">ACVP RSA-SigGen-FIPS186-5 · v1.5</button>
+    <button class="btn ghost sm" data-ex="siggen-sha3" type="button">SigGen · v1.5 SHA3-512</button>
+    <button class="btn ghost sm" data-ex="siggen-pss" type="button">SigGen · PSS SHA-256</button>
+    <button class="btn ghost sm" data-ex="sigver-v15" type="button"><span lang="vi">ACVP RSA-SigVer-FIPS186-5 · v1.5 · 6 ca</span><span lang="en">ACVP RSA-SigVer-FIPS186-5 · v1.5 · 6 cases</span></button>
+    <button class="btn ghost sm" data-ex="sigver-pss" type="button"><span lang="vi">SigVer · PSS SHA3-256 · 6 ca</span><span lang="en">SigVer · PSS SHA3-256 · 6 cases</span></button>
+  </div>
+  <div class="result" id="sig-result" role="status" aria-live="polite"></div>
+  <div class="trace" id="sig-trace"></div>
+</section>
+
+<!-- ================================================================ NIST table -->
+<h2 id="nist"><span lang="vi">Các trường hợp NIST kiểm</span><span lang="en">What NIST's tests check</span></h2>
+<p lang="vi">Một bộ RSA được NIST công nhận phải qua chương trình kiểm thuật toán (CAVP, nay chạy qua máy chủ ACVP): phòng
+thử nghiệm gửi đầu vào, bộ máy trả kết quả, máy chủ so với đáp án. Bảng dưới nối mỗi thẻ với tên phép thử của NIST.</p>
+<p lang="en">An RSA implementation recognised by NIST must pass the algorithm validation program (CAVP, now run
+through the ACVP server): the lab sends inputs, the implementation answers, the server compares with the expected
+results. The table maps each tab to NIST's test names.</p>
+<div class="tbl-wrap"><table>
+  <thead><tr>
+    <th><span lang="vi">Thẻ</span><span lang="en">Tab</span></th>
+    <th><span lang="vi">Phép thử của NIST</span><span lang="en">NIST test</span></th>
+    <th><span lang="vi">Phòng thí nghiệm làm gì</span><span lang="en">What the lab does</span></th>
+    <th><span lang="vi">Qua được thì chứng minh</span><span lang="en">A pass proves</span></th>
+    <th><span lang="vi">… nhưng không chứng minh</span><span lang="en">… but does not prove</span></th>
+  </tr></thead>
+  <tbody>
+    <tr><td><span lang="vi">Sinh khoá</span><span lang="en">KeyGen</span></td><td>ACVP RSA-KeyGen-FIPS186-5</td>
+      <td><span lang="vi">Nhận p, q, e của tệp, tính n, dP, dQ, qInv và so với tệp; chạy mọi điều kiện của A.1.1.</span><span lang="en">Takes the file's p, q, e, computes n, dP, dQ, qInv and compares them with the file; runs every A.1.1 condition.</span></td>
+      <td><span lang="vi">Phép tính khoá CRT và các phép kiểm khoá đúng.</span><span lang="en">The CRT key arithmetic and the key checks are right.</span></td>
+      <td><span lang="vi">Cách sinh p, q của tệp: các nhóm ACVP đó dùng số nguyên tố chứng minh được hoặc có số nguyên tố phụ (A.1.2, A.1.4–A.1.6), trang này không hiện thực. Cách A.1.3 của trang được kiểm bằng một mô hình độc lập.</span><span lang="en">How the file made p, q: those ACVP groups use provable or auxiliary primes (A.1.2, A.1.4–A.1.6), which this page does not implement. The page's A.1.3 method is checked against an independent model instead.</span></td></tr>
+    <tr><td><span lang="vi">Mã hoá</span><span lang="en">Encrypt</span></td><td>CAVS RSADPComponent800_56B · ACVP RSA-DecryptionPrimitive-Sp800-56Br2</td>
+      <td><span lang="vi">Dùng đáp án của phép giải mã theo chiều ngược: RSAEP(k) phải ra đúng c (k là tên của bản rõ trong tệp của CAVS).</span><span lang="en">Uses the decryption answers backwards: RSAEP(k) must give exactly c (k is the CAVS file's name for the plaintext integer).</span></td>
+      <td><span lang="vi">RSAEP đúng, kể cả với e dài cỡ n.</span><span lang="en">RSAEP is right, including with an e as long as n.</span></td>
+      <td><span lang="vi">OAEP: NIST không có vector OAEP ở đây; OAEP được kiểm bằng mô hình độc lập và bằng node <code>crypto</code> theo cả hai chiều.</span><span lang="en">OAEP: NIST has no OAEP vectors here; OAEP is checked against an independent model and against node <code>crypto</code> both ways.</span></td></tr>
+    <tr><td><span lang="vi">Giải mã</span><span lang="en">Decrypt</span></td><td>ACVP RSA-DecryptionPrimitive-Sp800-56Br2 · CAVS RSADPComponent800_56B</td>
+      <td><span lang="vi">RSADP thường và CRT trên khoá của tệp; từ chối c ngoài 1 &lt; c &lt; n − 1.</span><span lang="en">Plain and CRT RSADP on the file's keys; refuses c outside 1 &lt; c &lt; n − 1.</span></td>
+      <td><span lang="vi">Phép giải mã và bước kiểm khoảng đúng.</span><span lang="en">Decryption and the range check are right.</span></td>
+      <td><span lang="vi">Chống kênh bên, chống tiêm lỗi: NIST không kiểm hai điều này ở mức thuật toán.</span><span lang="en">Side-channel or fault resistance: NIST does not test those at the algorithm level.</span></td></tr>
+    <tr><td><span lang="vi">Ký</span><span lang="en">Sign</span></td><td>CAVS SigGen15_186-3 · CAVS RSASP1 · ACVP RSA-SigGen-FIPS186-5 · ACVP RSA-SignaturePrimitive</td>
+      <td><span lang="vi">Tệp SigGen chỉ có khoá công khai của bên được thử, nên trang dựng lại EM từ thông điệp và kiểm S<sup>e</sup> mod n = EM từng byte; với PSS còn lấy lại salt. RSASP1: ký thật bằng khoá trong tệp.</span><span lang="en">The SigGen files hold only the tested party's public key, so the page rebuilds EM from the message and checks S<sup>e</sup> mod n = EM byte for byte; for PSS it also recovers the salt. RSASP1: real signing with the file's key.</span></td>
+      <td><span lang="vi">Phần mã hoá EM (DigestInfo - phần đầu DER ghi tên hàm băm trong PKCS#1 v1.5 -, đệm, MGF1) đúng từng byte.</span><span lang="en">The EM encoding (DigestInfo - the DER header that names the hash in PKCS#1 v1.5 -, padding, MGF1) is right to the byte.</span></td>
+      <td><span lang="vi">Chất lượng salt ngẫu nhiên của chính trang.</span><span lang="en">The quality of the page's own random salts.</span></td></tr>
+    <tr><td><span lang="vi">Xác minh</span><span lang="en">Verify</span></td><td>CAVS SigVer15_186-3 · ACVP RSA-SigVer-FIPS186-5</td>
+      <td><span lang="vi">Ra đúng phán quyết P / F của tệp và nói lý do; ACVP còn ghi lý do của NIST để so.</span><span lang="en">Gives the file's P / F verdict and says why; ACVP also states NIST's reason to compare with.</span></td>
+      <td><span lang="vi">Bên xác minh không nhận chữ ký sửa, thông điệp sửa hay khoá sai.</span><span lang="en">The verifier rejects modified signatures, modified messages and wrong keys.</span></td>
+      <td><span lang="vi">Không rò lý do ra ngoài: một bộ xác minh thật chỉ được nói "hợp lệ / không hợp lệ".</span><span lang="en">That the reason does not leak: a real verifier should only say "valid / invalid".</span></td></tr>
+  </tbody>
+</table></div>
+
+<!-- ================================================================ trust -->
+<h2 id="tin-cay"><span lang="vi">Mã này có đáng tin không</span><span lang="en">Can this code be trusted</span></h2>
+<p lang="vi">Phần tính toán là JavaScript tôi tự viết theo FIPS 186-5, SP 800-56B r2 và RFC 8017, dùng BigInt của trình duyệt
+và hai tệp băm dùng chung của trang (SHA-2, SHA-3 / SHAKE), không thư viện ngoài. Tôi làm bốn việc để chứng minh nó:</p>
+<p lang="en">The computation is JavaScript I wrote myself from FIPS 186-5, SP 800-56B r2 and RFC 8017, using the browser's
+BigInt and the site's two shared hash files (SHA-2, SHA-3 / SHAKE), with no external library. I did four things to
+prove it:</p>
+<ul lang="vi">
+  <li>So với ba nhân chứng độc lập: các tệp vector công khai của NIST (CAVP và ACVP: sinh khoá, RSADP, RSASP1, SigGen,
+      SigVer), một mô hình Python viết riêng (kể cả viết lại quy tắc sinh khoá có seed của trang), và thư viện
+      <code>crypto</code> của node (chữ ký PKCS#1 v1.5 so từng byte, PSS và OAEP kiểm chéo hai chiều):
+      <span data-i18n="neutral" id="n-core">3358</span> phép so, tất cả khớp.</li>
+  <li>Cho một trình duyệt giả lập bấm qua mọi thẻ và mọi nút ví dụ — <span data-i18n="neutral" id="n-ui">136</span> phép kiểm, trong đó có
+      <span data-i18n="neutral">88</span> con số của bài viết so với mô hình —
+      và sau mỗi cú bấm soát xem có câu nào chỉ có một ngôn ngữ không; cố tình gài một đáp án sai vào vector và đòi nút ví dụ
+      lẫn nút kiểm chứng phải báo đúng chỗ sai.</li>
+  <li>Cố tình làm hỏng mã <span data-i18n="neutral" id="n-mut">45</span> lần — Miller–Rabin, λ thay cho φ, các phép kiểm
+      |p − q| và cỡ của d, CRT / Garner, OAEP, PSS, lý do xác minh, gcd của tấn công lỗi, cách trang nối các nút và cả
+      những chuỗi chỉ có một ngôn ngữ — và đòi phép kiểm phải đỏ: cả 45 lần đều đỏ. Trước đó, đọc lại bộ kiểm đã cho thấy
+      hai bước của FIPS 186-5 chưa từng chạy với dữ liệu ngẫu nhiên: với e = 65537 hầu như không ứng viên nào bị loại vì
+      gcd(x − 1, e) ≠ 1, còn bước |p − q| chỉ xảy ra với xác suất cỡ 2<sup>−100</sup>. Tôi thêm một e có thừa số nhỏ và
+      một p dựng sát ứng viên đầu tiên để cả hai bước đều thật sự được kiểm.</li>
+  <li>Nút dưới đây lặp lại một phần các phép so đó ngay trong máy bạn.</li>
+</ul>
+<ul lang="en">
+  <li>Compared with three independent witnesses: NIST's public vector files (CAVP and ACVP: key generation, RSADP,
+      RSASP1, SigGen, SigVer), a separately written Python model (which also re-implements the page's seeded key
+      generation rule), and node's <code>crypto</code> library (PKCS#1 v1.5 signatures byte for byte, PSS and OAEP
+      cross-checked both ways): <span data-i18n="neutral">3358</span> comparisons, all matching.</li>
+  <li>Had a simulated browser click through every tab and every example button —
+      <span data-i18n="neutral">136</span> checks, including the article's <span data-i18n="neutral">88</span> computed numbers
+      against the model — looking after every click for any sentence in one language only;
+      planted a wrong answer in the vectors and required both the example button and the self-test to point at it.</li>
+  <li>Broke the code on purpose <span data-i18n="neutral">45</span> times — Miller–Rabin, λ replaced by φ, the |p − q| and
+      d-size checks, CRT / Garner, OAEP, PSS, verify reasons, the fault attack's gcd, the page's button wiring and even
+      strings present in one language only — and required the tests to go red: all 45 went red. Before that, re-reading
+      the suite showed two FIPS 186-5 steps that random data never reaches: with e = 65537 almost no candidate is ever
+      rejected for gcd(x − 1, e) ≠ 1, and the |p − q| step fires with probability around 2<sup>−100</sup>. I added an e with
+      small factors and a p placed right next to the first candidate, so both steps are really tested.</li>
+  <li>The button below repeats part of those comparisons on your machine.</li>
+</ul>
+<div class="selftest">
+  <button class="btn" id="bt-selftest" type="button"><span lang="vi">Chạy kiểm chứng</span><span lang="en">Run the self-test</span></button>
+  <span id="st-status" class="pill wait"><span lang="vi">chưa chạy</span><span lang="en">not run yet</span></span>
+  <span class="st-note">
+    <span lang="vi">Sinh lại khoá mẫu 512 và 1024 bit từ seed, chạy lại các ví dụ NIST mà trang mang theo (sinh khoá, RSADP,
+      RSASP1, SigGen, SigVer), chữ ký PKCS#1 v1.5 với mười hàm băm và OAEP có seed cố định.</span>
+    <span lang="en">Regenerates the 512- and 1024-bit example keys from their seeds and replays the NIST examples the page
+      carries (key generation, RSADP, RSASP1, SigGen, SigVer), PKCS#1 v1.5 signatures with ten hashes and OAEP with a
+      fixed seed.</span>
+  </span>
+</div>
+<div id="st-detail" class="hexbox" hidden></div>
+<div class="callout">
+  <span lang="vi"><strong>Đừng dùng mã này để bảo vệ thứ gì thật.</strong> Nó viết cho việc học: BigInt của JavaScript chạy
+  với thời gian phụ thuộc dữ liệu, không có làm mù thật, khoá nằm trong bộ nhớ JavaScript, và bộ sinh số ngẫu nhiên của
+  phần sinh khoá là một hàm tất định có seed — để bạn tái tạo được, không phải để bí mật.</span>
+  <span lang="en"><strong>Do not protect anything real with this code.</strong> It is written for learning: JavaScript's
+  BigInt runs in data-dependent time, there is no real blinding, keys live in JavaScript memory, and the key
+  generator's randomness is a seeded deterministic function — so you can reproduce it, not so it stays secret.</span>
+</div>
+
+<!-- ================================================================ refs -->
+<h2 id="doc-them"><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h2>
+<ul class="refs">
+  <li><a href="https://csrc.nist.gov/pubs/fips/186-5/final" target="_blank" rel="noopener" data-i18n="neutral">NIST FIPS 186-5, Digital Signature Standard (DSS)</a> — 02/2023.</li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/56/b/r2/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-56B Rev. 2, Pair-Wise Key Establishment Using Integer Factorization Cryptography</a> — 03/2019.</li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc8017" target="_blank" rel="noopener" data-i18n="neutral">RFC 8017, PKCS #1: RSA Cryptography Specifications Version 2.2</a> — 11/2016.</li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-57 Part 1 Rev. 5, Recommendation for Key Management</a> — 05/2020.</li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/131/a/r2/final" target="_blank" rel="noopener" data-i18n="neutral">NIST SP 800-131A Rev. 2, Transitioning the Use of Cryptographic Algorithms and Key Lengths</a> — 03/2019;
+      <a href="https://csrc.nist.gov/pubs/sp/800/131/a/r3/ipd" target="_blank" rel="noopener" data-i18n="neutral">Rev. 3, initial public draft</a> — 10/2024.</li>
+  <li><a href="https://csrc.nist.gov/pubs/ir/8547/final" target="_blank" rel="noopener" data-i18n="neutral">NIST IR 8547, Transition to Post-Quantum Cryptography Standards</a> — 10/2026.</li>
+  <li><a href="https://arxiv.org/abs/2505.15917" target="_blank" rel="noopener" data-i18n="neutral">C. Gidney, How to factor 2048 bit RSA integers with less than a million noisy qubits (arXiv:2505.15917)</a> — 05/2025.</li>
+  <li><a href="pqc-calculator.html" data-i18n="neutral">ML-KEM &amp; ML-DSA</a> · <a href="nist-205-206-207-calculator.html" data-i18n="neutral">SLH-DSA, FN-DSA &amp; HQC-KEM</a>
+      — <span lang="vi">hai máy tính hậu lượng tử trên trang này.</span><span lang="en">the two post-quantum calculators on this site.</span></li>
+  <li data-i18n="neutral">R. L. Rivest, A. Shamir, L. Adleman (1978), Comm. ACM 21(2) · P. L. Montgomery (1985), Math. Comp. 44 ·
+      Ç. K. Koç, T. Acar, B. S. Kaliski (1996), IEEE Micro 16(3) · P. Kocher (1996), CRYPTO '96 · P. Kocher, J. Jaffe, B. Jun (1999), CRYPTO '99 · D. Boneh, R. DeMillo,
+      R. Lipton (1997), EUROCRYPT '97 · D. Bleichenbacher (1998), CRYPTO '98 · M. Joye, S.-M. Yen (2002), CHES 2002 ·
+      P. W. Shor (1994), FOCS '94.</li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">← PQC, AI &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<script src="assets/pqc-mlkem.js"></script>
+<script src="assets/pqc-sha2.js"></script>
+<script src="assets/rsa-core.js"></script>
+<script src="assets/rsa-vectors.js"></script>
+<script src="assets/rsa-ui.js"></script>
+
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

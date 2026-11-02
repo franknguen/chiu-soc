@@ -488,22 +488,102 @@ main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
   </li>
   <li class="art-item">
     <div class="art-title">
+      <span lang="vi">RSA theo FIPS 186-5: sinh khoá, mã hoá, ký — thử trên trình duyệt</span>
+      <span lang="en">RSA under FIPS 186-5: key generation, encryption, signatures — in your browser</span>
+    </div>
+    <div class="art-desc" lang="vi">Từ ví dụ p = 61, q = 53 tính tay được tới khoá 4096 bit. Sinh khoá theo FIPS 186-5 với
+      từng phép kiểm hiện ra (Miller–Rabin, khoảng cách |p − q|, cỡ của d); mã hoá RSAEP và OAEP; giải mã thường và theo
+      CRT đặt cạnh nhau; ký PKCS#1 v1.5 và PSS. Mỗi thẻ ứng với một loại phép kiểm của NIST, có nút nạp ví dụ CAVP / ACVP
+      và so từng giá trị. Góc phần cứng: nhân Montgomery, làm mù, và tấn công Bellcore chạy thật — lật một bit trong lúc
+      giải mã CRT là đủ để phân tích được n.</div>
+    <div class="art-desc" lang="en">From the hand-sized p = 61, q = 53 example up to 4096-bit keys. FIPS 186-5 key
+      generation with every check on screen (Miller–Rabin, the |p − q| distance, the size of d); RSAEP and OAEP
+      encryption; plain and CRT decryption side by side; PKCS#1 v1.5 and PSS signatures. Each tab is one kind of NIST test,
+      with buttons that load CAVP / ACVP examples and compare every value. The hardware angle: Montgomery multiplication,
+      blinding, and a live Bellcore attack — flipping one bit during CRT decryption is enough to factor n.</div>
+    <div class="art-quotes">
+      <div class="art-quote" lang="vi">"Một bit lỗi trong phép CRT là đủ để lộ cả khoá — nên phần cứng phải
+        <em>tự kiểm lại trước khi trả kết quả.</em>"</div>
+      <div class="art-quote" lang="en">"One faulty bit in the CRT step is enough to give the whole key away — so hardware
+        must <em>check its answer before releasing it.</em>"</div>
+    </div>
+    <ul class="art-links">
+      <li><a class="link-html" href="posts/rsa-fips-186-5.html"><span lang="vi">Đọc bài và thử</span><span lang="en">Read and try it</span></a></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">
+      <span lang="vi">Đường cong elliptic: ECDH và ECDSA trên năm đường cong NIST</span>
+      <span lang="en">Elliptic curves: ECDH and ECDSA on the five NIST curves</span>
+    </div>
+    <div class="art-desc" lang="vi">Luật cộng điểm vẽ ra được: chọn hai điểm trên đường cong thực để thấy dây cung và tiếp
+      tuyến, rồi sang một trường hữu hạn nhỏ để thấy mọi điểm, quỹ đạo k·G và chặn Hasse; nhân vô hướng từng bit, nhân
+      đôi-và-cộng đặt cạnh thang Montgomery. Phòng thí nghiệm theo các phép kiểm của NIST trên P-192 … P-521: sinh cặp
+      khoá, kiểm tra khoá công khai, ECDH hai bên, ký ECDSA (k ngẫu nhiên, tất định theo RFC 6979, hoặc cho trước) và xác
+      minh có nêu lý do — kèm tấn công dùng lại nonce khôi phục khoá bí mật ngay trước mắt.</div>
+    <div class="art-desc" lang="en">The point-addition law, drawn: pick two points on a real curve to see the chord and the
+      tangent, then move to a small finite field to see every point, the k·G orbit and the Hasse bound; scalar
+      multiplication bit by bit, double-and-add beside the Montgomery ladder. A lab built on NIST's tests over P-192 …
+      P-521: key-pair generation, public-key validation, two-party ECDH, ECDSA signing (random k, deterministic per
+      RFC 6979, or given) and verification with the reason — plus a nonce-reuse attack that recovers the private key in
+      front of you.</div>
+    <div class="art-quotes">
+      <div class="art-quote" lang="vi">"Hai chữ ký dùng chung một nonce là đủ để tính ra khoá bí mật — <em>chỗ yếu của
+        ECDSA nằm ở bộ sinh số ngẫu nhiên.</em>"</div>
+      <div class="art-quote" lang="en">"Two signatures sharing one nonce are enough to compute the private key —
+        <em>ECDSA's weak spot is its random number generator.</em>"</div>
+    </div>
+    <ul class="art-links">
+      <li><a class="link-html" href="posts/ecdh-ecdsa-nist-curves.html"><span lang="vi">Đọc bài và thử</span><span lang="en">Read and try it</span></a></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">
+      <span lang="vi">SHA-2 và SHA-3 (Keccak): mở hàm băm ra xem từng bước</span>
+      <span lang="en">SHA-2 and SHA-3 (Keccak): a hash function, opened up step by step</span>
+    </div>
+    <div class="art-desc" lang="vi">Bài thứ hai sau MD5: dây chuyền Merkle–Damgård của SHA-1 / SHA-2 và "bọt biển" Keccak
+      của SHA-3, đủ 15 hàm của FIPS 180-4, FIPS 202 và SP 800-185. Phòng thí nghiệm hiện bản đồ đệm của khối cuối, bảng
+      từng vòng và lưới 5 × 5 lane sau θ ρ π χ ι; chạy lại các bài kiểm của NIST — ShortMsg, LongMsg, Monte Carlo 100 điểm
+      kiểm, SHAKE VariableOut — cùng các ca biên khối, nơi lõi băm phần cứng hay vỡ nhất; kèm một lần giả mạo bằng tấn
+      công mở rộng độ dài làm thật.</div>
+    <div class="art-desc" lang="en">Part two after MD5: the Merkle–Damgård chain of SHA-1 / SHA-2 and the Keccak "sponge"
+      of SHA-3, all 15 functions of FIPS 180-4, FIPS 202 and SP 800-185. The lab shows the padding map of the last block,
+      round-by-round tables and the 5 × 5 lane grid after θ ρ π χ ι; it re-runs NIST's tests — ShortMsg, LongMsg, the
+      100-checkpoint Monte Carlo, SHAKE VariableOut — and the block-boundary cases where hardware hash cores break most
+      often; plus a working length-extension forgery.</div>
+    <div class="art-quotes">
+      <div class="art-quote" lang="vi">"Lõi băm hiếm khi sai bên trong một vòng — nó sai ở <em>biên khối</em>, nơi phần
+        đệm cần thêm một khối và phần mềm ghi khối kế tiếp quá sớm."</div>
+      <div class="art-quote" lang="en">"A hash core rarely goes wrong inside a round — it goes wrong at <em>the block
+        boundary</em>, where padding needs one more block and software writes the next block too early."</div>
+    </div>
+    <ul class="art-links">
+      <li><a class="link-html" href="posts/sha2-sha3-keccak.html"><span lang="vi">Đọc bài và thử</span><span lang="en">Read and try it</span></a></li>
+    </ul>
+  </li>
+  <li class="art-item">
+    <div class="art-title">
       <span lang="vi">Từ mã sửa lỗi lượng tử đến ECC trong con chip</span>
       <span lang="en">From quantum error correction to ECC inside a chip</span>
     </div>
     <div class="art-desc" lang="vi">Luận án của tôi là về mã sửa lỗi cho xử lý thông tin lượng tử.
       Ghi chú này đi từ đó về lại mặt đất: khung chung của mọi mã sửa lỗi, khoảng cách Hamming,
       bậc thang từ parity tới LDPC và Polar, một ví dụ Hamming (12,8) tự tính được bằng tay,
-      và chỗ ECC gặp bảo mật qua PUF. Kèm hai trình mô phỏng chạy ngay trong bài: lật bit của một
-      từ mã SECDED và xem bộ giải mã nói gì, rồi dựng lại một khoá PUF từ dấu vân tay bị lệch bằng
-      dữ liệu trợ giúp. Viết lại từ bài giảng tôi soạn cho sinh viên.</div>
+      và chỗ ECC gặp bảo mật qua PUF. Kèm bốn trình mô phỏng chạy ngay trong bài: mã Hamming với
+      ma trận kiểm cho thấy vì sao hội chứng chỉ thẳng vào ô hỏng; mã BCH (15, k) giải đủ ba khâu
+      hội chứng, Berlekamp–Massey, dò nghiệm Chien, và đếm "vách đá" trên mọi mẫu lỗi; lật bit của
+      một từ mã SECDED; rồi dựng lại một khoá PUF từ dấu vân tay bị lệch bằng dữ liệu trợ giúp.
+      Viết lại từ bài giảng tôi soạn cho sinh viên.</div>
     <div class="art-desc" lang="en">My doctoral work was on error-correcting codes for quantum
       information processing. This note walks back down to earth: the skeleton every code shares,
       Hamming distance, the ladder from parity to LDPC and polar codes, a Hamming (12,8) example you
-      can work by hand, and where ECC meets security through PUFs. With two simulators that run inside
-      the article: flip bits of a SECDED codeword and watch what the decoder says, then rebuild a PUF
-      key from a drifted fingerprint using helper data. Rewritten from a lecture I prepared for
-      students.</div>
+      can work by hand, and where ECC meets security through PUFs. With four simulators that run inside
+      the article: a Hamming code whose parity-check matrix shows why the syndrome points at the broken
+      cell; a BCH (15, k) code decoded through all three stages — syndromes, Berlekamp–Massey, Chien
+      root search — with the "cliff" counted over every error pattern; flipping bits of a SECDED
+      codeword; and rebuilding a PUF key from a drifted fingerprint using helper data. Rewritten from a
+      lecture I prepared for students.</div>
     <div class="art-quotes">
       <div class="art-quote" lang="vi">"Đừng hỏi <em>dữ liệu có đúng không</em>,
         hãy hỏi <em>lỗi trông như thế nào</em>."</div>
