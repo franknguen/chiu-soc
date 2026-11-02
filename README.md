@@ -284,6 +284,21 @@ mẫu ≤ t bit và ba bảng vách đá; 141 phép kiểm giao diện (soát ha
 Một bản xem lại độc lập (đọc mã, không chạy) chỉ ra câu cũ "mỗi bit sửa thêm tốn thêm bốn bit kiểm" là sai (t = 2 → 3 chỉ
 thêm 2) và vài chỗ chữ / ký hiệu khó hiểu; đã sửa. Chưa xem trên trình duyệt thật — trên điện thoại, hàng 15 ô xuống hai dòng.
 
+### Mạch bài viết ECC (lời dẫn, mục 1–2 — viết lại 2026-11-03)
+
+Hai ý của tác giả, không hơn: **mã sửa lỗi lượng tử được phát triển từ mã sửa lỗi cổ điển** (Shor 1995 dùng mã lặp
+ba bit hai tầng; mã CSS của Calderbank–Shor và Steane năm 1996 dựng từ một cặp mã tuyến tính cổ điển lồng nhau; mã Steane 7 qubit là
+Hamming (7, 4) dùng hai lần), và **tác giả học mã cổ điển trước, rồi mới sang mã lượng tử**. Mối liên hệ vì thế là
+chuyện tự nhiên: đừng viết lại kiểu "hội chứng là chiếc cầu giữa hai thế giới" hay "điều làm tôi ngạc nhiên khi
+chuyển sang làm chip" — tác giả đã bác cách kể ấy. Lời dẫn, chú thích sơ đồ `ecc-khung-chung.svg` (làn trên cổ điển,
+làn dưới lượng tử dựng trên làn trên), câu đầu mục 11 và mục Đọc thêm (thêm Calderbank–Shor / Steane 1996) đã
+được chỉnh cho khớp.
+
+Trang này là **trang đã khoá**: `posts/tu-ma-luong-tu-den-ecc.html` chỉ chứa bản mã. Sửa nội dung ở
+`_plain/tu-ma-luong-tu-den-ecc.html` (không commit), chạy `check_site.py` trên một bản sao đầy đủ của site có bản rõ
+thay vào `posts/`, rồi khoá lại bằng `node tools/lock_pages.js lock` (mật khẩu qua biến môi trường `CHIUSOC_LOCK_PW`).
+Đừng chạy `restore` khi `_plain/` đang có bản sửa chưa khoá: nó ghi đè bản rõ bằng nội dung giải mã từ bản mã cũ.
+
 ## Ba bài mật mã cổ điển có phòng thí nghiệm — RSA, đường cong elliptic, SHA-2 / SHA-3
 
 Ba bài viết cho người không chuyên (giải thích trước, công thức sau, ví dụ tính tay được, góc nhìn của người làm
@@ -378,3 +393,81 @@ Nên kiểm: thẻ HTML cân; mọi `#anchor` và file đích tồn tại; số 
 `lang="en"` trong từng phần tử cha; không còn chữ tiếng Việt nằm ngoài mọi khối `lang`; không có
 tên công ty, đường dẫn máy nội bộ hay email công việc nào trong trang; và khối CSS `house-format` có mặt
 nguyên vẹn trên mọi trang.
+
+## Trang giới hạn truy cập — bảy bài phải nhập mật khẩu
+
+Bảy bài trong mục *Mật mã hậu lượng tử, AI & Mã sửa lỗi* (`pqc-calculator`, `kpqc-calculator`,
+`nist-205-206-207-calculator`, `rsa-fips-186-5`, `ecdh-ecdsa-nist-curves`, `sha2-sha3-keccak`,
+`tu-ma-luong-tu-den-ecc`) chỉ mở ra sau khi người đọc nhập đúng mật khẩu. Bài MD5 vẫn công khai.
+
+**Vì sao không dùng `if (password === "...")`.** Đây là trang tĩnh trên GitHub Pages: không có
+máy chủ nào để kiểm tra mật khẩu. Một phép so sánh trong JavaScript thì ai bấm *View Source* cũng
+đọc được cả mật khẩu lẫn toàn bộ bài viết — nó chỉ là tấm rèm. Nên bài viết được **mã hoá thật**:
+file nằm trên GitHub Pages không chứa một câu bản rõ nào.
+
+- AES-256-GCM; khoá sinh bằng PBKDF2-HMAC-SHA256, **600 000 vòng** — mức OWASP khuyến nghị hiện
+  hành cho PBKDF2-SHA256 (310 000 là con số của bản năm 2021).
+- Mỗi trang có `salt` 16 byte và `iv` 12 byte ngẫu nhiên riêng.
+- **Không lưu băm mật khẩu ở đâu cả**: nhập sai thì GCM không xác thực được và phép giải mã hỏng —
+  chính cái hỏng đó là tín hiệu "sai mật khẩu". Nói cho công bằng: thẻ xác thực GCM cũng là một bộ
+  kiểm mật khẩu y như một giá trị băm, nên mục *dò ngoại tuyến* bên dưới vẫn áp dụng nguyên vẹn. Nhập sai hiện màn hình *Nội dung giới hạn /
+  Limited access*; nhập đúng thì trang thật hiện ra ngay trong cùng một tab.
+- Mật khẩu **không nằm trong repo**. Nó chỉ đi vào công cụ qua biến môi trường `CHIUSOC_LOCK_PW`.
+- Ô *Nhớ mật khẩu cho đến khi đóng thẻ này* lưu **mật khẩu dạng rõ** vào `sessionStorage` của đúng
+  thẻ trình duyệt đó: mở thẻ mới là phải nhập lại, đóng thẻ là mất. Không có gì ghi xuống đĩa.
+
+### Các file
+
+| File | Vai trò |
+|---|---|
+| `_plain/<tên>.html` | **bản rõ — nguồn để sửa bài.** Đã nằm trong `.gitignore`, không bao giờ commit |
+| `posts/<tên>.html` | vỏ khoá đã mã hoá, chính là thứ đăng lên Pages |
+| `tools/lock_pages.js` | `lock` / `restore` / `status` |
+| `tools/lock-shell.css` | giao diện màn hình khoá (gồm cả khối `house-format`) |
+| `posts/assets/unlock.js` | phần chạy trên trình duyệt: hỏi mật khẩu, giải mã, mở trang |
+
+### Quy trình sửa một bài đã khoá
+
+```bash
+export CHIUSOC_LOCK_PW='...'            # không viết mật khẩu vào file nào trong repo
+node tools/lock_pages.js restore        # chỉ cần khi chưa có _plain/
+#   sửa _plain/<tên>.html
+python3 <đường dẫn>/check_site.py .   # kèm tham số --banned như mọi lần
+node tools/lock_pages.js lock           # mã hoá lại — BẮT BUỘC, nếu quên thì web vẫn là bản cũ
+node tools/lock_pages.js status         # phải in "7/7 trang đã khoá và còn mới"
+unset CHIUSOC_LOCK_PW
+```
+
+`status` không cần mật khẩu. Nó bắt đúng cái lỗi dễ mắc nhất: sửa `_plain/` rồi quên chạy `lock`,
+khiến trang web vẫn phục vụ bản mã cũ.
+
+Cổng kiểm `check_site.py` đọc `_plain/<tên>.html` thay cho trang đã khoá (nó không đọc được bên
+trong bản mã). Nếu không có `_plain/`, cổng in `LOCKED ... content NOT checked` và **vẫn xanh** —
+đó là cố ý, để một bản clone mới không bị báo đỏ oan; nhưng khi sửa bài thì phải có `_plain/`.
+
+### Lớp khoá này che được gì, và không che được gì
+
+Che được: toàn văn bảy bài; tiêu đề thật không nằm trong file trang (vỏ khoá chỉ ghi *Nội dung giới
+hạn*, còn mục lục thì vẫn ghi tên bài); và trang mang `noindex, nofollow` nên không vào kết quả tìm
+kiếm.
+
+**Không** che được, cần biết rõ:
+
+1. **Lịch sử git.** Bảy bài này từng được commit ở dạng bản rõ và đã đẩy lên remote. Mã hoá cây làm
+   việc không xoá được các blob cũ: ai `git clone` vẫn đọc được bài. Muốn dọn thì phải viết lại lịch
+   sử (`git filter-repo`) rồi force-push, hoặc lập repo mới — việc này xoá dấu vết cũ của cả repo
+   nên chỉ chủ repo quyết định.
+2. **Các file dùng chung trong `posts/assets/*.js`** vẫn tải được bằng URL trực tiếp, và trong đó có
+   chuỗi giao diện tiếng Việt. Muốn giấu nốt thì phải nhúng JS vào phần mã hoá, kèm việc dựng lại
+   ba Web Worker thành blob (`nist-worker.js`, `hash-worker.js`, `rsa-worker.js` đang dùng
+   `importScripts`).
+3. **`posts/assets/ecc-lecture-2026.pdf`** (bài giảng gốc) vẫn công khai và còn được liên kết từ
+   `index.html`.
+4. **Mục lục** vẫn hiện tên bảy bài và phần mô tả.
+5. **Dò mật khẩu ngoại tuyến.** Ai tải file về thì thử mật khẩu bao nhiêu lần cũng được; thứ duy
+   nhất cản là 600 000 vòng PBKDF2. Mật khẩu ngắn hoặc dễ đoán sẽ vỡ — nên dùng cụm từ bốn chữ
+   ngẫu nhiên trở lên, hoặc mười sáu ký tự ngẫu nhiên trở lên. Kiểu *tên + năm sinh* thì một máy
+   có GPU phá trong vài phút.
+
+Nói gọn: lớp này đủ để người lướt web, công cụ tìm kiếm và người tình cờ gặp link không đọc được
+bài — đúng mức "đề phòng cho chắc". Nó không phải là lớp bảo vệ chống một người quyết tâm.

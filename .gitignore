@@ -1,0 +1,3 @@
+# Bản rõ của các trang nội dung giới hạn — KHÔNG commit, KHÔNG đẩy lên GitHub Pages.
+# Khôi phục được từ chính bản mã trong posts/ bằng:  node tools/lock_pages.js restore
+/_plain/
