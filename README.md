@@ -352,6 +352,36 @@ thời gian phụ thuộc dữ liệu, không chống kênh bên, khoá nằm tr
 bấm "Chạy kiểm chứng" phải ra toàn xanh, và đổi thuật toán thì sinh lại file `*-vectors.js` bằng bộ kiểm thử ngoài
 repo, không sửa tay.
 
+### Cập nhật 03/11/2026: ba thao tác của RSA, và mô hình ứng dụng trên cả hai trang khoá công khai
+
+Bài RSA được cập nhật theo bản mới của ghi chú khái niệm RSA của tác giả; cả bài RSA và bài đường cong elliptic có thêm
+một mục **"Mô hình ứng dụng"** (`#ung-dung`, ngay trước phòng thí nghiệm): thuật toán chạy ở đâu trong một hệ thống thật,
+ai giữ khoá riêng, ai chỉ chạy phép công khai, và con chip ở mỗi vai phải làm gì.
+
+| trang | phần mới |
+|---|---|
+| `posts/rsa-fips-186-5.html` | **Ba thao tác** (`#ba-thao-tac`): hình SVG tổng quan sinh khoá → khoá công khai / khoá riêng dạng CRT → RSAEP = RSAVP1 / RSADP = RSASP1, bảng vào–ra–tên trong chuẩn–chi phí, hai dạng khoá riêng (RFC 8017 mục 3.2). Mục lũy thừa: câu cũ "giải mã và ký chậm hơn hàng trăm lần" chỉ đúng khi không dùng CRT — nay là số đếm (~180 lần không CRT, ~45 lần có CRT) và số đo OpenSSL (RSA-2048 / 3072 / 4096: 29 / 46 / 59 lần). Mục CRT: hệ số đếm trên khoá thật 3,96–3,97 (2048 bit), 3,98 (3072, 4096). **Mô hình ứng dụng**: chứng chỉ + TLS 1.3 (RFC 9846, RFC 9963), firmware ký số + khởi động an toàn (SP 800-193), bọc khoá bằng OAEP (CMS, RFC 8017 mục 7); bảng tổng hợp; hai kịch bản chạy thử — cập nhật firmware ký PSS rồi lật một byte, bọc khoá OAEP rồi lật một byte |
+| `posts/ecdh-ecdsa-nist-curves.html` | **Mô hình ứng dụng**: bắt tay TLS 1.3 = ECDHE + ECDSA (RFC 9846, lai hậu lượng tử RFC 10024), khoá FIDO2 / WebAuthn (W3C WebAuthn mức 3, ES256), firmware ký bằng ECDSA, HPKE (RFC 9180) trong bảng; kịch bản bắt tay rút gọn trên P-256 / P-384, có nút cho kẻ đứng giữa thay key share của máy chủ — Z hai bên lệch nhau và chữ ký không qua |
+
+Mã của hai kịch bản nằm **trong chính trang** (một `<script>` cuối trang, cửa kiểm thử `RSAApps` / `ECApps`), không
+trong `assets/`: như vậy chuỗi tiếng Việt của nó nằm trong trang đã khoá, còn file `assets/*.js` thì ai cũng tải được.
+Kịch bản chỉ gọi lõi đã kiểm (`RSACore`, `EC`, `PQCSHA2`); không file `assets/` nào bị sửa.
+
+Kiểm chứng (bộ kiểm ngoài repo, trình duyệt giả lập, soát hai ngôn ngữ sau mỗi cú bấm, Node `crypto` = OpenSSL làm
+nhân chứng độc lập cho từng giá trị kịch bản in ra):
+
+| | RSA | đường cong elliptic |
+|---|---|---|
+| kiểm giao diện cũ (không đổi) | 136 / 136 | 165 / 165 |
+| kịch bản mới | 140 / 140 | 190 / 190 |
+| đột biến vào mã kịch bản, mỗi cái phải chết ở một phép kiểm có tên | 22 / 22 | 15 / 15 |
+| hình mới nhìn bằng mắt (Edge chạy ẩn, VI và EN) | 4 hình | 3 hình |
+
+Số đo tốc độ trên hai trang là của **một máy**, hai lượt đo; tỷ lệ RSA-3072 / ECDSA khi xác minh ghi thành khoảng
+(P-256: 1,5–1,7 lần, P-384: 10–15 lần) vì hai lượt cho hai con số, và vì đường tính P-256 của OpenSSL được tối ưu riêng.
+Hai trang này đang khoá: phần sửa nằm trong `_plain/`, phải chạy `node tools/lock_pages.js lock` thì trang trên mạng mới
+đổi (`status` báo "BẢN MÃ CŨ" cho hai trang này cho tới lúc đó).
+
 ## Thêm một bài mới
 
 1. Copy một bài cùng loại trong `posts/` thành `posts/<ten-bai>.html`, sửa tiêu đề (`<title>`,

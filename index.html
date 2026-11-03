@@ -506,12 +506,16 @@ main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
       từng phép kiểm hiện ra (Miller–Rabin, khoảng cách |p − q|, cỡ của d); mã hoá RSAEP và OAEP; giải mã thường và theo
       CRT đặt cạnh nhau; ký PKCS#1 v1.5 và PSS. Mỗi thẻ ứng với một loại phép kiểm của NIST, có nút nạp ví dụ CAVP / ACVP
       và so từng giá trị. Góc phần cứng: nhân Montgomery, làm mù, và tấn công Bellcore chạy thật — lật một bit trong lúc
-      giải mã CRT là đủ để phân tích được n.</div>
+      giải mã CRT là đủ để phân tích được n. Kèm một hình tổng quan ba thao tác của RSA và ba mô hình ứng dụng thực
+      tế — chứng chỉ và TLS 1.3, firmware ký số và khởi động an toàn, bọc khoá bằng OAEP — có kịch bản chạy thử ngay trên
+      trang.</div>
     <div class="art-desc" lang="en">From the hand-sized p = 61, q = 53 example up to 4096-bit keys. FIPS 186-5 key
       generation with every check on screen (Miller–Rabin, the |p − q| distance, the size of d); RSAEP and OAEP
       encryption; plain and CRT decryption side by side; PKCS#1 v1.5 and PSS signatures. Each tab is one kind of NIST test,
       with buttons that load CAVP / ACVP examples and compare every value. The hardware angle: Montgomery multiplication,
-      blinding, and a live Bellcore attack — flipping one bit during CRT decryption is enough to factor n.</div>
+      blinding, and a live Bellcore attack — flipping one bit during CRT decryption is enough to factor n. Plus an overview of RSA's three operations in one figure and three
+      real application models — certificates and TLS 1.3, signed firmware and secure boot, OAEP key wrapping — with
+      scenarios you can run on the page.</div>
     <div class="art-quotes">
       <div class="art-quote" lang="vi">"Một bit lỗi trong phép CRT là đủ để lộ cả khoá — nên phần cứng phải
         <em>tự kiểm lại trước khi trả kết quả.</em>"</div>
@@ -533,13 +537,15 @@ main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
       tuyến, rồi sang một trường hữu hạn nhỏ để thấy mọi điểm, quỹ đạo k·G và chặn Hasse; nhân vô hướng từng bit, nhân
       đôi-và-cộng đặt cạnh thang Montgomery. Phòng thí nghiệm theo các phép kiểm của NIST trên P-192 … P-521: sinh cặp
       khoá, kiểm tra khoá công khai, ECDH hai bên, ký ECDSA (k ngẫu nhiên, tất định theo RFC 6979, hoặc cho trước) và xác
-      minh có nêu lý do — kèm tấn công dùng lại nonce khôi phục khoá bí mật ngay trước mắt.</div>
+      minh có nêu lý do — kèm tấn công dùng lại nonce khôi phục khoá bí mật ngay trước mắt. Kèm ba mô hình ứng dụng — bắt tay TLS 1.3 (ECDHE + ECDSA, có cả một kẻ
+      đứng giữa bị phát hiện), khoá FIDO2 / WebAuthn, firmware ký bằng ECDSA — và một bắt tay rút gọn chạy thử được.</div>
     <div class="art-desc" lang="en">The point-addition law, drawn: pick two points on a real curve to see the chord and the
       tangent, then move to a small finite field to see every point, the k·G orbit and the Hasse bound; scalar
       multiplication bit by bit, double-and-add beside the Montgomery ladder. A lab built on NIST's tests over P-192 …
       P-521: key-pair generation, public-key validation, two-party ECDH, ECDSA signing (random k, deterministic per
       RFC 6979, or given) and verification with the reason — plus a nonce-reuse attack that recovers the private key in
-      front of you.</div>
+      front of you. Plus three application models — the TLS 1.3 handshake (ECDHE + ECDSA, including a man-in-the-middle
+      who gets caught), FIDO2 / WebAuthn keys, ECDSA-signed firmware — and a reduced handshake you can run.</div>
     <div class="art-quotes">
       <div class="art-quote" lang="vi">"Hai chữ ký dùng chung một nonce là đủ để tính ra khoá bí mật — <em>chỗ yếu của
         ECDSA nằm ở bộ sinh số ngẫu nhiên.</em>"</div>
