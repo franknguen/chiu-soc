@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi"
+      data-title-vi="Mật mã khoá công khai trong đời thường: ba việc, ba hình vẽ, và chúng chạy ở đâu quanh bạn — ChiU·SoC"
+      data-title-en="Public-key cryptography in everyday life: three jobs, three pictures, and where they run around you — ChiU·SoC">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mật mã khoá công khai trong đời thường: ba việc, ba hình vẽ, và chúng chạy ở đâu quanh bạn — ChiU·SoC</title>
+<meta name="description" content="Mật mã khoá công khai kể cho người không chuyên: một cặp khoá, ba việc (đóng gói khoá, thoả thuận khoá, chữ ký số), hình vẽ hai làn cho mỗi việc, và chúng chạy ở đâu quanh bạn: trang web, passkey, cập nhật phần mềm, tin nhắn mã hoá, bên trong con chip, và máy tính lượng tử thay đổi gì."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:  #14538f;
+  --accent2: #2a9d8f;
+  --text:    #1f2937;
+  --muted:   #5f6b7a;
+  --radius:  20px;
+  --max-w:   min(880px, calc(100vw - 44px));
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; scroll-padding-top:80px; }
+body{
+  margin:0; background:#f0f2f5;
+  font-family:"Inter",Arial,sans-serif;
+  font-size:17px; line-height:1.8; color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* bilingual */
+html[data-lang="vi"] [lang="en"]{ display:none; }
+html[data-lang="en"] [lang="vi"]{ display:none; }
+
+header{
+  position:sticky; top:0; z-index:100;
+  background:#14213d; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-inner{
+  max-width:var(--max-w); margin:0 auto; padding:12px 6px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.site-title{ font-size:20px; font-weight:800; letter-spacing:2px; }
+.site-title a{ color:#fff; text-decoration:none; }
+.site-title .dot{ color:var(--accent2); }
+.back-home{
+  margin-left:auto; color:rgba(255,255,255,.88); text-decoration:none;
+  font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+.back-home:hover{ background:rgba(255,255,255,.2); }
+.lang-switch{ display:flex; gap:3px; background:rgba(255,255,255,.12); padding:3px; border-radius:999px; }
+.lang-btn{
+  border:0; background:transparent; color:rgba(255,255,255,.8);
+  font:inherit; font-size:13px; font-weight:700; letter-spacing:.04em;
+  padding:4px 12px; border-radius:999px; cursor:pointer;
+}
+.lang-btn:hover{ color:#fff; }
+.lang-btn[aria-pressed="true"]{ background:#fff; color:#14213d; }
+
+main{ max-width:var(--max-w); margin:0 auto; padding:0 6px 40px; }
+article{
+  background:#fff; border-radius:var(--radius); padding:30px 34px;
+  margin:26px auto; box-shadow:0 10px 28px rgba(36,49,66,.08);
+  border:1px solid rgba(230,230,230,.7);
+  position:relative; overflow:hidden;
+}
+article::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+h1{ font-size:clamp(1.4rem,3vw,1.95rem); letter-spacing:-.02em; margin:0 0 6px; line-height:1.3; }
+.meta{ color:var(--muted); font-size:.88em; margin-bottom:10px; }
+.lede{ font-size:1.02em; color:#374151; border-left:3px solid var(--accent2);
+  padding:4px 0 4px 16px; margin:0 0 24px; }
+h2{ font-size:1.18rem; color:var(--accent); margin:30px 0 10px; letter-spacing:-.01em; }
+h3{ font-size:1rem; margin:20px 0 6px; color:var(--text); }
+p{ margin:0 0 14px; }
+ul,ol{ margin:0 0 14px; padding-left:1.3rem; }
+li{ margin-bottom:8px; }
+code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.86em; background:rgba(20,83,143,.07);
+  padding:1px 6px; border-radius:6px; overflow-wrap:anywhere;
+}
+pre{
+  background:#0f1b2d; color:#dbe7f5; border-radius:12px;
+  padding:14px 16px; overflow-x:auto; font-size:.84em; line-height:1.65;
+  margin:0 0 16px;
+}
+pre code{ background:none; padding:0; color:inherit; font-size:1em; }
+.tbl-wrap{ overflow-x:auto; margin:0 0 16px; }
+table{ border-collapse:collapse; width:100%; font-size:.9em; min-width:380px; }
+th,td{ border:1px solid rgba(31,41,55,.14); padding:7px 11px; text-align:left; }
+th{ background:rgba(20,83,143,.07); font-weight:700; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+blockquote{
+  border-left:3px solid var(--accent);
+  margin:18px 0; padding:10px 16px;
+  background:linear-gradient(135deg, rgba(20,83,143,.055), rgba(42,157,143,.035));
+  border-radius:0 10px 10px 0;
+  font-style:italic; color:#2d3748; font-size:.95em;
+}
+blockquote em{ font-style:normal; font-weight:600; }
+.callout{
+  background:rgba(234,179,8,.1); border:1px solid rgba(234,179,8,.3);
+  padding:13px 16px; border-radius:12px; margin:18px 0; font-size:.94em; line-height:1.7;
+}
+.refs{ font-size:.88em; color:var(--muted); }
+.refs li{ margin-bottom:5px; }
+.footer-nav{
+  margin-top:30px; padding-top:16px;
+  border-top:1px dashed rgba(31,41,55,.18);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.footer-nav a{
+  color:var(--accent); font-weight:700; font-size:.9em; text-decoration:none;
+  padding:6px 14px; background:rgba(20,83,143,.07); border-radius:999px;
+}
+.footer-nav a:hover{ background:rgba(20,83,143,.14); }
+footer{
+  background:#14213d; color:rgba(255,255,255,.75);
+  text-align:center; padding:20px 16px; font-size:.9em;
+}
+.diagram{ margin:22px 0 10px; }
+.diagram figcaption{ font-size:.82em; color:var(--muted); margin-top:9px; text-align:center; line-height:1.55; }
+.fig-scroll{ overflow-x:auto; }
+.fig-scroll svg{ min-width:620px; width:100%; height:auto; display:block; }
+.toy{ margin:18px 0; }
+.rule{
+  border:1px solid rgba(20,83,143,.25); background:rgba(20,83,143,.05);
+  padding:12px 16px; border-radius:12px; margin:14px 0 18px; font-size:.97em;
+}
+.rule .pub{ color:#2a9d8f; font-weight:700; }
+.rule .sec{ color:#9b1d28; font-weight:700; }
+.takeaways{
+  background:linear-gradient(135deg, rgba(20,83,143,.07), rgba(42,157,143,.06));
+  border:1px solid rgba(20,83,143,.18); border-radius:14px; padding:16px 20px; margin:20px 0;
+}
+.takeaways ol{ margin:0; }
+.scene{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin:0 0 18px; }
+.scene div{ background:rgba(20,83,143,.05); border-radius:12px; padding:10px 12px; font-size:.92em; line-height:1.6; }
+.scene strong{ color:var(--accent); }
+.pit{ border-left:3px solid #9b1d28; background:rgba(155,29,40,.05); padding:10px 14px; border-radius:0 10px 10px 0; margin:14px 0; font-size:.94em; }
+.pit summary{ cursor:pointer; font-weight:700; color:#9b1d28; }
+.pit p{ margin:8px 0 0; }
+.lead-in{ color:var(--muted); font-size:.94em; margin-bottom:6px; }
+/* ==== house-format v1 — bilingual-personal-site skill, scripts/house-format.css. Prose is justified on every page.
+     Do not edit this block in a page: edit the skill's copy, re-run apply_format.py; check_site.py fails a page whose
+     block differs. ==== */
+main p, main li, main blockquote, main dd, main .art-desc, main .art-quote{ text-align:justify; text-justify:inter-word; hyphens:auto; }
+main .refs li, main .art-links li, main .songlist li, main .toc-wrap li, main .listen p, main .pair li, main .result li, main table p, main table li{ text-align:left; hyphens:manual; }
+main .poem-credit, main .video-cap, main figcaption p, main figcaption li{ text-align:center; hyphens:manual; }
+main code, main pre, main kbd, main samp, main a{ hyphens:manual; }
+/* ==== /house-format ==== */
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title"><a href="../index.html">ChiU<span class="dot">·</span>SoC</a></div>
+    <a class="back-home" href="../index.html"><span lang="vi">← Trang chủ</span><span lang="en">← Home</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" class="lang-btn" data-lang="vi" aria-pressed="true">VI</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<article>
+<h1><span lang="vi">Mật mã khoá công khai trong đời thường: ba việc, ba hình vẽ, và chúng chạy ở đâu quanh bạn</span><span lang="en">Public-key cryptography in everyday life: three jobs, three pictures, and where they run around you</span></h1>
+<div class="meta"><span lang="vi">Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi · 03/11/2026 · Frank Nguyen</span><span lang="en">PQC, AI &amp; ECC · 3 Nov 2026 · Frank Nguyen</span></div>
+
+<p class="lede" lang="vi">Sáng nay bạn đã dùng mật mã khoá công khai ít nhất bốn lần mà không để ý. Bài này kể lại nó bằng
+hình vẽ và ví dụ nhỏ, tính tay được: một ý tưởng (hai chiếc khoá), ba việc nó làm được, và những chỗ nó đang chạy quanh bạn,
+từ trình duyệt đến bên trong con chip. Bạn không cần kiến thức nền; mỗi công thức đều có một bức tranh đời thường đi trước.</p>
+<p class="lede" lang="en">This morning you used public-key cryptography at least four times without noticing. This article
+retells it with pictures and hand-sized examples: one idea (two keys), the three jobs it can do, and the places it is
+running around you, from the browser to the inside of a chip. Nothing is assumed; every formula is preceded by an
+everyday picture.</p>
+
+<div class="scene">
+  <div><span lang="vi"><strong>Mở trang ngân hàng.</strong> Ổ khoá nhỏ trên thanh địa chỉ nghĩa là trình duyệt và máy chủ vừa
+  thoả thuận một khoá bí mật, và máy chủ vừa chứng minh nó đúng là chủ của địa chỉ bạn đang mở (ổ khoá không nói trang đó tử tế: trang lừa đảo cũng có ổ khoá).</span><span lang="en"><strong>Opening a
+  bank website.</strong> The little padlock in the address bar means the browser and the server just agreed on a secret
+  key, and the server just proved it really owns the address you opened (the padlock does not say the site is honest: scam sites have padlocks too).</span></div>
+  <div><span lang="vi"><strong>Đăng nhập bằng passkey.</strong> Điện thoại hỏi vân tay rồi ký một "thử thách"; mật khẩu
+  không hề được gửi đi, vì không có mật khẩu nào cả.</span><span lang="en"><strong>Logging in with a passkey.</strong> The
+  phone asks for a fingerprint and signs a "challenge"; no password is sent, because there is no password.</span></div>
+  <div><span lang="vi"><strong>Điện thoại cài bản cập nhật.</strong> Trước khi cài, nó kiểm chữ ký của nhà sản xuất trên
+  gói phần mềm. Gói giả sẽ bị từ chối dù tải từ đâu.</span><span lang="en"><strong>A phone installing an update.</strong>
+  Before installing, it checks the manufacturer's signature on the package. A fake package is refused wherever it came
+  from.</span></div>
+  <div><span lang="vi"><strong>Gửi email / tệp mã hoá.</strong> Ứng dụng gói một khoá ngắn bằng khoá công khai của
+  người nhận, rồi mã hoá nội dung bằng khoá ngắn đó.</span><span lang="en"><strong>Sending an encrypted email or file.</strong>
+  The app seals a short key with the receiver's public key, then encrypts the content under that short key.</span></div>
+</div>
+
+
+<h2 id="y-tuong"><span lang="vi">1. Một ý tưởng: hai chiếc khoá</span><span lang="en">1. One idea: two keys</span></h2>
+<p lang="vi">Hãy nghĩ về một hộp thư có khe bỏ thư. Ai đi ngang cũng bỏ thư vào được; chỉ người có chìa mới mở hộp lấy thư
+ra. Cái khe là <em>khoá công khai</em>: bạn có thể in nó lên danh thiếp, dán ngoài cửa, gửi cho cả thế giới. Cái chìa là
+<em>khoá bí mật</em>: nó ở lại trong túi bạn, và trong máy tính thì ở lại trong máy, không bao giờ đi ra ngoài.</p>
+<p lang="en">Think of a mailbox with a slot. Anyone walking past can drop a letter in; only the person with the key can open
+the box and take the letters out. The slot is the <em>public key</em>: you can print it on a business card, pin it on
+your door, send it to the whole world. The key is the <em>secret key</em>: it stays in your pocket, and in a computer it
+stays in the machine and never travels.</p>
+<p lang="vi">Mật mã đối xứng (kiểu truyền thống; AES, thuật toán mã hoá dữ liệu phổ biến nhất hôm nay, thuộc loại này) chỉ có một
+chiếc khoá dùng chung, và hai người muốn nói chuyện riêng phải gặp nhau trước để chia chiếc khoá đó. Mật mã khoá công khai (từ năm 1976) bỏ được bước gặp nhau: mỗi người tự sinh ra một <em>cặp</em> khoá, phát một
+nửa, giữ một nửa. Hai chiếc khoá sinh ra cùng nhau và khớp nhau, nhưng từ nửa công khai không ai tính ngược ra nửa bí
+mật được.</p>
+<p lang="en">Symmetric (traditional) cryptography, of which AES, today's most common data cipher, is one, has one shared key, and two people who want to talk privately must first meet to share it.
+Public-key cryptography (since 1976) removes the meeting: each person makes a <em>pair</em> of keys, hands out one
+half, keeps the other. The two keys are born together and fit each other, yet nobody can work backwards from the public
+half to the secret half.</p>
+<figure class="diagram" id="fig-keys">
+<div class="fig-scroll">
+<svg viewBox="0 0 680 252" role="img" aria-label="Một cặp khoá: khoá công khai phát cho mọi người, khoá bí mật ở lại trong máy" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="keys-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="keys-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="keys-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="keys-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="45" y="45" width="150" height="50" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="120" y="67" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Sinh khoá</text><text lang="en" x="120" y="67" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Key generation</text>
+<text lang="vi" x="120" y="83" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">từ số ngẫu nhiên</text><text lang="en" x="120" y="83" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">from random numbers</text>
+<polyline points="195,58 300,58 300,40 330,40" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#keys-arr-a)"/>
+<polyline points="195,82 300,82 300,118 330,118" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#keys-arr-a)"/>
+<rect x="330" y="18" width="200" height="44" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.3"/>
+<text lang="vi" x="430" y="37" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Khoá công khai pk</text><text lang="en" x="430" y="37" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Public key pk</text>
+<text lang="vi" x="430" y="53" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">phát cho mọi người</text><text lang="en" x="430" y="53" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">handed to everyone</text>
+<rect x="330" y="96" width="200" height="44" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="430" y="115" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Khoá bí mật sk</text><text lang="en" x="430" y="115" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Secret key sk</text>
+<text lang="vi" x="430" y="131" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ở lại trong máy / trong chip</text><text lang="en" x="430" y="131" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">stays in the device / chip</text>
+<text lang="vi" x="560" y="34" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">ai cũng được cầm,</text><text lang="en" x="560" y="34" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">anyone may hold it,</text>
+<text lang="vi" x="560" y="48" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">kể cả kẻ xấu</text><text lang="en" x="560" y="48" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">the attacker included</text>
+<text lang="vi" x="560" y="112" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">không bao giờ</text><text lang="en" x="560" y="112" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">never travels</text>
+<text lang="vi" x="560" y="126" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">đi ra ngoài</text><text lang="en" x="560" y="126" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">outside</text>
+<line x1="30" y1="160" x2="650" y2="160" stroke="#1f2937" stroke-opacity=".25"/>
+<text lang="vi" x="30" y="186" font-size="12" font-family="Inter,Arial,sans-serif" fill="#14538f" font-weight="700">Cửa sập (trapdoor):</text><text lang="en" x="30" y="186" font-size="12" font-family="Inter,Arial,sans-serif" fill="#14538f" font-weight="700">The trapdoor:</text>
+<text x="175" y="186" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">61 × 53 = 3233</text>
+<text lang="vi" x="300" y="186" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937">dễ, tính nhẩm được</text><text lang="en" x="300" y="186" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937">easy, do it in your head</text>
+<text x="175" y="210" font-size="13" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">3233 = ? × ?</text>
+<text lang="vi" x="300" y="210" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937">khó hơn hẳn; ở cỡ thật (600 chữ số) là bất khả thi</text><text lang="en" x="300" y="210" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937">much harder; at real size (600 digits) infeasible</text>
+<text lang="vi" x="30" y="238" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">pk được tính từ sk (dễ). sk không tính ngược được từ pk (khó). Toàn bộ sự an toàn đứng trên câu đó.</text><text lang="en" x="30" y="238" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">pk is computed from sk (easy). sk cannot be recovered from pk (hard). All the security stands on that sentence.</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 1 — Một cặp khoá sinh từ số ngẫu nhiên. Màu xanh lá = công khai, ai cũng được biết; màu đỏ = bí mật, không bao giờ rời máy. Bên dưới là "cửa sập" của RSA bằng số nhỏ.</span><span lang="en">Figure 1 — One key pair made from random numbers. Green = public, anyone may know it; red = secret, it never leaves the device. Below, the RSA "trapdoor" with small numbers.</span></figcaption>
+</figure>
+<p lang="vi">Vì sao "không tính ngược được"? Vì cặp khoá được dựng trên một phép toán dễ làm xuôi mà khó làm ngược, gọi là
+<em>cửa sập</em>. Ví dụ của RSA: nhân hai số nguyên tố thì dễ (61 × 53 = 3233, bạn nhẩm được), nhưng cho 3233 mà hỏi
+"tích của hai số nào?" thì phải thử. Với số nhỏ, thử vài chục lần là ra; với số dài 600 chữ số như RSA thật, thử đến hết
+tuổi vũ trụ cũng chưa xong. Với đường cong elliptic, cửa sập là một phép "cộng điểm" lặp lại nhiều lần mà không đếm
+ngược được số lần. Bài này không đi sâu vào toán; hai bài <a href="rsa-fips-186-5.html">RSA</a> và
+<a href="ecdh-ecdsa-nist-curves.html">đường cong elliptic</a> trên trang này làm việc đó.</p>
+<p lang="en">Why "cannot work backwards"? Because the pair is built on an operation that is easy forwards and hard
+backwards, called a <em>trapdoor</em>. RSA's example: multiplying two primes is easy (61 × 53 = 3233, you can do it in
+your head), but given 3233 and asked "the product of which two?" you have to try. With small numbers a few dozen tries
+suffice; with 600-digit numbers like real RSA, trying until the end of the universe is not enough. On an elliptic curve
+the trapdoor is a "point addition" repeated many times whose count cannot be recovered. This article stays out of the
+mathematics; the <a href="rsa-fips-186-5.html">RSA</a> and <a href="ecdh-ecdsa-nist-curves.html">elliptic-curve</a>
+articles on this site do that part.</p>
+<div class="rule">
+  <span lang="vi"><strong>Một câu để nhớ hướng khoá.</strong> Muốn <em>giữ bí mật</em> một thứ cho ai, dùng khoá
+  <span class="pub">công khai của NGƯỜI NHẬN</span>. Muốn <em>chứng minh mình là ai</em>, dùng khoá <span class="sec">bí
+  mật của CHÍNH MÌNH</span>. Ba việc dưới đây đều là một trong hai hướng đó.</span>
+  <span lang="en"><strong>One sentence to remember the key direction.</strong> To <em>keep something secret</em> for
+  someone, use the <span class="pub">RECEIVER's public key</span>. To <em>prove who you are</em>, use <span
+  class="sec">YOUR OWN secret key</span>. Each of the three jobs below is one of those two directions.</span>
+</div>
+
+<h2 id="viec-1"><span lang="vi">2. Việc 1 — Gửi một khoá cho người nhận (đóng gói khoá)</span><span lang="en">2. Job 1 — Deliver a key to a receiver (key encapsulation)</span></h2>
+<p lang="vi"><strong>Hình ảnh.</strong> Bạn muốn gửi một món đồ cho A. A phát cho cả thế giới những chiếc ổ khoá <em>đang
+mở</em>, giống hệt nhau, mà chỉ A có chìa. Bạn lấy một chiếc, bỏ đồ vào hộp, bấm ổ khoá lại, gửi đi. Ai cũng bấm được ổ
+khoá; chỉ A mở được. Ổ khoá đang mở là khoá công khai của A, chìa là khoá bí mật của A.</p>
+<p lang="en"><strong>The picture.</strong> You want to send something to A. A hands the whole world identical <em>open</em>
+padlocks that only A has the key for. You take one, put the item in a box, snap the padlock shut, send it. Anyone can snap
+a padlock shut; only A can open it. The open padlock is A's public key, the key is A's secret key.</p>
+<p lang="vi"><strong>Trong máy tính</strong>, "món đồ" gần như luôn là một khoá ngắn (16 hoặc 32 byte) chứ không phải tệp
+hay tin nhắn, vì phép toán khoá công khai chậm hơn mã hoá đối xứng hàng nghìn lần và chỉ chứa được vài trăm byte. Cách
+làm hiện đại gọi là <em>đóng gói khoá</em> (KEM, key encapsulation mechanism): người gửi không chọn khoá; thuật toán
+tự sinh một bí mật ngẫu nhiên <code>ss</code> và một "gói" <code>ct</code>, gửi gói đi; người nhận mở gói bằng khoá bí mật và
+có đúng <code>ss</code> ấy. Hai bên dùng <code>ss</code> làm khoá AES cho dữ liệu thật.</p>
+<p lang="en"><strong>In a computer</strong>, the "item" is almost always a short key (16 or 32 bytes), not a file or a
+message, because a public-key operation is thousands of times slower than a symmetric cipher and holds only a few hundred
+bytes. The modern form is called <em>key encapsulation</em> (KEM, key encapsulation mechanism): the sender does not choose
+a key; the algorithm makes a random secret <code>ss</code> and a "package" <code>ct</code>, sends the package; the receiver
+opens it with the secret key and gets the very same <code>ss</code>. Both sides then use <code>ss</code> as the AES key for the
+real data.</p>
+<figure class="diagram" id="fig-kem">
+<div class="fig-scroll">
+<svg viewBox="0 0 640 410" role="img" aria-label="Sơ đồ hai làn của việc 1: đóng gói khoá" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="kem-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="kem-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="kem-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="kem-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="16" y="14" width="290" height="392" rx="12" fill="#f4f6f9"/>
+<text lang="vi" x="161" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Bên A — người nhận</text><text lang="en" x="161" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Party A — the receiver</text>
+<text lang="vi" x="161" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">giữ cặp khoá (pk, sk)</text><text lang="en" x="161" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">holds the key pair (pk, sk)</text>
+<rect x="334" y="14" width="290" height="392" rx="12" fill="#f4f6f9"/>
+<text lang="vi" x="479" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Bên B — người gửi</text><text lang="en" x="479" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Party B — the sender</text>
+<text lang="vi" x="479" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">chỉ cần pk của A</text><text lang="en" x="479" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">needs only A's pk</text>
+<rect x="81" y="87" width="160" height="46" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="161" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Sinh khoá</text><text lang="en" x="161" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">KeyGen</text>
+<text lang="vi" x="161" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ra pk và sk</text><text lang="en" x="161" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">makes pk and sk</text>
+<rect x="399" y="177" width="160" height="46" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.3"/>
+<text lang="vi" x="479" y="197" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Đóng gói</text><text lang="en" x="479" y="197" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Encaps</text>
+<text lang="vi" x="479" y="213" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">dùng pk, ra (ct, ss)</text><text lang="en" x="479" y="213" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">uses pk, gives (ct, ss)</text>
+<rect x="81" y="277" width="160" height="46" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="161" y="297" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Mở gói</text><text lang="en" x="161" y="297" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Decaps</text>
+<text lang="vi" x="161" y="313" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">dùng sk, ra ss</text><text lang="en" x="161" y="313" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">uses sk, gives ss</text>
+<polyline points="28,110 81,110" fill="none" stroke="#5f6b7a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#kem-arr-m)"/>
+<text lang="vi" x="54" y="102" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ngẫu nhiên</text><text lang="en" x="54" y="102" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">random</text>
+<polyline points="612,200 559,200" fill="none" stroke="#5f6b7a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#kem-arr-m)"/>
+<text lang="vi" x="586" y="192" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ngẫu nhiên</text><text lang="en" x="586" y="192" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">random</text>
+<polyline points="161,133 161,277" fill="none" stroke="#9b1d28" stroke-width="1.6" marker-end="url(#kem-arr-s)"/>
+<text lang="vi" x="169" y="208" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" font-weight="600">khoá bí mật sk</text><text lang="en" x="169" y="208" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" font-weight="600">secret key sk</text>
+<polyline points="241,110 479,110 479,177" fill="none" stroke="#2a9d8f" stroke-width="1.6" marker-end="url(#kem-arr-p)"/>
+<text lang="vi" x="340" y="102" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">khoá công khai pk</text><text lang="en" x="340" y="102" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">public key pk</text>
+<polyline points="450.2,223 450.2,300 241,300" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#kem-arr-a)"/>
+<text lang="vi" x="345.6" y="292" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">bản mã ct (gói khoá)</text><text lang="en" x="345.6" y="292" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">ciphertext ct (the sealed key)</text>
+<polyline points="507.8,223 507.8,368" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#kem-arr-a)"/>
+<polyline points="161,323 161,368" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#kem-arr-a)"/>
+<text lang="vi" x="161" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">bí mật chung ss</text><text lang="en" x="161" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">shared secret ss</text>
+<text lang="vi" x="507.8" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">bí mật chung ss</text><text lang="en" x="507.8" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">shared secret ss</text>
+<text lang="vi" x="320" y="345" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">kẻ nghe lén thấy pk và ct,</text><text lang="en" x="320" y="345" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">an eavesdropper sees pk and ct,</text>
+<text lang="vi" x="320" y="359" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">không tính được ss</text><text lang="en" x="320" y="359" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">cannot compute ss</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 2 — Việc 1, đóng gói khoá (KEM). Chỉ A có cặp khoá. pk đi sang B; B dùng nó để tạo một bí mật ss và gói nó thành ct; chỉ sk của A mở được gói. Mũi tên vượt khe giữa hai làn là thứ đi trên mạng.</span><span lang="en">Figure 2 — Job 1, key encapsulation (KEM). Only A has a key pair. pk travels to B; B uses it to make a secret ss and seal it as ct; only A's sk opens the seal. Arrows crossing the gap are what travels over the network.</span></figcaption>
+</figure>
+<p lang="vi"><strong>Các thuật toán đang làm việc này:</strong> RSA-OAEP (người gửi tự chọn khoá rồi mã hoá nó, cách cũ hơn
+KEM) và RSA-KEM, cả hai dựa trên độ khó phân tích số lớn ra thừa số; ECIES (thực chất là một ECDH với khoá tạm thời của
+người gửi); và từ 2024 là <strong>ML-KEM</strong> (FIPS 203), chuẩn KEM hậu lượng tử đầu tiên của NIST, đã chạy trong
+trình duyệt của bạn. Lưu ý một điều: việc 1 không cho người nhận biết <em>ai</em> đã gửi, vì ai cũng
+bấm được ổ khoá. Muốn biết người gửi, phải ghép thêm việc 3.</p>
+<p lang="en"><strong>Algorithms doing this today:</strong> RSA-OAEP (the sender picks a key and encrypts it, the older form
+than a KEM) and RSA-KEM, both resting on the hardness of factoring large numbers; ECIES (really an ECDH with an ephemeral
+key of the sender); and since 2024 <strong>ML-KEM</strong> (FIPS 203), NIST's first post-quantum KEM standard, already
+running in your browser. One caveat: job 1 does not tell the receiver <em>who</em> sent the package, since anyone can snap
+the padlock. To know the sender, add job 3.</p>
+<details class="pit">
+<summary><span lang="vi">Dành cho người thiết kế: một cạm bẫy có thật</span><span lang="en">For designers: a real pitfall</span></summary>
+<p lang="vi">Năm 1998 Daniel Bleichenbacher nhận ra rằng thông báo lỗi của
+  máy chủ khi mở một gói RSA kiểu cũ (PKCS #1 v1.5) tiết lộ đủ để kẻ tấn công, sau hàng triệu gói cố tình sửa hỏng, mở
+  được gói thật. Mười chín năm sau, nghiên cứu ROBOT (2017) tìm lại đúng lỗi đó ở ít nhất bảy hãng, cả thiết bị mạng lẫn thư viện TLS. Bài học
+  cho người thiết kế: bước "mở gói" không được để lộ <em>vì sao</em> nó thất bại, cả qua thông báo lẫn qua thời gian; RFC
+  8017 ghi rõ cảnh báo này và yêu cầu dùng OAEP cho ứng dụng mới.</p>
+<p lang="en">In 1998 Daniel Bleichenbacher noticed that a server's error messages when
+  opening an old-style RSA package (PKCS #1 v1.5) leaked enough for an attacker, after millions of deliberately damaged
+  packages, to open the real one. Nineteen years later the ROBOT study (2017) found the very same flaw at at least seven
+  vendors, network equipment and TLS libraries alike. The lesson for designers: the "open" step must not reveal <em>why</em> it failed, neither by
+  message nor by timing; RFC 8017 carries this warning and requires OAEP for new applications.</p>
+</details>
+<p class="lead-in" lang="vi"><strong>Đồ chơi 1.</strong> RSA với số nhỏ: p = 61, q = 53, n = 3233, e = 17, d = 413. Gõ một
+số, xem nó được "bấm khoá" thành bản mã rồi mở lại; chuyển sang chế độ Ký để thấy cùng phép toán đổi hướng.</p>
+<p class="lead-in" lang="en"><strong>Toy 1.</strong> RSA with small numbers: p = 61, q = 53, n = 3233, e = 17, d = 413. Type
+a number, watch it get "padlocked" into a ciphertext and opened again; switch to Sign mode to see the same operation
+change direction.</p>
+<div class="toy" id="toy-rsa" data-toy="rsa"></div>
+<noscript><p><span lang="vi">Ba đồ chơi trong bài cần JavaScript; bài đọc được bình thường khi không có.</span><span lang="en">The three toys in this article need JavaScript; the article reads fine without them.</span></p></noscript>
+
+<h2 id="viec-2"><span lang="vi">3. Việc 2 — Hai bên cùng tạo một khoá (thoả thuận khoá)</span><span lang="en">3. Job 2 — Two sides make one key together (key agreement)</span></h2>
+<p lang="vi"><strong>Hình ảnh.</strong> Hai người pha màu. Cả hai bắt đầu từ cùng một lon sơn vàng công khai. Mỗi người
+trộn vào đó một màu bí mật riêng, rồi đưa cho nhau lon sơn đã trộn, giữa đường ai nhìn cũng được. Về nhà, mỗi người
+trộn màu bí mật của mình vào lon nhận được. Hai lon cuối cùng ra <em>cùng một màu</em>, vì vàng + đỏ + xanh cũng là
+vàng + xanh + đỏ. Người nhìn trộm thấy hai lon đi giữa đường, nhưng tách sơn ra thành màu gốc thì không làm được.</p>
+<p lang="en"><strong>The picture.</strong> Two people mixing paint. Both start from the same public tin of yellow. Each stirs a
+secret colour of their own into it, then they hand each other the mixed tins, in full view of anyone on the road. At home,
+each stirs their own secret colour into the tin they received. The two final tins come out the <em>same colour</em>,
+because yellow + red + blue is also yellow + blue + red. A snoop sees the two tins travelling, but un-mixing paint back to
+its ingredients cannot be done.</p>
+<p lang="vi"><strong>Trong máy tính</strong>, mỗi bên có cặp khoá riêng, chỉ gửi nửa công khai, rồi "trộn" khoá bí mật của
+mình với khoá công khai của bên kia. Phép trộn được chọn sao cho hai bên ra cùng một kết quả, và kết quả không gửi đi
+bao giờ. Khác với việc 1, ở đây <em>cả hai</em> bên có cặp khoá và đóng góp như nhau. Khi cả hai cặp khoá là <em>tạm
+thời</em> (sinh mới cho mỗi phiên rồi xoá), có thêm một tính chất quý: ai ghi lại lưu lượng hôm nay rồi sau này lấy được
+khoá dài hạn của máy chủ cũng không mở được phiên cũ. Tên nó là <em>bí mật chuyển tiếp</em> (forward secrecy).</p>
+<p lang="en"><strong>In a computer</strong>, each side has its own key pair, sends only the public half, then "mixes" its
+own secret key with the other side's public key. The mixing is chosen so that both sides get the same result, and the
+result is never sent. Unlike job 1, here <em>both</em> sides have a key pair and contribute equally. When both pairs are
+<em>ephemeral</em> (made fresh for each session and then erased) there is a precious extra property: whoever records
+today's traffic and later obtains the server's long-term key still cannot open the old session. Its name is <em>forward
+secrecy</em>.</p>
+<figure class="diagram" id="fig-ka">
+<div class="fig-scroll">
+<svg viewBox="0 0 640 410" role="img" aria-label="Sơ đồ hai làn của việc 2: thoả thuận khoá" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ka-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="ka-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="ka-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="ka-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="16" y="14" width="290" height="392" rx="12" fill="#f4f6f9"/>
+<text lang="vi" x="161" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Bên A</text><text lang="en" x="161" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Party A</text>
+<text lang="vi" x="161" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">có cặp khoá riêng (skA, pkA)</text><text lang="en" x="161" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">has its own pair (skA, pkA)</text>
+<rect x="334" y="14" width="290" height="392" rx="12" fill="#f4f6f9"/>
+<text lang="vi" x="479" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Bên B</text><text lang="en" x="479" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Party B</text>
+<text lang="vi" x="479" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">có cặp khoá riêng (skB, pkB)</text><text lang="en" x="479" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">has its own pair (skB, pkB)</text>
+<rect x="81" y="77" width="160" height="46" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="161" y="97" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Sinh khoá</text><text lang="en" x="161" y="97" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">KeyGen</text>
+<text lang="vi" x="161" y="113" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ra skA, pkA</text><text lang="en" x="161" y="113" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">makes skA, pkA</text>
+<rect x="399" y="142" width="160" height="46" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="479" y="162" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Sinh khoá</text><text lang="en" x="479" y="162" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">KeyGen</text>
+<text lang="vi" x="479" y="178" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ra skB, pkB</text><text lang="en" x="479" y="178" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">makes skB, pkB</text>
+<rect x="81" y="267" width="160" height="46" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="161" y="287" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Trộn</text><text lang="en" x="161" y="287" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Derive</text>
+<text lang="vi" x="161" y="303" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">skA với pkB</text><text lang="en" x="161" y="303" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">skA with pkB</text>
+<rect x="399" y="267" width="160" height="46" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="479" y="287" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Trộn</text><text lang="en" x="479" y="287" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Derive</text>
+<text lang="vi" x="479" y="303" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">skB với pkA</text><text lang="en" x="479" y="303" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">skB with pkA</text>
+<polyline points="28,100 81,100" fill="none" stroke="#5f6b7a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ka-arr-m)"/>
+<text lang="vi" x="54" y="92" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ngẫu nhiên</text><text lang="en" x="54" y="92" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">random</text>
+<polyline points="479,118 479,142" fill="none" stroke="#5f6b7a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ka-arr-m)"/>
+<text lang="vi" x="487" y="134" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">ngẫu nhiên</text><text lang="en" x="487" y="134" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">random</text>
+<polyline points="121,123 121,267" fill="none" stroke="#9b1d28" stroke-width="1.6" marker-end="url(#ka-arr-s)"/>
+<text x="114" y="200" font-size="11.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#9b1d28" text-anchor="end" font-weight="600">skA</text>
+<polyline points="399,165 201,165 201,267" fill="none" stroke="#2a9d8f" stroke-width="1.6" marker-end="url(#ka-arr-p)"/>
+<text lang="vi" x="300" y="157" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">khoá công khai pkB</text><text lang="en" x="300" y="157" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">public key pkB</text>
+<polyline points="241,100 575,100 575,290 559,290" fill="none" stroke="#2a9d8f" stroke-width="1.6" marker-end="url(#ka-arr-p)"/>
+<text lang="vi" x="408" y="92" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">khoá công khai pkA</text><text lang="en" x="408" y="92" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">public key pkA</text>
+<polyline points="479,188 479,267" fill="none" stroke="#9b1d28" stroke-width="1.6" marker-end="url(#ka-arr-s)"/>
+<text x="487" y="232" font-size="11.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#9b1d28" font-weight="600">skB</text>
+<polyline points="161,313 161,368" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#ka-arr-a)"/>
+<polyline points="479,313 479,368" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#ka-arr-a)"/>
+<text lang="vi" x="161" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">bí mật chung ss</text><text lang="en" x="161" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">shared secret ss</text>
+<text lang="vi" x="479" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">bí mật chung ss</text><text lang="en" x="479" y="388" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">shared secret ss</text>
+<text lang="vi" x="320" y="345" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">hai bên ra CÙNG một ss</text><text lang="en" x="320" y="345" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">both sides get the SAME ss</text>
+<text lang="vi" x="320" y="359" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">mà không ai gửi nó đi</text><text lang="en" x="320" y="359" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">and nobody ever sent it</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 3 — Việc 2, thoả thuận khoá. Cả hai bên có cặp khoá; chỉ hai khoá công khai đi qua mạng. Mỗi bên trộn khoá bí mật của mình với khoá công khai của bên kia và ra cùng một bí mật.</span><span lang="en">Figure 3 — Job 2, key agreement. Both sides have a key pair; only the two public keys cross the network. Each side mixes its own secret key with the other's public key and gets the same secret.</span></figcaption>
+</figure>
+<p lang="vi"><strong>Các thuật toán đang làm việc này:</strong> Diffie-Hellman theo modulo một số nguyên tố lớn (ít dùng
+dần), ECDH trên P-256 / P-384 (tên của hai đường cong chuẩn của NIST), và X25519 (một đường cong khác, phổ biến nhất trên
+Internet vì gọn và dễ làm cho chạy với "thời gian không đổi": thời gian tính không phụ thuộc vào khoá, nên không đo được
+khoá qua đồng hồ). Các chuẩn hậu lượng tử của NIST <em>không</em> có phép trộn tương đương (đề xuất như CSIDH còn quá chậm
+và chưa đủ tin cậy); thay vào đó người ta dùng việc 1 với khoá tạm thời: một bên sinh một cặp khoá mới cho phiên, bên kia
+gói một bí mật cho khoá đó, rồi cả hai xoá khoá tạm thời. Vì cặp khoá chỉ sống một phiên, kết quả giống hệt phép trộn:
+một bí mật chung mới toanh, và bí mật chuyển tiếp. TLS 1.3 hiện làm cả hai cùng lúc trong nhóm lai X25519MLKEM768 (RFC 10024): hai bí mật nối
+lại thành một, kẻ tấn công phải phá cả hai.</p>
+<p lang="en"><strong>Algorithms doing this today:</strong> Diffie-Hellman modulo a large prime (fading out), ECDH on P-256 /
+P-384 (the names of two NIST standard curves), and X25519 (another curve, the most common on the Internet, being compact
+and easy to run in "constant time": the running time does not depend on the key, so the key cannot be measured with a
+clock). NIST's post-quantum standards have <em>no</em> equivalent mixing operation (proposals such as CSIDH are still too
+slow and not trusted enough); instead job 1 is used with ephemeral keys: one side makes a fresh key pair for the session,
+the other seals a secret for it, then both erase the ephemeral key. Because the pair lives for one session only, the
+result is the same as mixing: a brand-new shared secret, and forward secrecy. TLS 1.3 now does both at once in the hybrid group X25519MLKEM768 (RFC 10024):
+the two secrets are joined into one, and an attacker has to break both.</p>
+<details class="pit">
+<summary><span lang="vi">Dành cho người thiết kế: một cạm bẫy có thật</span><span lang="en">For designers: a real pitfall</span></summary>
+<p lang="vi">Phép trộn trên đường cong chỉ an toàn khi khoá công khai nhận được
+  thật sự nằm trên đường cong. Năm 2018, CERT công bố CVE-2018-5383: phần sụn Bluetooth của nhiều hãng không kiểm tra đủ
+  tham số đường cong của khoá công khai bên kia khi ghép đôi, nên kẻ tấn công trong tầm sóng có thể đưa vào một khoá
+  không hợp lệ và suy ra khoá phiên. Bài học: <em>kiểm tra mọi khoá công khai nhận được trước khi trộn</em> (với các đường cong như P-256; X25519 được
+  thiết kế để chịu được khoá lạ), và việc kiểm tra ấy phải nằm trong phần cứng hoặc phần sụn, không trông chờ vào lớp trên.</p>
+<p lang="en">The mixing on a curve is only safe when the received public key really
+  lies on the curve. In 2018 CERT published CVE-2018-5383: the Bluetooth firmware of several vendors did not sufficiently
+  validate the curve parameters of the other side's public key during pairing, so an attacker within radio range could
+  inject an invalid key and derive the session key. The lesson: <em>validate every received public key before mixing</em> (on curves such as P-256; X25519 is designed
+  to tolerate strange keys), and that check belongs in the hardware or firmware, not in a layer above.</p>
+</details>
+<p class="lead-in" lang="vi"><strong>Đồ chơi 2.</strong> ECDH trên một đường cong tí hon với 19 điểm, y² = x³ + 2x + 2 trên các
+số từ 0 đến 16 (cùng đường cong với bài đường cong elliptic). A chọn số bí mật a, B chọn b; xem hai bên ra cùng một điểm.
+Với a = 3, b = 7 cả hai ra (6, 3).</p>
+<p class="lead-in" lang="en"><strong>Toy 2.</strong> ECDH on a tiny curve with 19 points, y² = x³ + 2x + 2 over the numbers 0 to
+16 (the same curve as the elliptic-curve article). A picks a secret a, B picks b; watch both sides land on the same point.
+With a = 3, b = 7 both get (6, 3).</p>
+<div class="toy" id="toy-ecdh" data-toy="ecdh"></div>
+
+<h2 id="viec-3"><span lang="vi">4. Việc 3 — Chứng minh ai đã viết (chữ ký số)</span><span lang="en">4. Job 3 — Prove who wrote it (digital signature)</span></h2>
+<p lang="vi"><strong>Hình ảnh.</strong> Con dấu sáp ngày xưa. Chỉ nhà vua có con dấu; ai cũng biết hình con dấu trông thế nào.
+Thư có dấu đúng thì là thư của vua; dấu không khớp, hoặc thư bị bóc rồi dán lại, thì không tin. Con dấu là khoá bí mật,
+hình con dấu mà ai cũng biết là khoá công khai. Để ý hướng khoá đảo lại so với hai việc trước: người <em>ký</em> dùng khoá bí
+mật của <em>chính mình</em>; người kiểm chỉ cần khoá công khai.</p>
+<p lang="en"><strong>The picture.</strong> The old wax seal. Only the king has the seal; everyone knows what its imprint looks
+like. A letter with the right imprint is the king's; a wrong imprint, or a letter opened and re-sealed, is not trusted. The
+seal is the secret key, the imprint everyone knows is the public key. Notice the key direction flips compared with the two
+jobs before: the <em>signer</em> uses their <em>own</em> secret key; the checker needs only the public key.</p>
+<p lang="vi"><strong>Trong máy tính</strong>, người ký băm thông điệp (rút gọn nó thành 32 byte bằng SHA-256) rồi tạo chữ ký
+từ mã băm và khoá bí mật. Ai có khoá công khai đều kiểm được: chữ ký khớp với thông điệp này, và chỉ người giữ khoá bí
+mật mới tạo ra được. Đổi một bit của thông điệp, chữ ký hết hợp lệ. Chữ ký <em>không giấu</em> gì cả, thông điệp vẫn đi ở dạng rõ (không
+mã hoá) ngay bên cạnh; nó chỉ làm hai việc: bảo đảm toàn vẹn và nói ai là tác giả.</p>
+<p lang="en"><strong>In a computer</strong>, the signer hashes the message (condenses it to 32 bytes with SHA-256) and makes
+the signature from the hash and the secret key. Anyone with the public key can check: this signature fits this message,
+and only the holder of the secret key could have made it. Flip one bit of the message and the signature stops being valid.
+A signature <em>hides nothing</em>, the message travels in the clear beside it; it does just two things: guarantee integrity
+and name the author.</p>
+<figure class="diagram" id="fig-sig">
+<div class="fig-scroll">
+<svg viewBox="0 0 640 410" role="img" aria-label="Sơ đồ hai làn của việc 3: chữ ký số" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="sig-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="sig-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="sig-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="sig-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="16" y="14" width="290" height="392" rx="12" fill="#f4f6f9"/>
+<text lang="vi" x="161" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Bên A — người ký</text><text lang="en" x="161" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Party A — the signer</text>
+<text lang="vi" x="161" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">giữ cặp khoá (pk, sk)</text><text lang="en" x="161" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">holds the key pair (pk, sk)</text>
+<rect x="334" y="14" width="290" height="392" rx="12" fill="#f4f6f9"/>
+<text lang="vi" x="479" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Bên B — người kiểm</text><text lang="en" x="479" y="38" font-size="14" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Party B — the verifier</text>
+<text lang="vi" x="479" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">chỉ cần pk của A</text><text lang="en" x="479" y="56" font-size="11" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">needs only A's pk</text>
+<rect x="81" y="77" width="160" height="46" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="161" y="97" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Sinh khoá</text><text lang="en" x="161" y="97" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">KeyGen</text>
+<text lang="vi" x="161" y="113" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ra pk và sk</text><text lang="en" x="161" y="113" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">makes pk and sk</text>
+<rect x="399" y="182" width="160" height="46" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.3"/>
+<text lang="vi" x="479" y="202" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Kiểm</text><text lang="en" x="479" y="202" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Verify</text>
+<text lang="vi" x="479" y="218" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">dùng pk</text><text lang="en" x="479" y="218" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">uses pk</text>
+<rect x="91" y="277" width="140" height="46" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="161" y="297" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Ký</text><text lang="en" x="161" y="297" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Sign</text>
+<text lang="vi" x="161" y="313" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">dùng sk</text><text lang="en" x="161" y="313" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">uses sk</text>
+<polyline points="28,100 81,100" fill="none" stroke="#5f6b7a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#sig-arr-m)"/>
+<text lang="vi" x="54" y="92" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ngẫu nhiên</text><text lang="en" x="54" y="92" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">random</text>
+<polyline points="161,123 161,277" fill="none" stroke="#9b1d28" stroke-width="1.6" marker-end="url(#sig-arr-s)"/>
+<text lang="vi" x="169" y="200" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" font-weight="600">khoá bí mật sk</text><text lang="en" x="169" y="200" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" font-weight="600">secret key sk</text>
+<polyline points="241,100 479,100 479,182" fill="none" stroke="#2a9d8f" stroke-width="1.6" marker-end="url(#sig-arr-p)"/>
+<text lang="vi" x="340" y="92" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">khoá công khai pk</text><text lang="en" x="340" y="92" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">public key pk</text>
+<polyline points="24,300 91,300" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#sig-arr-a)"/>
+<text lang="vi" x="55" y="279" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle">thông điệp</text><text lang="en" x="55" y="279" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle">message</text>
+<text x="55" y="292" font-size="11.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937" text-anchor="middle">M</text>
+<polyline points="231,300 479,300 479,228" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#sig-arr-a)"/>
+<text lang="vi" x="355" y="318" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">chữ ký s + thông điệp M</text><text lang="en" x="355" y="318" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">signature s + message M</text>
+<polyline points="559,205 590,205 590,250" fill="none" stroke="#2a9d8f" stroke-width="1.6" marker-end="url(#sig-arr-p)"/>
+<text lang="vi" x="612" y="266" font-size="11" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="end" font-weight="600">hợp lệ /</text><text lang="en" x="612" y="266" font-size="11" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="end" font-weight="600">valid /</text>
+<text lang="vi" x="612" y="280" font-size="11" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="end" font-weight="600">không hợp lệ</text><text lang="en" x="612" y="280" font-size="11" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="end" font-weight="600">invalid</text>
+<polyline points="161,352 161,323" fill="none" stroke="#5f6b7a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#sig-arr-m)"/>
+<text lang="vi" x="169" y="344" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">ngẫu nhiên*</text><text lang="en" x="169" y="344" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a">random*</text>
+<text lang="vi" x="161" y="384" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">* ECDSA cần; Ed25519 thì không</text><text lang="en" x="161" y="384" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">* ECDSA needs it; Ed25519 does not</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 4 — Việc 3, chữ ký số. Hướng khoá đảo lại: người ký dùng khoá BÍ MẬT, ai có khoá công khai cũng kiểm được. Thông điệp đi rõ bên cạnh chữ ký; chữ ký không giấu gì, nó chứng minh.</span><span lang="en">Figure 4 — Job 3, digital signature. The key direction flips: the signer uses the SECRET key; anyone with the public key can check. The message travels in the clear beside the signature; a signature hides nothing, it proves.</span></figcaption>
+</figure>
+<p lang="vi"><strong>Các thuật toán đang làm việc này:</strong> RSA-PSS, ECDSA (P-256 rất phổ biến trong chứng chỉ web và gần
+như là mặc định của passkey) và Ed25519 (FIPS 186-5); hậu lượng tử có <strong>ML-DSA</strong> (FIPS 204) và
+<strong>SLH-DSA</strong> (FIPS 205, chỉ dùng hàm băm, chữ ký rất lớn nhưng dựa trên ít giả thiết an toàn nhất). Một chi tiết thực dụng: với RSA, phép <em>ký</em> và phép <em>mở
+gói</em> là cùng một phép tính với khoá bí mật; vì vậy một cặp khoá chỉ nên làm một việc, không dùng chung cho cả ký lẫn
+nhận khoá.</p>
+<p lang="en"><strong>Algorithms doing this today:</strong> RSA-PSS, ECDSA (P-256 is very common in web certificates and nearly the default for passkeys)
+and Ed25519 (FIPS 186-5); post-quantum there are <strong>ML-DSA</strong> (FIPS 204) and <strong>SLH-DSA</strong> (FIPS 205,
+hash-based only, very large signatures but the fewest security assumptions). A practical detail: in RSA, <em>signing</em>
+and <em>opening a package</em> are the same computation with the secret key; so one key pair should do one job, never both
+signing and receiving keys.</p>
+<details class="pit">
+<summary><span lang="vi">Dành cho người thiết kế: một cạm bẫy có thật</span><span lang="en">For designers: a real pitfall</span></summary>
+<p lang="vi">ECDSA cần một số ngẫu nhiên mới, gọi là <code>k</code>, cho <em>mỗi</em>
+  chữ ký. RFC 6979 nói thẳng: k phải được chọn ngẫu nhiên và đều, và "ngay cả lệch nhỏ cũng có thể biến thành tấn công".
+  Lặp lại k cho hai thông điệp khác nhau thì tệ hơn lệch: hai chữ ký cùng r, và từ đó khoá bí mật tính ra được bằng vài
+  phép chia (đồ chơi 3 làm việc này trước mắt bạn). Câu chuyện được kể nhiều nhất là máy chơi game PlayStation 3 năm
+  2010, trình bày trong bài nói "Console Hacking 2010" tại hội nghị 27C3 về cách hệ thống bảo mật của máy bị phá. Bài học
+  cho phần cứng: k lấy từ nguồn ngẫu nhiên đã kiểm định, hoặc tính tất định theo RFC 6979, hoặc dùng Ed25519, thuật toán
+  không cần k ngẫu nhiên. Riêng trên chip, ký hoàn toàn tất định lại dễ bị tiêm lỗi hơn, nên phần cứng thường trộn thêm
+  ngẫu nhiên vào k (kiểu "hedged", cũng là chế độ mặc định của ML-DSA).</p>
+<p lang="en">ECDSA needs a fresh random number, called <code>k</code>, for <em>every</em>
+  signature. RFC 6979 says it plainly: k must be chosen randomly and uniformly, and "even slight biases in that process may
+  be turned into attacks". Reusing k for two different messages is worse than a bias: two signatures share r, and from
+  them the secret key falls out with a few divisions (toy 3 does it before your eyes). The most-told story is the
+  PlayStation 3 game console in 2010, presented in the talk "Console Hacking 2010" at the 27C3 conference on how the
+  console's security system was broken. The hardware lesson: take k from a vetted random source, or compute it
+  deterministically per RFC 6979, or use Ed25519, which needs no random k. On a chip, though, fully deterministic signing
+  is easier to attack by fault injection, so hardware usually stirs extra randomness into k ("hedged" signing, also
+  ML-DSA's default mode).</p>
+</details>
+<p class="lead-in" lang="vi"><strong>Đồ chơi 3.</strong> ECDSA trên cùng đường cong 19 điểm. Chọn khoá bí mật d, một "mã băm"
+h và một số k; xem chữ ký (r, s) sinh ra và được kiểm, sửa thông điệp để thấy chữ ký bị từ chối, rồi bấm "Dùng lại số k (nonce) cho thông điệp thứ hai" để xem khoá bí mật bị
+tính ra. Với d = 7, h = 8, k = 3 ta được (r, s) = (10, 7); đồ chơi tự chọn mã băm thứ hai h' =
+9, ký cùng k thì s' = 1, và kẻ tấn công tính ra k = 3, d = 7. Chỉ ở đồ chơi: vài k cho r = 0 hoặc s = 0 và bị từ chối, và vì
+chỉ có 19 giá trị, một thông điệp bị sửa thỉnh thoảng vẫn "hợp lệ" do trùng ngẫu nhiên (288 trên 5184
+trường hợp; ở cỡ thật, cỡ 1 trên 2<sup>256</sup>).</p>
+<p class="lead-in" lang="en"><strong>Toy 3.</strong> ECDSA on the same 19-point curve. Pick a secret key d, a "hash" h and a
+number k; watch the signature (r, s) being made and checked, tamper with the message to see the signature refused, then press
+"Reuse the nonce k for a second message" to watch the secret key fall out. With d = 7, h = 8, k = 3 we get (r, s) = (10, 7); the toy picks the
+second hash h' = 9 itself, signing it with the same k gives s' = 1, and the attacker computes k = 3, d =
+7. Only on a toy: a few k give r = 0 or s = 0 and are refused, and with only 19 possible values a tampered message
+occasionally still verifies by coincidence (288 of 5184 cases; at real size, about 1 in 2<sup>256</sup>).</p>
+<div class="toy" id="toy-ecdsa" data-toy="ecdsa"></div>
+
+<h2 id="bang"><span lang="vi">5. Ba việc trong một bảng</span><span lang="en">5. The three jobs on one table</span></h2>
+<div class="tbl-wrap">
+<table>
+<tr><th></th>
+<th><span lang="vi">1 · Đóng gói khoá</span><span lang="en">1 · Key encapsulation</span></th>
+<th><span lang="vi">2 · Thoả thuận khoá</span><span lang="en">2 · Key agreement</span></th>
+<th><span lang="vi">3 · Chữ ký số</span><span lang="en">3 · Digital signature</span></th></tr>
+<tr><td><span lang="vi">Mục đích</span><span lang="en">Purpose</span></td>
+<td><span lang="vi">đưa một khoá tới người giữ khoá bí mật</span><span lang="en">deliver a key to the holder of the secret key</span></td>
+<td><span lang="vi">hai bên cùng tạo một khoá</span><span lang="en">two sides make one key</span></td>
+<td><span lang="vi">toàn vẹn + ai là tác giả</span><span lang="en">integrity + who the author is</span></td></tr>
+<tr><td><span lang="vi">Ai có cặp khoá</span><span lang="en">Who has a key pair</span></td>
+<td><span lang="vi">chỉ người nhận</span><span lang="en">only the receiver</span></td>
+<td><span lang="vi">cả hai bên</span><span lang="en">both sides</span></td>
+<td><span lang="vi">chỉ người ký</span><span lang="en">only the signer</span></td></tr>
+<tr><td><span lang="vi">Đi trên mạng</span><span lang="en">Crosses the network</span></td>
+<td>pk, ct</td><td>pkA, pkB</td><td>pk, M, s</td></tr>
+<tr><td><span lang="vi">Phép dùng khoá bí mật</span><span lang="en">Operation using the secret key</span></td>
+<td><span lang="vi">Mở gói (người nhận)</span><span lang="en">Decaps (receiver)</span></td>
+<td><span lang="vi">Trộn (cả hai)</span><span lang="en">Derive (both)</span></td>
+<td><span lang="vi">Ký (người ký)</span><span lang="en">Sign (signer)</span></td></tr>
+<tr><td><span lang="vi">Cần số ngẫu nhiên</span><span lang="en">Needs randomness</span></td>
+<td><span lang="vi">sinh khoá, đóng gói</span><span lang="en">keygen, encaps</span></td>
+<td><span lang="vi">sinh khoá tạm thời</span><span lang="en">ephemeral keygen</span></td>
+<td><span lang="vi">sinh khoá; ký: ECDSA (bắt buộc), RSA-PSS, ML-DSA (thường có)</span><span lang="en">keygen; signing: ECDSA (required), RSA-PSS, ML-DSA (usually)</span></td></tr>
+<tr><td><span lang="vi">Biết bên kia là ai?</span><span lang="en">Knows who the other side is?</span></td>
+<td><span lang="vi">người gửi: có, ngầm (chỉ A mở được); người nhận: không</span><span lang="en">sender: yes, implicitly (only A can open); receiver: no</span></td>
+<td><span lang="vi">không</span><span lang="en">no</span></td>
+<td><span lang="vi">có, nếu biết pk là của ai (chứng chỉ)</span><span lang="en">yes, if you know whose pk it is (certificate)</span></td></tr>
+<tr><td><span lang="vi">Cổ điển</span><span lang="en">Classical</span></td>
+<td>RSA-OAEP, RSA-KEM, ECIES</td><td>ECDH, X25519</td><td>RSA-PSS, ECDSA, Ed25519</td></tr>
+<tr><td><span lang="vi">Hậu lượng tử</span><span lang="en">Post-quantum</span></td>
+<td>ML-KEM (FIPS 203)</td>
+<td><span lang="vi">ML-KEM tạm thời; lai X25519MLKEM768</span><span lang="en">ephemeral ML-KEM; hybrid X25519MLKEM768</span></td>
+<td>ML-DSA (FIPS 204), SLH-DSA (FIPS 205)</td></tr>
+</table>
+</div>
+<p lang="vi">Hai việc đầu đều kết thúc bằng một khoá chung nhưng tự chúng không xác thực được bên kia (người nhận trong
+việc 1 không biết ai đã gửi; hai bên trong việc 2 không biết mình đang trộn với ai); việc 3 không cho khoá nào nhưng cho
+biết tác giả. Vì vậy mọi giao thức thật là <em>tổ hợp</em>: việc 1 hoặc 2 để có bí mật, việc 3 để biết mình đang nói
+chuyện với ai. Kích thước cũng đáng xem: ở cùng mức an toàn khoảng 128 bit (nghĩa là kẻ tấn công cần cỡ 2<sup>128</sup>
+phép thử), khoá công khai RSA-3072 lớn gấp 11.6 lần khoá P-256 nén, và các thuật toán hậu lượng tử lớn hơn nữa. Bộ
+nhớ đệm, băng thông và thời gian bắt tay đều chịu ảnh hưởng của chênh lệch này.</p>
+<p lang="en">The first two jobs both end in a shared key but cannot by themselves authenticate the other side (the receiver
+in job 1 does not know who sent; the two sides in job 2 do not know whom they are mixing with); job 3 yields no key but
+names the author. That is why every real protocol is a <em>combination</em>: job 1 or 2 for the secret, job 3 to know whom
+you are talking to. Sizes are worth a look too: at the same security level of about 128 bits (meaning an attacker needs
+about 2<sup>128</sup> tries), an RSA-3072 public key is 11.6 times a compressed P-256 key, and the post-quantum
+algorithms are larger still. Buffers, bandwidth and handshake time are all affected by the difference.</p>
+<figure class="diagram" id="fig-sizes">
+<div class="fig-scroll">
+<svg viewBox="0 0 680 360" role="img" aria-label="Kích thước khoá công khai và bản mã / chữ ký ở cùng mức an toàn" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="sizes-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="sizes-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="sizes-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="sizes-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<text lang="vi" x="170" y="22" font-size="11" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" font-weight="700">khoá công khai</text><text lang="en" x="170" y="22" font-size="11" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" font-weight="700">public key</text>
+<rect x="150" y="13" width="14" height="10" fill="#2a9d8f"/>
+<text lang="vi" x="300" y="22" font-size="11" font-family="Inter,Arial,sans-serif" fill="#14538f" font-weight="700">bản mã (ct) hoặc chữ ký (sig)</text><text lang="en" x="300" y="22" font-size="11" font-family="Inter,Arial,sans-serif" fill="#14538f" font-weight="700">ciphertext (ct) or signature (sig)</text>
+<rect x="280" y="13" width="14" height="10" fill="#14538f"/>
+<text x="158" y="62" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="end" font-weight="600">RSA-3072</text>
+<rect x="170" y="46" width="201.738" height="11" fill="#2a9d8f" rx="2"/>
+<text x="376.738" y="56" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">384 B</text>
+<rect x="170" y="60" width="201.738" height="11" fill="#14538f" rx="2"/>
+<text x="376.738" y="70" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">384 B sig</text>
+<text x="158" y="100" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="end" font-weight="600">ECDSA P-256</text>
+<rect x="170" y="84" width="45.9533" height="11" fill="#2a9d8f" rx="2"/>
+<text x="220.953" y="94" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">33 B</text>
+<rect x="170" y="98" width="88" height="11" fill="#14538f" rx="2"/>
+<text x="263" y="108" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">64 B sig</text>
+<text x="158" y="138" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="end" font-weight="600">X25519 / Ed25519</text>
+<rect x="170" y="122" width="44" height="11" fill="#2a9d8f" rx="2"/>
+<text x="219" y="132" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">32 B</text>
+<rect x="170" y="136" width="88" height="11" fill="#14538f" rx="2"/>
+<text x="263" y="146" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">64 B sig</text>
+<text x="158" y="176" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="end" font-weight="600">ML-KEM-768</text>
+<rect x="170" y="160" width="273.216" height="11" fill="#2a9d8f" rx="2"/>
+<text x="448.216" y="170" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">1184 B</text>
+<rect x="170" y="174" width="267.848" height="11" fill="#14538f" rx="2"/>
+<text x="442.848" y="184" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">1088 B ct</text>
+<text x="158" y="214" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="end" font-weight="600">ML-DSA-44</text>
+<rect x="170" y="198" width="279.732" height="11" fill="#2a9d8f" rx="2"/>
+<text x="454.732" y="208" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">1312 B</text>
+<rect x="170" y="212" width="318.595" height="11" fill="#14538f" rx="2"/>
+<text x="493.595" y="222" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">2420 B sig</text>
+<text x="158" y="252" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="end" font-weight="600">ML-DSA-65</text>
+<rect x="170" y="236" width="304.952" height="11" fill="#2a9d8f" rx="2"/>
+<text x="479.952" y="246" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">1952 B</text>
+<rect x="170" y="250" width="338.456" height="11" fill="#14538f" rx="2"/>
+<text x="513.456" y="260" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">3309 B sig</text>
+<text x="158" y="290" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="end" font-weight="600">SLH-DSA-128s</text>
+<rect x="170" y="274" width="44" height="11" fill="#2a9d8f" rx="2"/>
+<text x="219" y="284" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">32 B</text>
+<rect x="170" y="288" width="393.341" height="11" fill="#14538f" rx="2"/>
+<text x="568.341" y="298" font-size="10.5" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#1f2937">7856 B sig</text>
+<line x1="170" y1="316" x2="610" y2="316" stroke="#1f2937" stroke-opacity=".4"/>
+<line x1="170" y1="316" x2="170" y2="321" stroke="#1f2937" stroke-opacity=".4"/>
+<text x="170" y="334" font-size="10" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#5f6b7a" text-anchor="middle">16</text>
+<line x1="258" y1="316" x2="258" y2="321" stroke="#1f2937" stroke-opacity=".4"/>
+<text x="258" y="334" font-size="10" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#5f6b7a" text-anchor="middle">64</text>
+<line x1="346" y1="316" x2="346" y2="321" stroke="#1f2937" stroke-opacity=".4"/>
+<text x="346" y="334" font-size="10" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#5f6b7a" text-anchor="middle">256</text>
+<line x1="434" y1="316" x2="434" y2="321" stroke="#1f2937" stroke-opacity=".4"/>
+<text x="434" y="334" font-size="10" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#5f6b7a" text-anchor="middle">1024</text>
+<line x1="522" y1="316" x2="522" y2="321" stroke="#1f2937" stroke-opacity=".4"/>
+<text x="522" y="334" font-size="10" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#5f6b7a" text-anchor="middle">4096</text>
+<line x1="610" y1="316" x2="610" y2="321" stroke="#1f2937" stroke-opacity=".4"/>
+<text x="610" y="334" font-size="10" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#5f6b7a" text-anchor="middle">16384</text>
+<text lang="vi" x="390" y="350" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">byte, thang lô-ga-rít (mỗi vạch = gấp 4 lần)</text><text lang="en" x="390" y="350" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">bytes, logarithmic scale (each tick = 4 times more)</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 5 — Kích thước khoá công khai và bản mã / chữ ký, tính bằng byte theo công thức trong chuẩn: RSA-3072, P-256, X25519 / Ed25519, ML-DSA-44 và SLH-DSA-128s ở khoảng 128 bit; ML-KEM-768 và ML-DSA-65 cao hơn một bậc (khoảng 192 bit), được vẽ vì đây là bộ đang chạy thật. Thang lô-ga-rít, mỗi vạch gấp bốn lần vạch trước.</span><span lang="en">Figure 5 — Public-key and ciphertext / signature sizes in bytes, from the formulas in the standards: RSA-3072, P-256, X25519 / Ed25519, ML-DSA-44 and SLH-DSA-128s at about 128 bits; ML-KEM-768 and ML-DSA-65 one category higher (about 192 bits), drawn because they are the set actually deployed. Logarithmic scale, each tick four times the previous.</span></figcaption>
+</figure>
+
+<h2 id="ung-dung"><span lang="vi">6. Chúng chạy ở đâu quanh bạn: bốn mô hình áp dụng</span><span lang="en">6. Where they run around you: four application models</span></h2>
+<p lang="vi">Quay lại bốn cảnh ở đầu bài. Hình dưới nối mỗi cảnh với việc đang chạy; bốn hình tiếp theo vẽ từng cảnh theo
+kiểu "ai làm gì, lúc nào": mỗi cột là một bên, mỗi ô là một phép toán chạy <em>tại</em> bên đó, mỗi mũi tên ngang là
+thứ đi qua mạng.</p>
+<p lang="en">Back to the four scenes from the opening. The figure below connects each scene to the job running in it; the
+four figures after it draw each scene as "who does what, when": each column is a party, each box an operation running
+<em>at</em> that party, each horizontal arrow something that crosses the network.</p>
+<figure class="diagram" id="fig-map">
+<div class="fig-scroll">
+<svg viewBox="0 0 680 290" role="img" aria-label="Bản đồ: bốn cảnh đời thường nối tới ba việc" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="map-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="map-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="map-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="map-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="25" y="28" width="250" height="44" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="150" y="54.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Mở trang ngân hàng (https)</text><text lang="en" x="150" y="54.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Opening a bank site (https)</text>
+<rect x="25" y="96" width="250" height="44" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="150" y="122.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Đăng nhập bằng passkey</text><text lang="en" x="150" y="122.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Logging in with a passkey</text>
+<rect x="25" y="164" width="250" height="44" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="150" y="190.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Điện thoại cài bản cập nhật</text><text lang="en" x="150" y="190.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">A phone installing an update</text>
+<rect x="25" y="232" width="250" height="44" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="150" y="258.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Gửi email / tệp mã hoá</text><text lang="en" x="150" y="258.32" font-size="12" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Sending an encrypted email or file</text>
+<rect x="425" y="61" width="230" height="50" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.3"/>
+<text lang="vi" x="540" y="83" font-size="12.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">1 · Đóng gói khoá</text><text lang="en" x="540" y="83" font-size="12.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">1 · Key encapsulation</text>
+<text lang="vi" x="540" y="99" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">gửi một khoá tới người nhận</text><text lang="en" x="540" y="99" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">deliver a key to a receiver</text>
+<rect x="425" y="127" width="230" height="50" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="540" y="149" font-size="12.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">2 · Thoả thuận khoá</text><text lang="en" x="540" y="149" font-size="12.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">2 · Key agreement</text>
+<text lang="vi" x="540" y="165" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">hai bên cùng tạo một khoá</text><text lang="en" x="540" y="165" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">two sides make one key</text>
+<rect x="425" y="193" width="230" height="50" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="540" y="215" font-size="12.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">3 · Chữ ký số</text><text lang="en" x="540" y="215" font-size="12.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">3 · Digital signature</text>
+<text lang="vi" x="540" y="231" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">chứng minh ai đã viết</text><text lang="en" x="540" y="231" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">prove who wrote it</text>
+<path d="M275 50 C 340 50, 360 152, 425 152" fill="none" stroke="#14538f" stroke-width="1.8" marker-end="url(#map-arr-a)"/>
+<path d="M275 50 C 340 50, 360 218, 425 218" fill="none" stroke="#9b1d28" stroke-width="1.8" marker-end="url(#map-arr-s)"/>
+<path d="M275 50 C 340 50, 360 86, 425 86" fill="none" stroke="#2a9d8f" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#map-arr-p)"/>
+<path d="M275 118 C 340 118, 360 218, 425 218" fill="none" stroke="#9b1d28" stroke-width="1.8" marker-end="url(#map-arr-s)"/>
+<path d="M275 186 C 340 186, 360 218, 425 218" fill="none" stroke="#9b1d28" stroke-width="1.8" marker-end="url(#map-arr-s)"/>
+<path d="M275 254 C 340 254, 360 86, 425 86" fill="none" stroke="#2a9d8f" stroke-width="1.8" marker-end="url(#map-arr-p)"/>
+<path d="M275 254 C 340 254, 360 218, 425 218" fill="none" stroke="#9b1d28" stroke-width="1.8" marker-end="url(#map-arr-s)"/>
+<text lang="vi" x="540" y="268" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">nét đứt = chỉ khi dùng nhóm lai</text><text lang="en" x="540" y="268" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">dashed = only with the hybrid group</text>
+<text lang="vi" x="150" y="20" font-size="12" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-weight="700">Cảnh đời thường</text><text lang="en" x="150" y="20" font-size="12" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-weight="700">Everyday scene</text>
+<text lang="vi" x="540" y="20" font-size="12" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-weight="700">Việc nào của mật mã khoá công khai</text><text lang="en" x="540" y="20" font-size="12" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-weight="700">Which public-key job</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 6 — Bốn cảnh trong phần mở đầu và việc nào đang chạy ở mỗi cảnh. Chữ ký số có mặt ở cả bốn (ở email / tệp mã hoá thì tuỳ chọn); trang web dùng thêm việc 2 và, với nhóm lai, việc 1; email / tệp mã hoá dùng thêm việc 1.</span><span lang="en">Figure 6 — The four scenes from the opening and which job runs in each. The signature appears in all four (optional for encrypted email / files); the website adds job 2 and, with the hybrid group, job 1; encrypted email / files add job 1.</span></figcaption>
+</figure>
+
+<h3><span lang="vi">(a) Mở một trang web: TLS 1.3</span><span lang="en">(a) Opening a website: TLS 1.3</span></h3>
+<p lang="vi">TLS là giao thức đứng sau chữ "https". Phiên bản 1.3 (RFC 9846) chỉ còn một cách tạo khoá phiên: khoá tạm thời
+ở cả hai bên, nghĩa là việc 2 (và việc 1, khi dùng nhóm lai có ML-KEM). Cách cũ "mã hoá khoá phiên bằng khoá RSA dài
+hạn của máy chủ" đã bị bỏ, nên mọi lần bắt tay đầy đủ đều có bí mật chuyển tiếp (trừ kiểu nối lại phiên chỉ dùng khoá
+chia sẻ trước, PSK, và dữ liệu gửi sớm 0-RTT). Rồi máy chủ gửi chứng chỉ (khoá công khai
+dài hạn của nó, có chữ ký của một tổ chức cấp chứng chỉ, CA) và một chữ ký trên toàn bộ bản ghi bắt tay: việc 3, ít
+nhất hai lần kiểm ở phía trình duyệt. Không có chữ ký đó, kẻ tấn công đứng giữa có thể thoả thuận khoá riêng với từng bên và đọc hết.</p>
+<p lang="en">TLS is the protocol behind the "https". Version 1.3 (RFC 9846) keeps only one way to make a session key:
+ephemeral keys on both sides, that is job 2 (and job 1, when a hybrid group with ML-KEM is used). The old way, "encrypt the
+session key under the server's long-term RSA key", was removed, so every full handshake has forward secrecy (PSK-only resumption and 0-RTT early data are the
+exceptions). Then the
+server sends its certificate (its long-term public key, signed by a certificate authority, CA) and a signature over the
+whole handshake transcript: job 3, checked at least twice on the browser side. Without that signature a man in the middle could
+agree a separate key with each side and read everything.</p>
+<figure class="diagram" id="fig-tls">
+<div class="fig-scroll">
+<svg viewBox="0 0 700 512" role="img" aria-label="Mô hình a: mở một trang web bằng TLS 1.3" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="tls-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="tls-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="tls-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="tls-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="45" y="10" width="170" height="36" rx="10" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="130" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Máy khách (trình duyệt)</text><text lang="en" x="130" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Client (browser)</text>
+<line x1="130" y1="46" x2="130" y2="486" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="485" y="10" width="170" height="36" rx="10" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="570" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Máy chủ (ngân hàng)</text><text lang="en" x="570" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Server (the bank)</text>
+<line x1="570" y1="46" x2="570" y2="486" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="30" y="58" width="200" height="40" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.2"/>
+<text lang="vi" x="130" y="75" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">Sinh khoá tạm thời</text><text lang="en" x="130" y="75" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">Make an ephemeral key</text>
+<text lang="vi" x="130" y="90" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">X25519 + ML-KEM (lai)</text><text lang="en" x="130" y="90" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">X25519 + ML-KEM (hybrid)</text>
+<polyline points="142,120 558,120" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#tls-arr-a)"/>
+<text lang="vi" x="350" y="114" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">ClientHello: khoá công khai tạm thời</text><text lang="en" x="350" y="114" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">ClientHello: ephemeral public key</text>
+<rect x="460" y="140" width="220" height="40" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.2"/>
+<text lang="vi" x="570" y="157" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Việc 2 + việc 1</text><text lang="en" x="570" y="157" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Job 2 + job 1</text>
+<text lang="vi" x="570" y="172" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">trộn ECDH, đóng gói ML-KEM</text><text lang="en" x="570" y="172" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ECDH mix, ML-KEM encaps</text>
+<polyline points="558,202 142,202" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#tls-arr-a)"/>
+<text lang="vi" x="350" y="196" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">ServerHello: khoá tạm thời của máy chủ + bản mã</text><text lang="en" x="350" y="196" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">ServerHello: server's ephemeral key + ciphertext</text>
+<rect x="30" y="220" width="200" height="40" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.2"/>
+<text lang="vi" x="130" y="237" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Việc 2 + việc 1</text><text lang="en" x="130" y="237" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Job 2 + job 1</text>
+<text lang="vi" x="130" y="252" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">trộn ECDH, mở gói ML-KEM</text><text lang="en" x="130" y="252" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ECDH mix, ML-KEM decaps</text>
+<line x1="20" y1="272" x2="680" y2="272" stroke="#1f2937" stroke-opacity=".25"/>
+<text lang="vi" x="350" y="267" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">từ đây mọi bản tin được mã hoá bằng khoá chung</text><text lang="en" x="350" y="267" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">from here every message is encrypted under the shared key</text>
+<polyline points="558,304 142,304" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#tls-arr-a)"/>
+<text lang="vi" x="350" y="298" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">Certificate: khoá công khai dài hạn, do CA ký</text><text lang="en" x="350" y="298" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">Certificate: long-term public key, signed by a CA</text>
+<rect x="460" y="322" width="220" height="40" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.2"/>
+<text lang="vi" x="570" y="339" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Việc 3 — Ký</text><text lang="en" x="570" y="339" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Job 3 — Sign</text>
+<text lang="vi" x="570" y="354" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ký bản ghi bắt tay, khoá dài hạn</text><text lang="en" x="570" y="354" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">sign the transcript, long-term key</text>
+<polyline points="558,384 142,384" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#tls-arr-a)"/>
+<text lang="vi" x="350" y="378" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">CertificateVerify: chữ ký</text><text lang="en" x="350" y="378" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">CertificateVerify: the signature</text>
+<rect x="20" y="404" width="220" height="40" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.2"/>
+<text lang="vi" x="130" y="421" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Việc 3 — Kiểm, hai lần</text><text lang="en" x="130" y="421" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Job 3 — Verify, twice</text>
+<text lang="vi" x="130" y="436" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">chữ ký của CA, rồi chữ ký của máy chủ</text><text lang="en" x="130" y="436" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">the CA's signature, then the server's</text>
+<polyline points="142,468 558,468" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#tls-arr-a)"/>
+<text lang="vi" x="350" y="462" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">Finished — bắt đầu gửi dữ liệu thật</text><text lang="en" x="350" y="462" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">Finished — real data starts</text>
+<text lang="vi" x="130" y="500" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">xoá khoá tạm thời</text><text lang="en" x="130" y="500" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">erase the ephemeral key</text>
+<text lang="vi" x="570" y="500" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">xoá khoá tạm thời; khoá dài hạn ở lại</text><text lang="en" x="570" y="500" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">erase the ephemeral key; the long-term key stays</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 7 — Mô hình (a), TLS 1.3. Việc 2 (và việc 1, trong nhóm lai) tạo khoá phiên; việc 3 chứng minh khoá đó đúng là của ngân hàng. Khoá tạm thời bị xoá sau bắt tay: ghi lại lưu lượng hôm nay cũng không mở được về sau (bí mật chuyển tiếp).</span><span lang="en">Figure 7 — Model (a), TLS 1.3. Job 2 (and job 1, in the hybrid group) makes the session key; job 3 proves that key really belongs to the bank. The ephemeral keys are erased after the handshake: recording today's traffic does not open it later (forward secrecy).</span></figcaption>
+</figure>
+
+<h3><span lang="vi">(b) Đăng nhập không mật khẩu: passkey</span><span lang="en">(b) Logging in without a password: passkeys</span></h3>
+<p lang="vi">Passkey là tên thân thiện của chuẩn FIDO2 / WebAuthn (W3C; bản Level 3 đã thành chuẩn chính thức của W3C,
+Recommendation, từ tháng 8/2026). Khi đăng ký, thiết bị của bạn sinh một cặp khoá <em>riêng cho trang web đó</em> và chỉ
+gửi nửa công khai (passkey đồng bộ thì được sao chép, đã mã hoá đầu-cuối, sang các thiết bị khác của bạn). Mỗi lần đăng
+nhập, trang web gửi một số ngẫu nhiên; trình duyệt tự ghi thêm tên trang đang thật sự mở; thiết bị hỏi vân tay hoặc PIN
+để mở khoá bí mật, ký cả hai, gửi chữ ký về. Chỉ có việc 3. Hai hệ quả dễ thấy: trang web bị lộ dữ liệu cũng không lộ gì
+để đăng nhập thay bạn (chỉ có khoá công khai), và trang giả mạo không lừa được, vì chính trình duyệt (không phải trang
+web) ghi tên trang thật vào thứ được ký. Thuật toán mặc định là
+ECDSA P-256 với SHA-256, tên gọi tắt ES256.</p>
+<p lang="en">Passkey is the friendly name of the FIDO2 / WebAuthn standard (W3C; Level 3 became an official W3C Recommendation
+in August 2026). At registration your device makes a key pair <em>just for that website</em> and sends only the public
+half (a synced passkey is copied, end-to-end encrypted, to your other devices). At each login the website sends a random
+number; the browser adds the name of the site it is really on; the device asks for a fingerprint or PIN to unlock the
+secret key, signs both, and returns the signature. Job 3 only. Two visible consequences: a data breach at the website
+leaks nothing that logs in as you (only public keys are there), and a look-alike site cannot fool it, because the browser
+(not the website) writes the real site name into what is signed. The default algorithm is ECDSA P-256 with SHA-256, nicknamed ES256.</p>
+<figure class="diagram" id="fig-pk2">
+<div class="fig-scroll">
+<svg viewBox="0 0 700 424" role="img" aria-label="Mô hình b: đăng nhập bằng passkey" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="pk2-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="pk2-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="pk2-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="pk2-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="25" y="10" width="170" height="36" rx="10" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="110" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Thiết bị (passkey)</text><text lang="en" x="110" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Device (passkey)</text>
+<line x1="110" y1="46" x2="110" y2="398" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="265" y="10" width="170" height="36" rx="10" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="350" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Trình duyệt</text><text lang="en" x="350" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Browser</text>
+<line x1="350" y1="46" x2="350" y2="398" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="505" y="10" width="170" height="36" rx="10" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.3"/>
+<text lang="vi" x="590" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Trang web</text><text lang="en" x="590" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Website</text>
+<line x1="590" y1="46" x2="590" y2="398" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<line x1="20" y1="70" x2="680" y2="70" stroke="#1f2937" stroke-opacity=".25"/>
+<text lang="vi" x="350" y="65" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">đăng ký, một lần</text><text lang="en" x="350" y="65" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">registration, once</text>
+<rect x="15" y="80" width="190" height="40" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.2"/>
+<text lang="vi" x="110" y="97" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">Việc 3 — Sinh khoá</text><text lang="en" x="110" y="97" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="600">Job 3 — KeyGen</text>
+<text lang="vi" x="110" y="112" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">một cặp riêng cho trang này</text><text lang="en" x="110" y="112" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">one pair just for this site</text>
+<polyline points="122,142 578,142" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#pk2-arr-a)"/>
+<text lang="vi" x="350" y="136" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">khoá công khai (sk ở lại thiết bị)</text><text lang="en" x="350" y="136" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">public key (sk stays on the device)</text>
+<rect x="495" y="162" width="190" height="40" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.2"/>
+<text lang="vi" x="590" y="179" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Lưu khoá công khai</text><text lang="en" x="590" y="179" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Store the public key</text>
+<text lang="vi" x="590" y="194" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">gắn với tài khoản</text><text lang="en" x="590" y="194" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">bound to the account</text>
+<line x1="20" y1="220" x2="680" y2="220" stroke="#1f2937" stroke-opacity=".25"/>
+<text lang="vi" x="350" y="215" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">mỗi lần đăng nhập</text><text lang="en" x="350" y="215" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">every login</text>
+<polyline points="578,252 122,252" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#pk2-arr-a)"/>
+<text lang="vi" x="350" y="246" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">thử thách: một số ngẫu nhiên</text><text lang="en" x="350" y="246" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">challenge: a random number</text>
+<text lang="vi" x="350" y="268" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">trình duyệt tự ghi tên trang đang mở</text><text lang="en" x="350" y="268" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">the browser adds the site it is really on</text>
+<rect x="10" y="272" width="200" height="40" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.2"/>
+<text lang="vi" x="110" y="289" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Mở khoá bằng vân tay / PIN</text><text lang="en" x="110" y="289" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Unlock by fingerprint / PIN</text>
+<text lang="vi" x="110" y="304" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">rồi Việc 3 — Ký thử thách</text><text lang="en" x="110" y="304" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">then Job 3 — Sign the challenge</text>
+<polyline points="122,334 578,334" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#pk2-arr-a)"/>
+<text lang="vi" x="350" y="328" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">chữ ký</text><text lang="en" x="350" y="328" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">the signature</text>
+<rect x="495" y="354" width="190" height="40" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.2"/>
+<text lang="vi" x="590" y="371" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Việc 3 — Kiểm</text><text lang="en" x="590" y="371" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Job 3 — Verify</text>
+<text lang="vi" x="590" y="386" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">bằng khoá công khai đã lưu</text><text lang="en" x="590" y="386" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">with the stored public key</text>
+<text lang="vi" x="590" y="412" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">hợp lệ → đã đăng nhập</text><text lang="en" x="590" y="412" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">valid → logged in</text>
+<text lang="vi" x="110" y="412" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">không mật khẩu nào rời thiết bị</text><text lang="en" x="110" y="412" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">no password ever leaves the device</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 8 — Mô hình (b), passkey (FIDO2 / WebAuthn). Chỉ có việc 3: mỗi lần đăng nhập là một chữ ký trên một thử thách mới; trang web chỉ giữ khoá công khai, nên dữ liệu bị rò rỉ từ trang web không chứa gì để đăng nhập thay bạn.</span><span lang="en">Figure 8 — Model (b), passkeys (FIDO2 / WebAuthn). Job 3 only: every login is a signature over a fresh challenge; the website keeps only the public key, so a data leak from the site holds nothing that logs in as you.</span></figcaption>
+</figure>
+
+<h3><span lang="vi">(c) Cập nhật phần mềm có chữ ký và khởi động an toàn</span><span lang="en">(c) Signed software updates and secure boot</span></h3>
+<p lang="vi">Đây là mô hình "sạch" nhất: chỉ việc 3, và thiết bị <em>không giữ bí mật nào</em>. Nhà sản xuất ký gói phần mềm
+bằng khoá bí mật nằm trong một thiết bị chuyên giữ khoá (HSM, hardware security module) ở phía nhà sản xuất; khoá đó không bao
+giờ đi ra ngoài. Gói đi qua máy chủ, qua Internet, qua thẻ nhớ, kênh nào cũng được, vì ai sửa gói là chữ ký hết khớp.
+Thiết bị chỉ cần khoá công khai (hoặc mã băm của nó) ghi vào bộ nhớ một lần, không sửa được. Khởi động an toàn là cùng
+mô hình, chạy sớm nhất: một đoạn mã nhỏ nằm trong ROM của chip kiểm chữ ký của phần sụn trước khi cho nó chạy. Vì ROM
+không vá được sau khi chip ra lò, thuật toán kiểm trong ROM là quyết định dài hạn nhất của một con chip, và là lý do các
+chip mới cần một thuật toán ký hậu lượng tử ngay từ bây giờ: ML-DSA, SLH-DSA, hoặc chữ ký băm có trạng thái LMS / XMSS
+(NIST SP 800-208), lựa chọn phổ biến cho phần sụn.</p>
+<p lang="en">This is the "cleanest" model: job 3 only, and the device <em>holds no secret</em>. The manufacturer signs the
+package with a secret key kept in a dedicated key-holding device (HSM, hardware security module) at the factory; that key
+never leaves. The package travels through servers, the Internet, a memory card, any channel at all, because whoever edits
+it breaks the signature. The device needs only the public key (or its hash), written into memory once, unchangeable.
+Secure boot is the same model run earliest: a small piece of code in the chip's ROM checks the firmware's signature before
+letting it run. Because ROM cannot be patched after the chip is made, the verification algorithm in ROM is a chip's most
+long-term decision, and the reason new chips need a post-quantum signature algorithm today: ML-DSA, SLH-DSA, or the stateful hash-based
+LMS / XMSS (NIST SP 800-208), a common choice for firmware.</p>
+<figure class="diagram" id="fig-boot">
+<div class="fig-scroll">
+<svg viewBox="0 0 700 326" role="img" aria-label="Mô hình c: cập nhật phần mềm có chữ ký và khởi động an toàn" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="boot-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="boot-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="boot-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="boot-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="25" y="10" width="170" height="36" rx="10" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="110" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Nhà sản xuất</text><text lang="en" x="110" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Manufacturer</text>
+<line x1="110" y1="46" x2="110" y2="286" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="265" y="10" width="170" height="36" rx="10" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="350" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Máy chủ cập nhật</text><text lang="en" x="350" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Update server</text>
+<line x1="350" y1="46" x2="350" y2="286" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="505" y="10" width="170" height="36" rx="10" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.3"/>
+<text lang="vi" x="590" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Thiết bị</text><text lang="en" x="590" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Device</text>
+<line x1="590" y1="46" x2="590" y2="286" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="10" y="64" width="200" height="40" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.2"/>
+<text lang="vi" x="110" y="81" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Việc 3 — Ký phần sụn</text><text lang="en" x="110" y="81" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Job 3 — Sign the firmware</text>
+<text lang="vi" x="110" y="96" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">khoá bí mật nằm trong HSM</text><text lang="en" x="110" y="96" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">secret key in an HSM</text>
+<polyline points="122,126 338,126" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#boot-arr-a)"/>
+<text lang="vi" x="230" y="120" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">phần sụn + chữ ký</text><text lang="en" x="230" y="120" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">firmware + signature</text>
+<polyline points="362,166 578,166" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#boot-arr-a)"/>
+<text lang="vi" x="470" y="160" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">phần sụn + chữ ký (kênh nào cũng được)</text><text lang="en" x="470" y="160" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">firmware + signature (any channel will do)</text>
+<rect x="490" y="188" width="200" height="40" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.2"/>
+<text lang="vi" x="590" y="205" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Việc 3 — Kiểm</text><text lang="en" x="590" y="205" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Job 3 — Verify</text>
+<text lang="vi" x="590" y="220" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">bằng khoá công khai nằm trong chip</text><text lang="en" x="590" y="220" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">with the public key kept in the chip</text>
+<rect x="490" y="242" width="200" height="40" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.2"/>
+<text lang="vi" x="590" y="259" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">hợp lệ → cài / khởi động</text><text lang="en" x="590" y="259" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">valid → install / boot</text>
+<text lang="vi" x="590" y="274" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">không hợp lệ → từ chối</text><text lang="en" x="590" y="274" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">invalid → refuse</text>
+<text lang="vi" x="590" y="300" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">chip chỉ giữ một mã băm của khoá công khai</text><text lang="en" x="590" y="300" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">the chip keeps only a hash of the public key</text>
+<text lang="vi" x="590" y="314" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">ghi một lần, không sửa được</text><text lang="en" x="590" y="314" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">written once, cannot be changed</text>
+<text lang="vi" x="110" y="300" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">không có bí mật nào trong thiết bị</text><text lang="en" x="110" y="300" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">no secret anywhere in the device</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 9 — Mô hình (c), cập nhật có chữ ký và khởi động an toàn. Chỉ việc 3. Kẻ xấu có thể chặn, đọc, thậm chí thay bản cập nhật, nhưng không tạo được chữ ký hợp lệ; thiết bị không giữ bí mật nào, chỉ một khoá công khai (hoặc mã băm của nó).</span><span lang="en">Figure 9 — Model (c), signed updates and secure boot. Job 3 only. An attacker may intercept, read, even replace the update, but cannot make a valid signature; the device holds no secret, only a public key (or its hash).</span></figcaption>
+</figure>
+
+<h3><span lang="vi">(d) Email và tệp mã hoá: mã hoá lai</span><span lang="en">(d) Encrypted email and files: hybrid encryption</span></h3>
+<p lang="vi">Khoá công khai không mã hoá tệp 100 MB; nó chở một khoá 32 byte. Người gửi lấy khoá công khai của người nhận
+(đã kiểm, thường qua một chữ ký), chạy việc 1 để có bí mật chung và gói <code>ct</code>, mã hoá nội dung bằng AES-GCM với khoá
+dẫn xuất từ bí mật chung, và (nếu muốn người nhận biết ai gửi) ký tất cả bằng khoá bí mật của mình. Người nhận mở gói
+bằng khoá bí mật, giải mã, kiểm chữ ký. Email mã hoá (OpenPGP, S/MIME), tệp mã hoá gửi qua đám mây, sao lưu mã hoá: tất cả
+đều là mô hình này, chỉ khác thuật toán chọn cho từng ô. Ứng dụng nhắn tin như Signal phức tạp hơn: chúng ghép thoả thuận
+khoá (việc 2, nay thêm một KEM hậu lượng tử) và đổi khoá liên tục cho từng tin nhắn.</p>
+<p lang="en">A public key does not encrypt a 100 MB file; it carries a 32-byte key. The sender takes the receiver's public key
+(checked, usually through a signature), runs job 1 to get a shared secret and the package <code>ct</code>, encrypts the content
+with AES-GCM under a key derived from the shared secret, and (if the receiver should know who sent it) signs everything with
+their own secret key. The receiver opens the package with the secret key, decrypts, checks the signature. Encrypted email
+(OpenPGP, S/MIME), encrypted files sent through the cloud, encrypted backups: all are this model, differing only in the
+algorithm chosen for each box. Messaging apps such as Signal are more involved: they combine key agreement (job 2, now
+with a post-quantum KEM added) and keep changing the key for every message.</p>
+<figure class="diagram" id="fig-msg">
+<div class="fig-scroll">
+<svg viewBox="0 0 700 422" role="img" aria-label="Mô hình d: email hoặc tệp mã hoá (mã hoá lai)" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="msg-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="msg-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="msg-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="msg-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<rect x="45" y="10" width="170" height="36" rx="10" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="130" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Người gửi</text><text lang="en" x="130" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Sender</text>
+<line x1="130" y1="46" x2="130" y2="398" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<rect x="485" y="10" width="170" height="36" rx="10" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="570" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Người nhận</text><text lang="en" x="570" y="33" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Receiver</text>
+<line x1="570" y1="46" x2="570" y2="398" stroke="#1f2937" stroke-opacity=".3" stroke-dasharray="4 4"/>
+<polyline points="558,80 142,80" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#msg-arr-a)"/>
+<text lang="vi" x="350" y="74" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">khoá công khai của người nhận (lấy trước, đã kiểm)</text><text lang="en" x="350" y="74" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">receiver's public key (fetched earlier, checked)</text>
+<rect x="20" y="104" width="220" height="40" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.2"/>
+<text lang="vi" x="130" y="121" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Việc 1 — Đóng gói</text><text lang="en" x="130" y="121" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Job 1 — Encaps</text>
+<text lang="vi" x="130" y="136" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ra ss và bản mã ct</text><text lang="en" x="130" y="136" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">gives ss and ciphertext ct</text>
+<rect x="20" y="156" width="220" height="40" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.2"/>
+<text lang="vi" x="130" y="173" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">Mã hoá đối xứng (AES-GCM)</text><text lang="en" x="130" y="173" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">Symmetric cipher (AES-GCM)</text>
+<text lang="vi" x="130" y="188" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">khoá từ ss; nội dung dài bao nhiêu cũng được</text><text lang="en" x="130" y="188" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">key from ss; content of any length</text>
+<rect x="20" y="208" width="220" height="40" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.2"/>
+<text lang="vi" x="130" y="225" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Việc 3 — Ký (tuỳ chọn)</text><text lang="en" x="130" y="225" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Job 3 — Sign (optional)</text>
+<text lang="vi" x="130" y="240" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">để người nhận biết ai gửi</text><text lang="en" x="130" y="240" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">so the receiver knows who sent it</text>
+<polyline points="142,272 558,272" fill="none" stroke="#14538f" stroke-width="1.6" marker-end="url(#msg-arr-a)"/>
+<text lang="vi" x="350" y="266" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">ct + nội dung đã mã hoá + chữ ký</text><text lang="en" x="350" y="266" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle">ct + encrypted content + signature</text>
+<rect x="460" y="294" width="220" height="40" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.2"/>
+<text lang="vi" x="570" y="311" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Việc 1 — Mở gói</text><text lang="en" x="570" y="311" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">Job 1 — Decaps</text>
+<text lang="vi" x="570" y="326" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">bằng khoá bí mật → ss</text><text lang="en" x="570" y="326" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">with the secret key → ss</text>
+<rect x="460" y="346" width="220" height="40" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.2"/>
+<text lang="vi" x="570" y="363" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Giải mã, rồi Việc 3 — Kiểm</text><text lang="en" x="570" y="363" font-size="11.5" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="600">Decrypt, then Job 3 — Verify</text>
+<text lang="vi" x="570" y="378" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">khoá từ ss; chữ ký bằng pk người gửi</text><text lang="en" x="570" y="378" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">key from ss; signature with the sender's pk</text>
+<text lang="vi" x="350" y="410" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">khoá công khai chỉ chở một khoá ngắn; dữ liệu thật đi bằng AES</text><text lang="en" x="350" y="410" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">the public key only carries a short key; the real data travels under AES</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 10 — Mô hình (d), mã hoá lai: việc 1 chở một khoá ngắn, mã hoá đối xứng chở nội dung, việc 3 (tuỳ chọn) nói ai đã gửi. Đây là cách email mã hoá (OpenPGP, S/MIME), tệp và bản sao lưu mã hoá làm việc.</span><span lang="en">Figure 10 — Model (d), hybrid encryption: job 1 carries a short key, a symmetric cipher carries the content, job 3 (optional) says who sent it. This is how encrypted email (OpenPGP, S/MIME), encrypted files and backups work.</span></figcaption>
+</figure>
+<p lang="vi">Bạn có thể tự chạy các thuật toán này trên trang: SLH-DSA và hai ứng viên FN-DSA, HQC trong
+<a href="nist-205-206-207-calculator.html">máy tính NIST FIPS 205 / 206 / 207</a>; ML-KEM / ML-DSA trong
+<a href="pqc-calculator.html">máy tính PQC</a>.</p>
+<p lang="en">You can run these algorithms yourself on this site: SLH-DSA and the two candidates FN-DSA and HQC in the
+<a href="nist-205-206-207-calculator.html">NIST FIPS 205 / 206 / 207 calculator</a>; ML-KEM / ML-DSA in the
+<a href="pqc-calculator.html">PQC calculator</a>.</p>
+
+<h2 id="chip"><span lang="vi">7. Bên trong con chip</span><span lang="en">7. Inside the chip</span></h2>
+<p lang="vi">Đây là góc nhìn của người thiết kế SoC (system on chip: cả hệ thống trên một con chip). Mọi thứ ở trên đều phải
+chạy ở đâu đó, và chỗ nguy hiểm nhất là nơi khoá bí mật được <em>dùng</em>. Một khối mật mã điển hình có: các bộ tăng tốc
+cho phép toán khoá công khai (RSA, đường cong elliptic, ML-KEM, ML-DSA), một khối băm và AES, một nguồn ngẫu nhiên thật
+(TRNG, true random number generator), và một kho khoá bí mật trong bộ nhớ ghi một lần (OTP) hoặc bộ nhớ riêng. Điều
+quan trọng nhất trong hình không phải là ô nào, mà là <em>đường đỏ</em>: khoá bí mật đi thẳng từ kho vào bộ tăng tốc
+bằng một đường riêng mà CPU, và do đó phần mềm, không đọc được. Phần mềm chỉ ra lệnh "ký cái này", không bao giờ cầm
+khoá.</p>
+<p lang="en">This is the SoC designer's view (system on chip: the whole system on one chip). Everything above has to run
+somewhere, and the most dangerous place is where the secret key is <em>used</em>. A typical crypto subsystem has:
+accelerators for the public-key operations (RSA, elliptic curves, ML-KEM, ML-DSA), a hash and AES block, a true random
+number generator (TRNG), and a secret-key store in one-time-programmable memory (OTP) or private memory. The most important
+thing in the figure is not any box but the <em>red line</em>: the secret key goes straight from the store into the
+accelerator over a private path the CPU, and therefore software, cannot read. Software only says "sign this"; it never holds
+the key.</p>
+<figure class="diagram" id="fig-chip">
+<div class="fig-scroll">
+<svg viewBox="0 0 700 404" role="img" aria-label="Bên trong con chip: khối mật mã trên một đường riêng" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="chip-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="chip-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="chip-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="chip-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<line x1="30" y1="200" x2="670" y2="200" stroke="#5f6b7a" stroke-width="6" stroke-opacity=".35"/>
+<text lang="vi" x="488" y="190" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">bus hệ thống</text><text lang="en" x="488" y="190" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle" font-style="italic">system bus</text>
+<rect x="30" y="84" width="120" height="52" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text x="90" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">CPU</text>
+<text lang="vi" x="90" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">chạy phần mềm</text><text lang="en" x="90" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">runs the software</text>
+<rect x="175" y="84" width="140" height="52" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text lang="vi" x="245" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">ROM khởi động</text><text lang="en" x="245" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">Boot ROM</text>
+<text lang="vi" x="245" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">kiểm chữ ký (việc 3)</text><text lang="en" x="245" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">verifies the signature (job 3)</text>
+<rect x="340" y="84" width="120" height="52" rx="8" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.3"/>
+<text x="400" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="700">RAM / Flash</text>
+<text lang="vi" x="400" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">bộ nhớ thường</text><text lang="en" x="400" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ordinary memory</text>
+<rect x="490" y="84" width="170" height="52" rx="8" fill="#e8f5f3" stroke="#2a9d8f" stroke-width="1.3"/>
+<text lang="vi" x="575" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Mã băm khoá công khai</text><text lang="en" x="575" y="107" font-size="13" font-family="Inter,Arial,sans-serif" fill="#2a9d8f" text-anchor="middle" font-weight="700">Public-key hash</text>
+<text lang="vi" x="575" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">OTP, ghi một lần</text><text lang="en" x="575" y="123" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">OTP, written once</text>
+<line x1="90" y1="136" x2="90" y2="197" stroke="#5f6b7a" stroke-width="1.4"/>
+<line x1="245" y1="136" x2="245" y2="197" stroke="#5f6b7a" stroke-width="1.4"/>
+<line x1="400" y1="136" x2="400" y2="197" stroke="#5f6b7a" stroke-width="1.4"/>
+<line x1="575" y1="136" x2="575" y2="197" stroke="#5f6b7a" stroke-width="1.4"/>
+<rect x="24" y="222" width="652" height="172" rx="12" fill="none" stroke="#14538f" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text lang="vi" x="38" y="384" font-size="11" font-family="Inter,Arial,sans-serif" fill="#14538f" font-weight="700">khối mật mã — ranh giới bảo mật</text><text lang="en" x="38" y="384" font-size="11" font-family="Inter,Arial,sans-serif" fill="#14538f" font-weight="700">crypto subsystem — the security boundary</text>
+<rect x="30" y="245" width="180" height="46" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="120" y="265" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Bộ tăng tốc</text><text lang="en" x="120" y="265" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Accelerators</text>
+<text x="120" y="281" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">RSA, P-256, ML-KEM, ML-DSA</text>
+<rect x="220" y="245" width="140" height="46" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text lang="vi" x="290" y="265" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Băm + AES</text><text lang="en" x="290" y="265" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">Hash + AES</text>
+<text x="290" y="281" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">SHA-2 / 3, AES-GCM</text>
+<rect x="375" y="245" width="110" height="46" rx="8" fill="#e7eef7" stroke="#14538f" stroke-width="1.3"/>
+<text x="430" y="265" font-size="13" font-family="Inter,Arial,sans-serif" fill="#14538f" text-anchor="middle" font-weight="700">TRNG</text>
+<text lang="vi" x="430" y="281" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ngẫu nhiên thật</text><text lang="en" x="430" y="281" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">true random</text>
+<rect x="510" y="245" width="150" height="46" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="585" y="265" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Kho khoá bí mật</text><text lang="en" x="585" y="265" font-size="13" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Secret-key store</text>
+<text lang="vi" x="585" y="281" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">OTP / bộ nhớ riêng</text><text lang="en" x="585" y="281" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">OTP / private memory</text>
+<line x1="120" y1="203" x2="120" y2="245" stroke="#5f6b7a" stroke-width="1.4"/>
+<line x1="290" y1="203" x2="290" y2="245" stroke="#5f6b7a" stroke-width="1.4"/>
+<line x1="430" y1="203" x2="430" y2="245" stroke="#5f6b7a" stroke-width="1.4"/>
+<text lang="vi" x="585" y="238" font-size="10" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-style="italic">không nối bus</text><text lang="en" x="585" y="238" font-size="10" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-style="italic">not on the bus</text>
+<polyline points="430,291 430,308 160,308 160,291" fill="none" stroke="#5f6b7a" stroke-width="1.6" marker-end="url(#chip-arr-m)"/>
+<text lang="vi" x="295" y="304" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">số ngẫu nhiên cho sinh khoá, nonce</text><text lang="en" x="295" y="304" font-size="10" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">random numbers for keygen, nonces</text>
+<polyline points="585,291 585,328 90,328 90,291" fill="none" stroke="#9b1d28" stroke-width="2" marker-end="url(#chip-arr-s)"/>
+<text lang="vi" x="340" y="346" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">đường riêng: khoá đi thẳng vào bộ tăng tốc, CPU không đọc được</text><text lang="en" x="340" y="346" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="600">private path: the key goes straight into the accelerator, the CPU cannot read it</text>
+<rect x="475" y="20" width="210" height="40" rx="8" fill="#fbeced" stroke="#9b1d28" stroke-width="1.3"/>
+<text lang="vi" x="580" y="37" font-size="12" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Cảm biến / chống tiêm lỗi</text><text lang="en" x="580" y="37" font-size="12" font-family="Inter,Arial,sans-serif" fill="#9b1d28" text-anchor="middle" font-weight="700">Sensors / fault protection</text>
+<text lang="vi" x="580" y="53" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">điện áp, xung nhịp, ánh sáng</text><text lang="en" x="580" y="53" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">voltage, clock, light</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 11 — Một khối mật mã điển hình trong SoC (vẽ chung chung). CPU đọc / ghi được mọi thứ nối vào bus hệ thống. Khoá bí mật nằm trong kho riêng và đi thẳng vào bộ tăng tốc bằng một đường mà CPU không đọc được; ROM khởi động chỉ cần mã băm của khoá công khai.</span><span lang="en">Figure 11 — A typical crypto subsystem inside an SoC (drawn generically). The CPU can read / write everything attached to the system bus. The secret key lives in its own store and enters the accelerator over a path the CPU cannot read; the boot ROM needs only a hash of the public key.</span></figcaption>
+</figure>
+<p lang="vi">Mỗi việc cần một thứ khác từ phần cứng:</p>
+<p lang="en">Each job asks the hardware for something different:</p>
+<ul lang="vi">
+  <li><strong>Phía giữ khoá bí mật</strong> (mở gói, trộn, ký): chạy với thời gian không đổi và điện năng không phụ thuộc bit khoá,
+  vì kẻ tấn công đo thời gian, dòng điện hay bức xạ của chip để đọc khoá (tấn công <em>kênh bên</em>); chịu được <em>tiêm
+  lỗi</em>, vì với RSA tính theo cách nhanh thông dụng (CRT), một chữ ký sai duy nhất đã đủ để phân tích khoá, nên chip kiểm
+  lại kết quả trước khi xuất và có cảm biến điện áp, xung nhịp, ánh sáng.</li>
+  <li><strong>Phía kiểm</strong> (ROM khởi động, kiểm chứng chỉ): không có bí mật, nhưng một xung làm lệnh "nhảy nếu không hợp
+  lệ" bị bỏ qua là khởi động phần sụn giả; khoá công khai (hoặc mã băm) phải nằm trong bộ nhớ không sửa được.</li>
+  <li><strong>Nguồn ngẫu nhiên</strong>: sinh khoá, đóng gói và k của ECDSA đều sống nhờ nó. Sự cố nổi tiếng nhất về nguồn ngẫu
+  nhiên là bản vá Debian năm 2008 (DSA-1571): một sửa đổi sai trong gói OpenSSL làm bộ sinh số ngẫu nhiên trở nên đoán được,
+  và mọi khoá SSH, VPN, chứng chỉ sinh trên các máy đó trong gần hai năm phải thay hết. Trên chip, TRNG có kiểm tra sức khoẻ
+  liên tục và được kiểm định riêng.</li>
+</ul>
+<ul lang="en">
+  <li><strong>The side holding the secret key</strong> (decaps, derive, sign): constant time and power independent of the key
+  bits, because an attacker measures the chip's timing, current or emissions to read the key (a <em>side-channel</em>
+  attack); resistance to <em>fault injection</em>, because with RSA computed the usual fast way (CRT) a single wrong
+  signature is enough to factor the key, so the chip re-checks its result before releasing it and carries voltage, clock
+  and light sensors.</li>
+  <li><strong>The verifying side</strong> (boot ROM, certificate checking): no secret, but a glitch that skips the "jump if
+  invalid" instruction boots fake firmware; the public key (or its hash) must sit in unchangeable memory.</li>
+  <li><strong>The random source</strong>: key generation, encapsulation and ECDSA's k all live on it. The most famous
+  randomness incident is the Debian patch of 2008 (DSA-1571): a wrong change in the OpenSSL package made the random number
+  generator predictable, and every SSH key, VPN key and certificate generated on those machines over almost two years had
+  to be replaced. On a chip, the TRNG has continuous health tests and is certified separately.</li>
+</ul>
+
+<h2 id="luong-tu"><span lang="vi">8. Máy tính lượng tử thay đổi gì</span><span lang="en">8. What a quantum computer changes</span></h2>
+<p lang="vi">Năm 1994 Peter Shor tìm ra một thuật toán cho máy tính lượng tử giải được cả hai cửa sập cổ điển: phân tích
+thừa số (RSA) và bài toán trên đường cong elliptic (ECDH, ECDSA, X25519, Ed25519). Máy lượng tử đủ lớn để chạy nó chưa
+có, nhưng khi có thì cả ba việc, với mọi thuật toán khoá công khai cổ điển, đều vỡ cùng lúc (AES và hàm băm vẫn đứng vững). Vì vậy NIST đã chuẩn hoá các thuật toán
+xây trên cửa sập khác mà Shor không giải được: ML-KEM cho việc 1 và 2, ML-DSA và SLH-DSA cho việc 3 (tháng 8/2024);
+FN-DSA (sẽ là FIPS 206) và HQC (sẽ là FIPS 207) đang được hoàn thiện.</p>
+<p lang="en">In 1994 Peter Shor found an algorithm for a quantum computer that solves both classical trapdoors: factoring
+(RSA) and the elliptic-curve problem (ECDH, ECDSA, X25519, Ed25519). A quantum machine large enough to run it does not
+exist yet, but when it does, all three jobs, with every classical public-key algorithm, break at once (AES and the hash functions
+still stand). So NIST standardised algorithms
+built on different trapdoors that Shor does not solve: ML-KEM for jobs 1 and 2, ML-DSA and SLH-DSA for job 3 (August 2024);
+FN-DSA (to become FIPS 206) and HQC (to become FIPS 207) are being finished.</p>
+<figure class="diagram" id="fig-tl">
+<div class="fig-scroll">
+<svg viewBox="0 0 700 124" role="img" aria-label="Mốc thời gian của chuyển đổi hậu lượng tử" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="tl-arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#14538f"/></marker><marker id="tl-arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a9d8f"/></marker><marker id="tl-arr-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9b1d28"/></marker><marker id="tl-arr-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5f6b7a"/></marker></defs>
+<line x1="40" y1="70" x2="670" y2="70" stroke="#14538f" stroke-width="2"/>
+<circle cx="80" cy="70" r="6" fill="#fff" stroke="#14538f" stroke-width="2"/>
+<text x="80" y="50" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#14538f" text-anchor="middle" font-weight="700">1994-95</text>
+<text lang="vi" x="80" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">Thuật toán Shor</text><text lang="en" x="80" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">Shor's algorithm</text>
+<text lang="vi" x="80" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">được công bố</text><text lang="en" x="80" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">is published</text>
+<circle cx="235" cy="70" r="6" fill="#fff" stroke="#14538f" stroke-width="2"/>
+<text x="235" y="50" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#14538f" text-anchor="middle" font-weight="700">8/2024</text>
+<text x="235" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">FIPS 203 / 204 / 205</text>
+<text x="235" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">ML-KEM, ML-DSA, SLH-DSA</text>
+<circle cx="380" cy="70" r="6" fill="#fff" stroke="#14538f" stroke-width="2"/>
+<text x="380" y="50" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#14538f" text-anchor="middle" font-weight="700">10/2026</text>
+<text x="380" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">NIST IR 8547</text>
+<text lang="vi" x="380" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">lộ trình, bản cuối</text><text lang="en" x="380" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">the plan, final</text>
+<circle cx="520" cy="70" r="6" fill="#fff" stroke="#14538f" stroke-width="2"/>
+<text x="520" y="50" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#14538f" text-anchor="middle" font-weight="700">2030</text>
+<text lang="vi" x="520" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">RSA &amp; đường cong</text><text lang="en" x="520" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">RSA &amp; curves</text>
+<text lang="vi" x="520" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">không còn được khuyến nghị</text><text lang="en" x="520" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">deprecated</text>
+<circle cx="645" cy="70" r="6" fill="#fff" stroke="#14538f" stroke-width="2"/>
+<text x="645" y="50" font-size="12" font-family="ui-monospace,Menlo,Consolas,monospace" fill="#14538f" text-anchor="middle" font-weight="700">2035</text>
+<text lang="vi" x="645" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">RSA &amp; đường cong</text><text lang="en" x="645" y="94" font-size="11" font-family="Inter,Arial,sans-serif" fill="#1f2937" text-anchor="middle" font-weight="600">RSA &amp; curves</text>
+<text lang="vi" x="645" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">bị cấm</text><text lang="en" x="645" y="110" font-size="10.5" font-family="Inter,Arial,sans-serif" fill="#5f6b7a" text-anchor="middle">disallowed</text>
+</svg>
+</div>
+<figcaption><span lang="vi">Hình 12 — Các mốc: từ thuật toán Shor đến ba chuẩn hậu lượng tử và hai hạn chót của NIST IR 8547 (bản cuối, 27/10/2026) cho RSA và các thuật toán đường cong elliptic ở mọi mức an toàn.</span><span lang="en">Figure 12 — The milestones: from Shor's algorithm to the three post-quantum standards and the two deadlines of NIST IR 8547 (final, 27 Oct 2026) for RSA and the elliptic-curve algorithms at every security level.</span></figcaption>
+</figure>
+<p lang="vi">Lộ trình nằm trong NIST IR 8547, bản cuối ngày 27/10/2026: RSA, ECDSA, ECDH và Diffie-Hellman ở mọi mức an
+toàn <em>không còn được khuyến nghị</em> sau năm 2030 và <em>bị cấm</em> sau năm 2035. Có một lý do để việc 1 và 2 phải
+chuyển sớm hơn việc 3, và nó vừa đời thường vừa đáng sợ: <em>ghi hôm nay, mở sau này</em>. Ai ghi lại lưu lượng mã hoá
+của bạn bây giờ chỉ cần chờ máy lượng tử ra đời để mở nó. Một chữ ký cũ thì không ai "mở" được gì, nhưng một bí mật phải
+giữ mười năm thì đã cần hậu lượng tử từ hôm nay. Đó là lý do trình duyệt của bạn đã dùng nhóm lai X25519 + ML-KEM: cổ
+điển đề phòng ML-KEM còn mới, chưa được thử thách đủ lâu, hậu lượng tử đề phòng máy lượng tử.</p>
+<p lang="en">The schedule is in NIST IR 8547, final on 27 Oct 2026: RSA, ECDSA, ECDH and Diffie-Hellman at every security
+level are <em>deprecated</em> after 2030 and <em>disallowed</em> after 2035. There is a reason jobs 1 and 2 must move
+earlier than job 3, and it is both everyday and unsettling: <em>harvest now, decrypt later</em>. Whoever records your
+encrypted traffic today only has to wait for the quantum machine to open it. An old signature cannot be "opened" for
+anything, but a secret that must hold for ten years already needs post-quantum protection today. That is why your browser
+already uses the hybrid X25519 + ML-KEM group: the classical half in case ML-KEM is still young, the post-quantum half in
+case the quantum computer arrives.</p>
+
+<h2 id="mang-ve"><span lang="vi">9. Ba điều mang về</span><span lang="en">9. Three things to take home</span></h2>
+<div class="takeaways">
+<ol lang="vi">
+  <li><strong>Hai chiếc khoá, hai hướng.</strong> Giữ bí mật cho ai: khoá công khai của <em>người nhận</em>. Chứng minh mình
+  là ai: khoá bí mật của <em>chính mình</em>. Nhầm hướng thì không có dịch vụ an toàn nào cả.</li>
+  <li><strong>Ba việc, và giao thức thật là tổ hợp.</strong> Đóng gói khoá và thoả thuận khoá cho một bí mật chung nhưng
+  không cho biết bên kia là ai; chữ ký cho biết tác giả nhưng không giấu gì. TLS ghép 2 (và 1, với nhóm lai) + 3; passkey và cập nhật phần mềm
+  chỉ cần 3; email / tệp mã hoá ghép 1 + 3 (3 tuỳ chọn).</li>
+  <li><strong>Khoá bí mật là một <em>nơi</em>, không chỉ là một con số.</strong> Nơi nó được dùng cần thời gian không đổi, chống
+  tiêm lỗi và một nguồn ngẫu nhiên tốt; nơi kiểm chỉ cần một khoá công khai không sửa được. Và trước 2035 (tốt nhất từ
+  2030), nơi đó phải chạy được thuật toán hậu lượng tử: ML-KEM; ML-DSA hoặc SLH-DSA.</li>
+</ol>
+<ol lang="en">
+  <li><strong>Two keys, two directions.</strong> To keep a secret for someone: the <em>receiver's</em> public key. To prove
+  who you are: your <em>own</em> secret key. Get the direction wrong and there is no security service at all.</li>
+  <li><strong>Three jobs, and a real protocol is a combination.</strong> Key encapsulation and key agreement give a shared
+  secret but not the other side's identity; a signature gives the author but hides nothing. TLS combines 2 (and 1, in the hybrid group) + 3; passkeys
+  and software updates need only 3; encrypted email / files combine 1 + 3 (3 optional).</li>
+  <li><strong>The secret key is a <em>place</em>, not just a number.</strong> Where it is used needs constant time, fault
+  protection and a good random source; where it is checked needs only an unchangeable public key. And before 2035 (ideally from
+  2030) that place has to run the post-quantum algorithms: ML-KEM; ML-DSA or SLH-DSA.</li>
+</ol>
+</div>
+
+<h3><span lang="vi">Thuật ngữ Việt – Anh</span><span lang="en">Vietnamese – English glossary</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th><span lang="vi">Tiếng Việt</span><span lang="en">Vietnamese</span></th><th><span lang="vi">Tiếng Anh</span><span lang="en">English</span></th><th><span lang="vi">Ký hiệu / ghi chú</span><span lang="en">Symbol / note</span></th></tr>
+<tr><td data-i18n="neutral">khoá công khai</td><td>public key</td><td>pk; ek (ML-KEM)</td></tr>
+<tr><td data-i18n="neutral">khoá bí mật</td><td>secret / private key</td><td>sk; dk (ML-KEM)</td></tr>
+<tr><td data-i18n="neutral">sinh khoá</td><td>key generation</td><td>KeyGen</td></tr>
+<tr><td data-i18n="neutral">đóng gói / mở gói khoá</td><td>key encapsulation / decapsulation</td><td>Encaps / Decaps; KEM</td></tr>
+<tr><td data-i18n="neutral">bản mã</td><td>ciphertext</td><td>ct, c</td></tr>
+<tr><td data-i18n="neutral">bí mật chung</td><td>shared secret</td><td>ss</td></tr>
+<tr><td data-i18n="neutral">thoả thuận khoá</td><td>key agreement</td><td>DH, ECDH, X25519</td></tr>
+<tr><td data-i18n="neutral">hàm dẫn xuất khoá</td><td>key derivation function</td><td>KDF, HKDF</td></tr>
+<tr><td data-i18n="neutral">chữ ký số</td><td>digital signature</td><td><span lang="vi">s hoặc (r, s)</span><span lang="en">s or (r, s)</span></td></tr>
+<tr><td data-i18n="neutral">thông điệp</td><td>message</td><td>M; h = H(M)</td></tr>
+<tr><td data-i18n="neutral">khoá tạm thời</td><td>ephemeral key</td><td><span lang="vi">sinh mới mỗi phiên</span><span lang="en">fresh for each session</span></td></tr>
+<tr><td data-i18n="neutral">bí mật chuyển tiếp</td><td>forward secrecy</td><td></td></tr>
+<tr><td data-i18n="neutral">kênh bên</td><td>side channel</td><td><span lang="vi">thời gian, điện năng, bức xạ</span><span lang="en">timing, power, emissions</span></td></tr>
+<tr><td data-i18n="neutral">thời gian không đổi</td><td>constant time</td><td><span lang="vi">thời gian tính không phụ thuộc khoá</span><span lang="en">running time independent of the key</span></td></tr>
+<tr><td data-i18n="neutral">tiêm lỗi</td><td>fault injection</td><td><span lang="vi">xung điện áp, xung nhịp, laser</span><span lang="en">voltage glitch, clock glitch, laser</span></td></tr>
+<tr><td data-i18n="neutral">mã hoá lai</td><td>hybrid encryption</td><td>KEM + AES</td></tr>
+<tr><td data-i18n="neutral">không còn được khuyến nghị / bị cấm</td><td>deprecated / disallowed</td><td>NIST IR 8547</td></tr>
+<tr><td data-i18n="neutral">hậu lượng tử</td><td>post-quantum (PQC)</td><td>ML-KEM, ML-DSA, SLH-DSA</td></tr>
+</table></div>
+
+<div class="callout">
+  <span lang="vi"><strong>Bài này lấy gì làm gốc.</strong> Chỉ các chuẩn công khai: FIPS 186-5 (RSA, ECDSA, EdDSA), FIPS 203 /
+  204 / 205 (ML-KEM, ML-DSA, SLH-DSA), các RFC của TLS 1.3, và NIST IR 8547 về lộ trình hậu lượng tử. Mọi con số nhỏ
+  trong bài đều được tính lại bằng máy trước khi in; ba "đồ chơi" trong bài cho bạn tự tính lại ngay trên trang.</span>
+  <span lang="en"><strong>What this article stands on.</strong> Public standards only: FIPS 186-5 (RSA, ECDSA, EdDSA), FIPS
+  203 / 204 / 205 (ML-KEM, ML-DSA, SLH-DSA), the TLS 1.3 RFCs, and NIST IR 8547 on the post-quantum transition. Every
+  small number in the article was recomputed by machine before printing; the three "toys" let you recompute them
+  yourself on this page.</span>
+</div>
+<h3><span lang="vi">Đọc thêm</span><span lang="en">Further reading</span></h3>
+<ul class="refs">
+  <li><a href="https://csrc.nist.gov/pubs/fips/203/final">FIPS 203</a>, <a href="https://csrc.nist.gov/pubs/fips/204/final">FIPS 204</a>, <a href="https://csrc.nist.gov/pubs/fips/205/final">FIPS 205</a> — <span lang="vi">ML-KEM, ML-DSA, SLH-DSA (NIST, 8/2024); công thức kích thước trong hình 5 lấy từ đây.</span><span lang="en">ML-KEM, ML-DSA, SLH-DSA (NIST, Aug 2024); the size formulas in figure 5 come from here.</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/fips/186-5/final">FIPS 186-5</a> — <span lang="vi">chữ ký số: RSA, ECDSA, EdDSA; cách tính d theo λ(n).</span><span lang="en">digital signatures: RSA, ECDSA, EdDSA; d computed modulo λ(n).</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final">NIST SP 800-57 Part 1</a> — <span lang="vi">mức an toàn tương đương: RSA-3072 ~ P-256 ~ 128 bit.</span><span lang="en">equivalent security levels: RSA-3072 ~ P-256 ~ 128 bits.</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/ir/8547/final">NIST IR 8547</a> — <span lang="vi">lộ trình chuyển sang hậu lượng tử, bản cuối 27/10/2026: hạn 2030 và 2035.</span><span lang="en">the post-quantum transition plan, final 27 Oct 2026: the 2030 and 2035 deadlines.</span></li>
+  <li><a href="https://csrc.nist.gov/pubs/sp/800/208/final">NIST SP 800-208</a> — <span lang="vi">chữ ký băm có trạng thái LMS / XMSS (2020), hay dùng cho phần sụn.</span><span lang="en">stateful hash-based signatures LMS / XMSS (2020), often used for firmware.</span></li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc9846">RFC 9846</a> — <span lang="vi">TLS 1.3 (thay RFC 8446): chỉ còn khoá tạm thời, bí mật chuyển tiếp cho mọi lần bắt tay đầy đủ.</span><span lang="en">TLS 1.3 (replacing RFC 8446): ephemeral keys only, forward secrecy for every full handshake.</span></li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc10024">RFC 10024</a> — <span lang="vi">nhóm lai ML-KEM + ECDHE cho TLS 1.3 (X25519MLKEM768).</span><span lang="en">hybrid ML-KEM + ECDHE key agreement for TLS 1.3 (X25519MLKEM768).</span></li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc9963">RFC 9963</a> — <span lang="vi">chỗ duy nhất trong các bản tin bắt tay TLS 1.3 còn chấp nhận chữ ký RSA kiểu cũ PKCS #1 v1.5: CertificateVerify phía máy khách (bên trong chứng chỉ thì kiểu chữ ký này vẫn luôn được chấp nhận).</span><span lang="en">the one place in the TLS 1.3 handshake messages that still accepts legacy PKCS #1 v1.5 RSA signatures: the client CertificateVerify (inside certificates that signature type has always been accepted).</span></li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc8017">RFC 8017</a> — <span lang="vi">PKCS #1 v2.2: RSA-OAEP, RSA-PSS, và ghi chú về tấn công Bleichenbacher (mục 7.2.2).</span><span lang="en">PKCS #1 v2.2: RSA-OAEP, RSA-PSS, and the note on Bleichenbacher's attack (section 7.2.2).</span></li>
+  <li><a href="https://robotattack.org/">ROBOT (2017)</a> — <span lang="vi">tấn công Bleichenbacher quay lại sau 19 năm.</span><span lang="en">the Bleichenbacher attack returning after 19 years.</span></li>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc6979">RFC 6979</a> — <span lang="vi">k tất định cho ECDSA; vì sao k phải ngẫu nhiên và đều.</span><span lang="en">deterministic k for ECDSA; why k must be random and uniform.</span></li>
+  <li><a href="https://kb.cert.org/vuls/id/304725">CERT VU#304725 / CVE-2018-5383</a> — <span lang="vi">Bluetooth không kiểm tra đủ khoá công khai đường cong khi ghép đôi.</span><span lang="en">Bluetooth pairing not sufficiently validating elliptic-curve public keys.</span></li>
+  <li><a href="https://lists.debian.org/debian-security-announce/2008/msg00152.html">Debian DSA-1571</a> — <span lang="vi">bộ sinh số ngẫu nhiên OpenSSL đoán được (2008).</span><span lang="en">the predictable OpenSSL random number generator (2008).</span></li>
+  <li><a href="https://fahrplan.events.ccc.de/congress/2010/Fahrplan/events/4087.en.html">27C3: Console Hacking 2010</a> — <span lang="vi">bài nói về cách hệ thống bảo mật của PlayStation 3 bị phá.</span><span lang="en">the talk on how the PlayStation 3's security system was broken.</span></li>
+  <li><a href="https://www.w3.org/TR/webauthn-3/">W3C WebAuthn Level 3</a> — <span lang="vi">chuẩn đứng sau passkey.</span><span lang="en">the standard behind passkeys.</span></li>
+  <li><a href="https://arxiv.org/abs/quant-ph/9508027">Shor (1995)</a> — <span lang="vi">thuật toán lượng tử cho phân tích thừa số và lô-ga-rít rời rạc.</span><span lang="en">the quantum algorithm for factoring and discrete logarithms.</span></li>
+  <li><span lang="vi">Trên trang này: chi tiết từng bản tin TLS 1.3 với ECDSA thật trên P-256 ở bài</span><span lang="en">On this site: the message-by-message TLS 1.3 detail with real ECDSA on P-256 in the</span> <a href="ecdh-ecdsa-nist-curves.html#ung-dung"><span lang="vi">đường cong elliptic, mục mô hình ứng dụng</span><span lang="en">elliptic-curve article, application-models section</span></a>; <span lang="vi">phần RSA trong chứng chỉ ở bài</span><span lang="en">the RSA part of certificates in the</span> <a href="rsa-fips-186-5.html#ung-dung"><span lang="vi">RSA, mục tương ứng</span><span lang="en">RSA article, same section</span></a>; <span lang="vi">các máy tính</span><span lang="en">the calculators</span> <a href="pqc-calculator.html">ML-KEM / ML-DSA</a>, <a href="kpqc-calculator.html">KpqC</a>, <a href="nist-205-206-207-calculator.html">FIPS 205 / 206 / 207</a>.</li>
+</ul>
+
+<div class="footer-nav">
+  <a href="../index.html#s2"><span lang="vi">← Mật mã hậu lượng tử, AI &amp; Mã sửa lỗi</span><span lang="en">← PQC, AI &amp; ECC</span></a>
+  <a href="../index.html#toc"><span lang="vi">↑ Mục lục</span><span lang="en">↑ Contents</span></a>
+</div>
+</article>
+</main>
+
+<footer>© 2026 Frank Nguyen · <strong>ChiU·SoC</strong></footer>
+
+<script src="assets/pk-toys.js"></script>
+<script>
+(function () {
+  var KEY = 'chiusoc-lang';
+  var root = document.documentElement;
+  function apply(lang) {
+    if (lang !== 'vi' && lang !== 'en') { lang = 'vi'; }
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    var t = root.getAttribute('data-title-' + lang);
+    if (t) { document.title = t; }
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) { apply(saved); }
+  document.addEventListener('click', function (ev) {
+    var el = ev.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('lang-btn')) {
+        apply(el.getAttribute('data-lang'));
+        return;
+      }
+      el = el.parentNode;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -382,6 +382,61 @@ Số đo tốc độ trên hai trang là của **một máy**, hai lượt đo; 
 Hai trang này đang khoá: phần sửa nằm trong `_plain/`, phải chạy `node tools/lock_pages.js lock` thì trang trên mạng mới
 đổi (`status` báo "BẢN MÃ CŨ" cho hai trang này cho tới lúc đó).
 
+### Cập nhật 04/11/2026: hình hai bên A – B cho RSA, ECDH và ECDSA
+
+Hai bài khoá công khai có thêm bốn hình **"Bên A | kênh công khai | Bên B"** theo cách vẽ quen thuộc của sách mật mã:
+mỗi cột là một bên và chỉ chứa những gì bên đó tự tính; mũi tên xanh là đúng thứ đi qua kênh; chữ đỏ là bí mật không bao
+giờ rời bên giữ nó; dòng chữ xám là một ví dụ số nhỏ tính được bằng tay. Hình tĩnh (SVG viết sẵn trong trang, không
+JavaScript), song ngữ, cuộn ngang trên điện thoại.
+
+| trang | hình mới | ví dụ số |
+|---|---|---|
+| `posts/rsa-fips-186-5.html` | mục con **"Giữa hai bên A và B"** (`#hai-ben`, cuối mục Ba thao tác): mã hoá A → B (RSAES-OAEP, RFC 8017 mục 7.1) và chữ ký A → B (RSASSA-PSS, mục 8.1), thêm đoạn dẫn và đoạn "hai điều hình không vẽ" (chứng chỉ, khoá đối xứng) | khoá của B: p = 61, q = 53, e = 17 (65 → 2790 → 65, CRT m₁ = 4, m₂ = 12, h = 1); khoá **khác** của A để ký: p = 47, q = 59 (EM = 100 → s = 1605; đổi s thành 1604 → 2610) — RFC 8017 mục 6: mỗi cặp khoá một lược đồ |
+| `posts/ecdh-ecdsa-nist-curves.html` | **Hình 4** ECDH (SP 800-56A r3 mục 5.7.1.2, kiểm tra khoá mục 5.6.2.3.3) và **Hình 5** ECDSA (FIPS 186-5 mục 6.4), ngay dưới hai tiêu đề con của mục "ECDH và ECDSA, từng bước" (nay có `id="tung-buoc"`); ba hình mô hình ứng dụng cũ đổi số 4–6 → **6–8** | đường cong của Hình 2: y² = x³ + 2x + 2 (mod 17), G = (5, 1), n = 19; ECDH d_A = 3, d_B = 10 → Z = 13; ECDSA d = 7, k = 4, e = 11 → (r, s) = (3, 8), sửa M → R′ = (10, 11) |
+
+Kiểm chứng (bộ kiểm ngoài repo): mọi con số trong hình và chú thích được tính **hai lần độc lập** (Python từ định nghĩa,
+JavaScript BigInt trong bộ kiểm) rồi so với chữ trên trang, ở cả hai ngôn ngữ.
+
+| | kết quả |
+|---|---|
+| kiểm hình mới (vị trí, cặp VI/EN, không còn dấu cách đôi trong SVG, marker, số liệu, thứ tự Hình 1–8, link chéo hai trang) | 55 / 55 |
+| đột biến cài vào trang / oracle, mỗi cái phải làm bộ kiểm đỏ | 12 / 12 |
+| kiểm giao diện + kịch bản cũ của hai trang (không đổi) | RSA 136 + 140, đường cong 165 + 190 |
+| cổng của site (`check_site.py`) | 21 / 21 trang |
+| nhìn bằng mắt (Edge chạy ẩn, VI và EN) | 4 hình × 2 ngôn ngữ |
+
+Hai trang này đang khoá: phần sửa nằm trong `_plain/`; phải chạy `node tools/lock_pages.js lock` thì trang trên mạng mới
+đổi (`status` báo "BẢN MÃ CŨ" cho tới lúc đó).
+
+## Bài nhập môn khoá công khai, đọc tự do — `posts/mat-ma-khoa-cong-khai-ba-viec.html`
+
+"Mật mã khoá công khai trong đời thường: ba việc, ba hình vẽ, và chúng chạy ở đâu quanh bạn" — bài viết cho người
+không chuyên, **không khoá** (không nằm trong `tools/lock_pages.js`, sửa thẳng trong `posts/`). Mạch bài: bốn cảnh
+đời thường → một ý tưởng (hộp thư, cửa sập, quy tắc nhớ hướng khoá) → ba việc, mỗi việc một mục với một hình hai làn
+A | B, một so sánh đời thường, thuật toán hôm nay và hậu lượng tử, một cạm bẫy có thật (gập trong `<details>`) và
+một đồ chơi số nhỏ → bảng so sánh + biểu đồ kích thước → **mô hình ứng dụng** (bản đồ cảnh → việc; TLS 1.3, passkey,
+cập nhật có chữ ký / khởi động an toàn, mã hoá lai cho email và tệp) → khối mật mã trong một con chip (vẽ chung chung)
+→ máy tính lượng tử thay đổi gì → ba điều mang về, thuật ngữ, đọc thêm. Mười hai hình SVG viết tay, song ngữ.
+
+| file | nội dung |
+|---|---|
+| `posts/mat-ma-khoa-cong-khai-ba-viec.html` | bài viết, 12 hình, chỗ gắn ba đồ chơi (`data-toy="rsa" / "ecdh" / "ecdsa"`) |
+| `posts/assets/pk-toys.js` | ba đồ chơi (biến toàn cục `PKToys`): RSA p = 61, q = 53, e = 17, d = 413 (mã hoá có từng bước bình phương-và-nhân; ký, sửa thông điệp → không hợp lệ); ECDH và ECDSA trên đường cong y² = x³ + 2x + 2 trên F₁₇ (19 điểm; lưới điểm vẽ bằng SVG; ECDSA từ chối r = 0 / s = 0, nút sửa thông điệp, nút dùng lại số k để thấy khoá bí mật bị tính ngược ra). Số học `Number` thường (số nhỏ), không thư viện ngoài, tự chèn CSS `.toy-*` |
+
+Kiểm chứng (bộ kiểm ngoài repo):
+
+| | kết quả |
+|---|---|
+| mô hình tham chiếu Python viết từ định nghĩa, **vét cạn**: mọi m, h trong 0..3232, mọi (a, b), mọi (d, h, k) = 6 156 bộ, 88 128 cặp dùng lại số k | 26 / 26 phép kiểm, 106 258 trường hợp |
+| trình duyệt giả lập: bấm mọi nút ở cả hai ngôn ngữ, so từng giá trị với mô hình, soát ngôn ngữ trong ba đồ chơi sau mỗi cú bấm | 29 / 29, 45 004 thao tác |
+| đột biến cố ý vào `pk-toys.js`, mỗi cái phải chết ở một phép kiểm có tên | 24 / 24 |
+| đối chiếu với các con số của tài liệu gốc (65 → 2790, chữ ký 123 → 2746, ECDSA (10, 7), khôi phục k = 3 và d = 7, k = 9 / 10 bị từ chối) | 11 / 11 |
+| 12 hình xem bằng mắt (Edge chạy ẩn, VI và EN) | sau hai lượt sửa |
+
+Các con số "chỉ có ở đồ chơi" bài viết phải nói thật: trên đường cong 19 điểm, sửa thông điệp thành h + 1 vẫn được chấp
+nhận do trùng hợp ở 288 / 5 184 chữ ký (ở cỡ thật xác suất cỡ 2⁻²⁵⁶). Bảng thuật ngữ cho hiện cột tiếng Việt ở cả hai
+ngôn ngữ bằng ngoại lệ có đếm `data-i18n="neutral"` (18 ô). Bài dài khoảng 20–23 phút đọc.
+
 ## Thêm một bài mới
 
 1. Copy một bài cùng loại trong `posts/` thành `posts/<ten-bai>.html`, sửa tiêu đề (`<title>`,
