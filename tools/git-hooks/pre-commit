@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# pre-commit — chốt chặn cho các trang khoá bằng mật khẩu (tools/lock_pages.js).
+#
+# Vì sao (04/11/2026): README.md và index.html mô tả các mục mới của hai trang đã khoá được commit và đẩy lên
+# trong khi chính hai trang ấy vẫn là bản mã CŨ — bản sửa chỉ nằm trong _plain/ (bị .gitignore), nên git không thấy
+# thiếu gì. Trên mạng, thẻ bài hứa những mục mà trang chưa có.
+#
+# Hook này từ chối commit khi:
+#   1. còn trang "BẢN MÃ CŨ" / "CHƯA KHOÁ" (node tools/lock_pages.js status trả mã khác 0);
+#   2. một trang đang khoá trong HEAD sắp được commit ở dạng bản rõ (thiếu id="lock-payload");
+#   3. có file trong _plain/ được thêm vào commit (git add -f).
+#
+# Bật một lần cho mỗi bản clone:   git config core.hooksPath tools/git-hooks
+# Cố ý bỏ qua kiểm tra 1 (vd. commit việc khác khi đang sửa dở một trang khoá):
+#                                   CHIUSOC_ALLOW_STALE=1 git commit ...
+# Kiểm tra 2 và 3 không có cách bỏ qua nào trừ git commit --no-verify.
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+fail=0
+
+# 3. bản rõ không bao giờ được vào git
+plain_staged=$(git diff --cached --name-only --diff-filter=ACMR -- '_plain/*')
+if [ -n "$plain_staged" ]; then
+  echo "pre-commit: TỪ CHỐI — file bản rõ trong _plain/ đang nằm trong commit:" >&2
+  echo "$plain_staged" | sed 's/^/    /' >&2
+  echo "  Bỏ ra:  git rm --cached -r _plain/" >&2
+  fail=1
+fi
+
+# 2. một trang đang khoá không được quay về bản rõ
+for f in $(git diff --cached --name-only --diff-filter=AM -- 'posts/*.html'); do
+  if git cat-file -e "HEAD:$f" 2>/dev/null && git show "HEAD:$f" | grep -q 'id="lock-payload"' \
+     && ! git show ":$f" | grep -q 'id="lock-payload"'; then
+    echo "pre-commit: TỪ CHỐI — $f đang là trang khoá trong HEAD nhưng bản sắp commit là BẢN RÕ." >&2
+    echo "  Sửa trong _plain/, rồi: CHIUSOC_LOCK_PW=… node tools/lock_pages.js lock" >&2
+    fail=1
+  fi
+done
+
+# 1. không commit khi bản sửa trong _plain/ chưa được khoá lại
+if [ -d _plain ] && [ "${CHIUSOC_ALLOW_STALE:-}" != 1 ]; then
+  if ! command -v node >/dev/null 2>&1; then
+    echo "pre-commit: không có node — không kiểm được 'lock_pages.js status'. Cài node hoặc dùng CHIUSOC_ALLOW_STALE=1." >&2
+    fail=1
+  else
+    out=$(node tools/lock_pages.js status 2>&1); rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "$out" | grep -vE '^[[:space:]]+ok[[:space:]]' >&2
+      cat >&2 <<'MSG'
+
+pre-commit: TỪ CHỐI — còn trang khoá có bản sửa trong _plain/ chưa được mã hoá lại.
+  Nếu commit bây giờ, site sẽ phục vụ bản CŨ của trang đó (và README / index có thể đang mô tả bản mới).
+  Khoá lại rồi commit cả các trang trong posts/:
+      CHIUSOC_LOCK_PW='…' node tools/lock_pages.js lock
+      node tools/lock_pages.js status          # phải ra "…trang đã khoá và còn mới"
+      git add posts/*.html && git commit
+  Cố ý commit việc khác trong lúc đang sửa dở:  CHIUSOC_ALLOW_STALE=1 git commit ...
+MSG
+      fail=1
+    fi
+  fi
+elif [ "${CHIUSOC_ALLOW_STALE:-}" = 1 ]; then
+  echo "pre-commit: CHIUSOC_ALLOW_STALE=1 — bỏ qua kiểm tra trang khoá còn mới." >&2
+fi
+
+exit $fail

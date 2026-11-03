@@ -507,7 +507,9 @@ file nằm trên GitHub Pages không chứa một câu bản rõ nào.
 |---|---|
 | `_plain/<tên>.html` | **bản rõ — nguồn để sửa bài.** Đã nằm trong `.gitignore`, không bao giờ commit |
 | `posts/<tên>.html` | vỏ khoá đã mã hoá, chính là thứ đăng lên Pages |
-| `tools/lock_pages.js` | `lock` / `restore` / `status` |
+| `tools/lock_pages.js` | `lock` / `restore [--force]` / `status` / `adopt` |
+| `_plain/.lock-state.json` | dấu vân tay SHA-256 của bản rõ và bản mã ở lần `lock` / `restore` / `adopt` cuối (bị ignore cùng `_plain/`) |
+| `tools/git-hooks/pre-commit` | chặn commit khi còn trang chưa khoá lại (xem dưới) |
 | `tools/lock-shell.css` | giao diện màn hình khoá (gồm cả khối `house-format`) |
 | `posts/assets/unlock.js` | phần chạy trên trình duyệt: hỏi mật khẩu, giải mã, mở trang |
 
@@ -525,6 +527,33 @@ unset CHIUSOC_LOCK_PW
 
 `status` không cần mật khẩu. Nó bắt đúng cái lỗi dễ mắc nhất: sửa `_plain/` rồi quên chạy `lock`,
 khiến trang web vẫn phục vụ bản mã cũ.
+
+### Chốt chặn khi commit (04/11/2026)
+
+**Sự cố.** Ngày 04/11, `README.md` và `index.html` mô tả các mục mới của bài RSA và bài đường cong elliptic đã
+được commit và đẩy lên, trong khi hai trang ấy vẫn là bản mã cũ: bản sửa chỉ nằm trong `_plain/` (bị ignore), nên git
+không thấy thiếu gì. Trên site, thẻ bài hứa những mục mà trang chưa có, cho tới lúc khoá lại (commit `re-lock RSA + EC`).
+
+**Hai lớp chặn:**
+
+1. `status` so **nội dung**, không chỉ thời điểm sửa. `lock`, `restore` và `adopt` ghi SHA-256 của bản rõ và bản mã
+   vào `_plain/.lock-state.json`. `status` báo `BẢN MÃ CŨ` (bản rõ sửa sau lần khoá cuối), `BẢN MÃ ĐÃ ĐỔI` (bản mã
+   trong `posts/` đổi từ bên ngoài, vd. sau `git pull` — chạy `restore` trước khi sửa) hoặc `XUNG ĐỘT` (cả hai đều
+   đổi), và trả mã thoát 1. Quy tắc cũ chỉ so thời điểm sửa nên bị lừa khi `git pull` / `checkout` ghi lại các file
+   trong `posts/`. `restore` nay **từ chối** ghi đè một trang có bản sửa chưa khoá (`--force` để cố ý ghi đè).
+2. `tools/git-hooks/pre-commit` từ chối commit khi `status` báo trang cần xử lý, khi một trang đang khoá sắp được
+   commit ở dạng bản rõ, và khi có file `_plain/` bị `git add -f`. Bật **một lần cho mỗi bản clone**:
+
+```bash
+git config core.hooksPath tools/git-hooks
+node tools/lock_pages.js adopt     # bản clone mới có _plain/ nhưng chưa có dấu vân tay: ghi lần đầu, không cần mật khẩu
+```
+
+Cố ý commit việc khác trong lúc đang sửa dở một trang khoá: `CHIUSOC_ALLOW_STALE=1 git commit ...`. Hai kiểm tra
+còn lại (bản rõ đè lên trang khoá, `_plain/` trong commit) không có đường tắt nào ngoài `git commit --no-verify`.
+Đã thử trên một bản clone với mật khẩu thử: 24 / 24 tình huống đúng (sửa bản rõ nhưng đặt thời điểm sửa cũ hơn bản mã,
+bản mã đổi kiểu `git pull`, cả hai cùng đổi, `restore` không đè bản sửa chưa khoá, sai mật khẩu, `adopt`, sáu tình
+huống của hook).
 
 Cổng kiểm `check_site.py` đọc `_plain/<tên>.html` thay cho trang đã khoá (nó không đọc được bên
 trong bản mã). Nếu không có `_plain/`, cổng in `LOCKED ... content NOT checked` và **vẫn xanh** —
